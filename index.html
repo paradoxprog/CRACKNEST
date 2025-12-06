@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrackNest | Master Your Interview Skills</title>
+    <meta name="description" content="Transform fear into readiness. The complete interview-training platform designed for students.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#F59E0B', // Amber 500
+                        dark: '#1E293B', // Slate 800
+                        light: '#F8FAFC', // Slate 50
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float-delayed {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-delayed {
+            animation: float-delayed 5s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(50px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-600 bg-white antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-indigo-800 rounded-xl flex items-center justify-center text-white">
+                        <i class="fa-solid fa-feather-pointed text-xl"></i>
+                    </div>
+                    <span class="font-heading font-bold text-2xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#problems" class="text-slate-600 hover:text-primary font-medium transition">Why CrackNest?</a>
+                    <a href="#features" class="text-slate-600 hover:text-primary font-medium transition">Features</a>
+                    <a href="#how-it-works" class="text-slate-600 hover:text-primary font-medium transition">How it Works</a>
+                    <a href="#" class="bg-primary hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full font-semibold transition shadow-lg shadow-primary/30">Get Started</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-primary focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100">
+            <div class="px-4 pt-2 pb-6 space-y-1">
+                <a href="#problems" class="block px-3 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-primary rounded-md">Why CrackNest?</a>
+                <a href="#features" class="block px-3 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-primary rounded-md">Features</a>
+                <a href="#how-it-works" class="block px-3 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-primary rounded-md">How it Works</a>
+                <a href="#" class="block mt-4 text-center bg-primary text-white px-4 py-3 rounded-lg font-semibold">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
+        <!-- Background Decor -->
+        <div class="blob bg-purple-300 w-96 h-96 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="blob bg-indigo-300 w-96 h-96 rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+                <!-- Text Content -->
+                <div class="text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-primary text-sm font-semibold mb-6">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        #1 Interview Prep for Students
+                    </div>
+                    <h1 class="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-6">
+                        Transform Interview <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Fear into Readiness</span>
+                    </h1>
+                    <p class="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                        Stop struggling with weak resumes and nervousness. Get structured preparation, personalized feedback, and the confidence to crack your dream job interview.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#" class="px-8 py-4 bg-primary text-white rounded-lg font-bold text-lg hover:bg-indigo-700 transition shadow-xl shadow-indigo-500/20 flex items-center justify-center gap-2">
+                            Start Practicing
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <a href="#how-it-works" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-lg font-bold text-lg hover:bg-slate-50 transition flex items-center justify-center">
+                            How It Works
+                        </a>
+                    </div>
+                    <div class="mt-8 flex items-center justify-center lg:justify-start gap-4 text-sm text-slate-500">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600">JD</div>
+                            <div class="w-8 h-8 rounded-full bg-slate-300 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600">AS</div>
+                            <div class="w-8 h-8 rounded-full bg-slate-400 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600">MR</div>
+                        </div>
+                        <p>Join 1,000+ students preparing today</p>
+                    </div>
+                </div>
+
+                <!-- Visual Content (CSS Generated Graphics) -->
+                <div class="relative lg:h-[500px] flex items-center justify-center">
+                    <!-- Main Card -->
+                    <div class="relative z-10 bg-white p-6 rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md float-animation">
+                        <div class="flex items-center gap-4 mb-4 border-b border-slate-100 pb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                <i class="fa-solid fa-check text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800">Mock Interview Result</h3>
+                                <p class="text-sm text-slate-500">Great communication skills!</p>
+                            </div>
+                            <div class="ml-auto font-bold text-green-600 text-xl">92%</div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm font-medium">
+                                <span>Technical Knowledge</span>
+                                <span class="text-slate-900">8/10</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 80%"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm font-medium pt-2">
+                                <span>Confidence</span>
+                                <span class="text-slate-900">9/10</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-secondary h-2 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Badge 1 -->
+                    <div class="absolute top-10 right-0 bg-white p-4 rounded-xl shadow-xl border border-slate-100 float-delayed hidden sm:flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                            <i class="fa-solid fa-file-lines"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Resume</p>
+                            <p class="font-bold text-slate-800">Optimized</p>
+                        </div>
+                    </div>
+
+                    <!-- Floating Badge 2 -->
+                    <div class="absolute bottom-10 left-0 bg-white p-4 rounded-xl shadow-xl border border-slate-100 float-delayed hidden sm:flex items-center gap-3" style="animation-delay: 2s;">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Coding</p>
+                            <p class="font-bold text-slate-800">Solved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problems" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="font-heading text-3xl font-bold text-slate-900 mb-4">Why Do Talented Students Fail?</h2>
+                <p class="text-slate-600 text-lg">It's not always about knowledge. The gap between college and corporate expectations is real.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center text-red-500 text-2xl mb-6">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-3">Lack of Structure</h3>
+                    <p class="text-slate-600">Randomly solving questions without a roadmap leads to confusion and wasted time during crucial preparation days.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center text-orange-500 text-2xl mb-6">
+                        <i class="fa-solid fa-file-circle-xmark"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-3">Weak Resumes</h3>
+                    <p class="text-slate-600">Generic templates and poor formatting mean your resume gets rejected by ATS before a human even sees it.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 text-2xl mb-6">
+                        <i class="fa-solid fa-person-circle-question"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-3">Interview Anxiety</h3>
+                    <p class="text-slate-600">Nervousness causes students to blank out on answers they actually know. Confidence comes from practice.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution/Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-primary font-bold tracking-wider uppercase text-sm">The Solution</span>
+                <h2 class="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4">Everything You Need to Get Hired</h2>
+                <p class="text-slate-600 text-lg">CrackNest bridges the gap with a complete ecosystem designed for student success.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="group p-6 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition duration-300">
+                    <div class="w-12 h-12 bg-indigo-100 text-primary rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Mock Interviews</h3>
+                    <p class="text-slate-600">Simulate real-world scenarios with AI and expert mentors. Get over the fear before the actual day.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="group p-6 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition duration-300">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Personalized Feedback</h3>
+                    <p class="text-slate-600">Don't just practice; improve. Get detailed analytics on your tone, pace, and technical accuracy.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="group p-6 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition duration-300">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-road"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Guided Learning</h3>
+                    <p class="text-slate-600">Structured roadmaps for different roles (SDE, Data Analyst, etc.) so you know exactly what to study.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="group p-6 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition duration-300">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-file-pen"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Resume Builder</h3>
+                    <p class="text-slate-600">Create ATS-friendly resumes that highlight your projects and skills effectively.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="group p-6 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition duration-300">
+                    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Skill-Based Practice</h3>
+                    <p class="text-slate-600">Targeted drills for Aptitude, Logical Reasoning, and Technical Coding rounds.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="group p-6 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50 transition duration-300">
+                    <div class="w-12 h-12 bg-pink-100 text-pink-600 rounded-lg flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-slate-900 mb-2">Communication Prep</h3>
+                    <p class="text-slate-600">Learn how to articulate your thoughts clearly. No more "umms" and "ahhs".</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="how-it-works" class="py-20 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-heading text-3xl font-bold mb-4">Your Path to Success</h2>
+                <p class="text-slate-300">Simple steps to turn your career goals into reality.</p>
+            </div>
+
+            <div class="relative">
+                <!-- Connecting Line (Desktop) -->
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-indigo-700 -translate-y-1/2 z-0"></div>
+
+                <div class="grid md:grid-cols-4 gap-8 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                        <div class="w-12 h-12 mx-auto bg-primary rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-slate-800">1</div>
+                        <h3 class="font-bold text-lg mb-2">Assess</h3>
+                        <p class="text-sm text-slate-400">Take a diagnostic test to find your weak spots.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                        <div class="w-12 h-12 mx-auto bg-primary rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-slate-800">2</div>
+                        <h3 class="font-bold text-lg mb-2">Learn</h3>
+                        <p class="text-sm text-slate-400">Follow a guided roadmap and study curated materials.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                        <div class="w-12 h-12 mx-auto bg-primary rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-slate-800">3</div>
+                        <h3 class="font-bold text-lg mb-2">Practice</h3>
+                        <p class="text-sm text-slate-400">Take mock interviews and solve technical challenges.</p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
+                        <div class="w-12 h-12 mx-auto bg-secondary rounded-full flex items-center justify-center font-bold text-xl mb-4 border-4 border-slate-800 text-white">4</div>
+                        <h3 class="font-bold text-lg mb-2">Succeed</h3>
+                        <p class="text-sm text-slate-400">Walk into your interview with 100% confidence.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <i class="fa-solid fa-quote-left text-4xl text-indigo-200 mb-6"></i>
+            <h2 class="text-2xl md:text-3xl font-medium text-slate-800 mb-8 italic">
+                "I used to freeze whenever an interviewer asked a technical question. CrackNest's mock interviews helped me get used to the pressure. I cleared the Amazon SDE interview last month!"
+            </h2>
+            <div class="flex items-center justify-center gap-4">
+                <div class="w-12 h-12 bg-gray-300 rounded-full overflow-hidden">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Student" />
+                </div>
+                <div class="text-left">
+                    <p class="font-bold text-slate-900">Rahul Verma</p>
+                    <p class="text-sm text-slate-500">Computer Science Student, Final Year</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-primary rounded-3xl p-8 md:p-16 text-center text-white shadow-2xl relative overflow-hidden">
+                <!-- Decorative Circles -->
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-10 rounded-full"></div>
+                <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-white opacity-10 rounded-full"></div>
+
+                <h2 class="font-heading text-3xl md:text-4xl font-bold mb-6">Ready to Crack Your Next Interview?</h2>
+                <p class="text-indigo-100 text-lg mb-8 max-w-2xl mx-auto">Join thousands of students who have transformed their careers with CrackNest. Don't let fear hold you back.</p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="px-8 py-4 bg-white text-primary rounded-lg font-bold text-lg hover:bg-indigo-50 transition shadow-lg">
+                        Get Started for Free
+                    </button>
+                    <button class="px-8 py-4 bg-indigo-700 text-white border border-indigo-500 rounded-lg font-bold text-lg hover:bg-indigo-600 transition">
+                        View Sample Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4 text-white">
+                        <i class="fa-solid fa-feather-pointed text-xl text-primary"></i>
+                        <span class="font-heading font-bold text-2xl">CrackNest</span>
+                    </div>
+                    <p class="max-w-sm">We help students bridge the gap between academic knowledge and industry expectations through structured interview preparation.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-4">Platform</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-primary transition">Mock Interviews</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Resume Builder</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Coding Practice</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Aptitude Tests</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Connect</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-primary transition">About Us</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Contact</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Blog</a></li>
+                        <div class="flex gap-4 mt-4">
+                            <a href="#" class="text-slate-400 hover:text-white transition"><i class="fa-brands fa-twitter"></i></a>
+                            <a href="#" class="text-slate-400 hover:text-white transition"><i class="fa-brands fa-linkedin"></i></a>
+                            <a href="#" class="text-slate-400 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center text-sm">
+                &copy; 2023 CrackNest. All rights reserved. Transforming fear into readiness.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Close menu when clicking a link
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
