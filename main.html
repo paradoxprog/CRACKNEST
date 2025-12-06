@@ -35,9 +35,7 @@
     </script>
     <style>
         /* Chat Scrollbar */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
         .markdown-prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
         .markdown-prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
         .markdown-prose h3 { font-weight: bold; font-size: 1.25rem; margin-top: 1rem; margin-bottom: 0.5rem; }
@@ -62,37 +60,6 @@
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-700 h-screen flex overflow-hidden">
-
-    <div id="apikey-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm hidden transition-opacity">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-purple-600"></div>
-            
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-indigo-100 text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <h2 class="text-2xl font-heading font-bold text-slate-900">Setup AI Access</h2>
-                <p class="text-slate-500 mt-2 text-sm">To use the Mock Interview and Resume features, you need a free Google Gemini API key.</p>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Enter Gemini API Key</label>
-                    <input type="password" id="modal-api-input" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="AIzaSy...">
-                </div>
-                
-                <button onclick="saveKeyFromModal()" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-500/30 transition">
-                    Save & Continue
-                </button>
-            </div>
-
-            <div class="mt-6 text-center border-t border-slate-100 pt-4">
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-primary text-sm font-semibold hover:underline flex items-center justify-center gap-2">
-                    Get a free API Key here <i class="fa-solid fa-external-link-alt text-xs"></i>
-                </a>
-            </div>
-        </div>
-    </div>
 
     <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
         <div class="h-20 flex items-center px-8 border-b border-slate-800">
@@ -154,9 +121,7 @@
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Strategies
                         </button>
                     </div>
-
-                    <div id="tips-output" class="hidden bg-white p-8 rounded-xl shadow-lg border border-indigo-100 markdown-prose">
-                        </div>
+                    <div id="tips-output" class="hidden bg-white p-8 rounded-xl shadow-lg border border-indigo-100 markdown-prose"></div>
                     <div id="tips-loader" class="hidden flex justify-center py-10"><div class="loader"></div></div>
                 </div>
             </div>
@@ -183,7 +148,6 @@
                             Generate Questions
                         </button>
                     </div>
-
                     <div id="q-output" class="hidden bg-white p-8 rounded-xl shadow-lg border border-slate-200 markdown-prose"></div>
                     <div id="q-loader" class="hidden flex justify-center py-10"><div class="loader"></div></div>
                 </div>
@@ -195,7 +159,6 @@
                         <h2 class="text-2xl font-bold text-slate-900">Mock Interview Simulator</h2>
                         <button onclick="clearChat()" class="text-sm text-red-500 hover:text-red-700">Reset Session</button>
                     </div>
-                    
                     <div id="chat-window" class="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm p-6 overflow-y-auto space-y-4 mb-4">
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div>
@@ -204,12 +167,9 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm flex gap-2">
                         <input type="text" id="chat-input" placeholder="Type your answer here..." class="flex-1 px-4 py-3 focus:outline-none text-slate-700">
-                        <button onclick="sendChat()" class="bg-primary text-white px-6 rounded-lg hover:bg-indigo-700 transition">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
+                        <button onclick="sendChat()" class="bg-primary text-white px-6 rounded-lg hover:bg-indigo-700 transition"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
@@ -227,38 +187,40 @@
                             <textarea id="job-desc" class="w-full h-64 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none text-sm" placeholder="Paste the job description you are applying for..."></textarea>
                         </div>
                     </div>
-                    <button onclick="analyzeResume()" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">
-                        Analyze Match
-                    </button>
-
+                    <button onclick="analyzeResume()" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">Analyze Match</button>
                     <div id="resume-output" class="hidden mt-8 bg-white p-8 rounded-xl shadow-lg border border-indigo-100 markdown-prose"></div>
                     <div id="resume-loader" class="hidden flex justify-center py-10"><div class="loader"></div></div>
                 </div>
             </div>
-
         </div>
     </main>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        const firebaseConfig = { apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU", authDomain: "crak-a74d0.firebaseapp.com", projectId: "crak-a74d0", storageBucket: "crak-a74d0.firebasestorage.app", messagingSenderId: "106356918520", appId: "1:106356918520:web:e9affa0adef64574c1530d", measurementId: "G-YFG4XZWP68" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, (user) => {
+            if (user) { document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0]; } 
+            else { window.location.href = "index.html"; }
+        });
+        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth).then(() => { window.location.href = "index.html"; }); });
+    </script>
+
     <script>
-        // --- Navigation ---
         function switchTab(tabId) {
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.remove('bg-primary', 'text-white');
-                btn.classList.add('text-slate-400');
-            });
+            document.querySelectorAll('.nav-item').forEach(btn => { btn.classList.remove('bg-primary', 'text-white'); btn.classList.add('text-slate-400'); });
             const activeBtn = document.getElementById(`nav-${tabId}`);
-            if(activeBtn) {
-                activeBtn.classList.add('bg-primary', 'text-white');
-                activeBtn.classList.remove('text-slate-400');
-            }
+            if(activeBtn) { activeBtn.classList.add('bg-primary', 'text-white'); activeBtn.classList.remove('text-slate-400'); }
             document.querySelectorAll('.content-view').forEach(view => view.classList.add('hidden'));
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
         }
 
-        // --- SECURE BACKEND CALL ---
+        // --- SECURE BACKEND CALL (Runs on Vercel) ---
         async function callGemini(prompt) {
             try {
-                // Call our own Vercel API route (No API Key needed here!)
+                // Calls the Vercel Serverless Function
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -272,160 +234,85 @@
                     alert("AI Error: " + data.error);
                     return null;
                 }
-
+                // Return text from Gemini
                 return data.candidates[0].content.parts[0].text;
             } catch (error) {
                 console.error("Network Error:", error);
-                alert("Error connecting to server.");
+                alert("Error connecting to server. Please check your internet connection.");
                 return null;
             }
         }
 
-        // --- Feature 1: Expert Tips ---
         async function generateTips() {
             const role = document.getElementById('tips-role').value;
             const topic = document.getElementById('tips-topic').value;
             const loader = document.getElementById('tips-loader');
             const output = document.getElementById('tips-output');
-
             if(!role) { alert("Please enter a role."); return; }
-
-            output.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            const prompt = `Act as a senior career coach. Provide 5 detailed, actionable, and expert strategies for a candidate applying for the role of ${role}, specifically focusing on ${topic}. Format the response in clear Markdown.`;
-
+            output.classList.add('hidden'); loader.classList.remove('hidden');
+            const prompt = `Act as a senior career coach. Provide 5 detailed, actionable strategies for a candidate applying for ${role}, focusing on ${topic}. Format in Markdown.`;
             const result = await callGemini(prompt);
-            
             loader.classList.add('hidden');
-            if(result) {
-                output.innerHTML = marked.parse(result);
-                output.classList.remove('hidden');
-            }
+            if(result) { output.innerHTML = marked.parse(result); output.classList.remove('hidden'); }
         }
 
-        // --- Feature 2: Question Bank ---
         async function generateQuestions() {
             const role = document.getElementById('q-role').value;
             const diff = document.getElementById('q-diff').value;
             const loader = document.getElementById('q-loader');
             const output = document.getElementById('q-output');
-
-            output.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            const prompt = `Generate 5 ${diff} level interview questions for a ${role}. For each question, provide a brief "Interviewer's Expectation" hint. Format in Markdown.`;
-
+            output.classList.add('hidden'); loader.classList.remove('hidden');
+            const prompt = `Generate 5 ${diff} level interview questions for a ${role}. Provide a brief "Interviewer's Expectation" hint for each. Format in Markdown.`;
             const result = await callGemini(prompt);
-
             loader.classList.add('hidden');
-            if(result) {
-                output.innerHTML = marked.parse(result);
-                output.classList.remove('hidden');
-            }
+            if(result) { output.innerHTML = marked.parse(result); output.classList.remove('hidden'); }
         }
 
-        // --- Feature 3: Mock Interview (Chat) ---
         let chatHistory = [];
-
         function appendMessage(sender, text) {
             const window = document.getElementById('chat-window');
             const isAI = sender === 'AI';
-            
             const div = document.createElement('div');
             div.className = `flex gap-3 ${isAI ? '' : 'flex-row-reverse'}`;
-            
-            div.innerHTML = `
-                <div class="w-8 h-8 rounded-full ${isAI ? 'bg-primary' : 'bg-slate-300'} text-white flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid ${isAI ? 'fa-robot' : 'fa-user'} text-xs"></i>
-                </div>
-                <div class="${isAI ? 'bg-slate-100 rounded-r-xl rounded-bl-xl text-slate-700' : 'bg-primary text-white rounded-l-xl rounded-br-xl'} p-3 text-sm max-w-[80%]">
-                    ${marked.parse(text)}
-                </div>
-            `;
-            window.appendChild(div);
-            window.scrollTop = window.scrollHeight;
+            div.innerHTML = `<div class="w-8 h-8 rounded-full ${isAI ? 'bg-primary' : 'bg-slate-300'} text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid ${isAI ? 'fa-robot' : 'fa-user'} text-xs"></i></div><div class="${isAI ? 'bg-slate-100 rounded-r-xl rounded-bl-xl text-slate-700' : 'bg-primary text-white rounded-l-xl rounded-br-xl'} p-3 text-sm max-w-[80%]">${marked.parse(text)}</div>`;
+            window.appendChild(div); window.scrollTop = window.scrollHeight;
         }
 
         async function sendChat() {
             const input = document.getElementById('chat-input');
             const msg = input.value;
             if(!msg) return;
-
-            appendMessage('User', msg);
-            input.value = '';
-
+            appendMessage('User', msg); input.value = '';
             const loaderId = 'chat-loader-' + Date.now();
             const windowDiv = document.getElementById('chat-window');
             const loaderDiv = document.createElement('div');
-            loaderDiv.id = loaderId;
-            loaderDiv.className = "flex gap-3";
+            loaderDiv.id = loaderId; loaderDiv.className = "flex gap-3";
             loaderDiv.innerHTML = `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center"><i class="fa-solid fa-robot text-xs"></i></div><div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl"><div class="loader w-4 h-4 border-2"></div></div>`;
-            windowDiv.appendChild(loaderDiv);
-            windowDiv.scrollTop = windowDiv.scrollHeight;
-
-            let context = "You are a professional, strict but helpful interviewer. We are conducting a mock interview. Ask one question at a time. After the user answers, critique their answer briefly and then ask the next relevant question. \n\nHistory:\n";
+            windowDiv.appendChild(loaderDiv); windowDiv.scrollTop = windowDiv.scrollHeight;
             chatHistory.push(`User: ${msg}`);
             const recentHistory = chatHistory.slice(-6).join("\n"); 
-            const prompt = context + recentHistory + "\nAI:";
-
+            const prompt = `You are a professional interviewer. Conduct a mock interview. History:\n${recentHistory}\nAI:`;
             const result = await callGemini(prompt);
-            
             document.getElementById(loaderId).remove();
-
-            if(result) {
-                appendMessage('AI', result);
-                chatHistory.push(`AI: ${result}`);
-            }
+            if(result) { appendMessage('AI', result); chatHistory.push(`AI: ${result}`); }
         }
-
         function clearChat() {
-            document.getElementById('chat-window').innerHTML = `
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div>
-                    <div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl text-slate-700 text-sm max-w-[80%]">
-                        Session Reset. What role would you like to practice for today?
-                    </div>
-                </div>
-            `;
+            document.getElementById('chat-window').innerHTML = `<div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div><div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl text-slate-700 text-sm max-w-[80%]">Session Reset. What role would you like to practice for today?</div></div>`;
             chatHistory = [];
         }
+        document.getElementById('chat-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChat(); });
 
-        document.getElementById('chat-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') sendChat();
-        });
-
-
-        // --- Feature 4: Resume Analysis ---
         async function analyzeResume() {
             const resume = document.getElementById('resume-text').value;
             const job = document.getElementById('job-desc').value;
             const loader = document.getElementById('resume-loader');
             const output = document.getElementById('resume-output');
-
             if(!resume || !job) { alert("Please provide both resume text and job description."); return; }
-
-            output.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            const prompt = `Analyze the following Resume Text against the Job Description. 
-            
-            1. Give a match percentage (0-100%).
-            2. List 3 Key Strengths.
-            3. List 3 Critical Missing Keywords or Skills.
-            4. Provide a rewritten Summary section for the resume tailored to this job.
-
-            Resume Text: "${resume.substring(0, 2000)}" 
-            
-            Job Description: "${job.substring(0, 1000)}"`;
-
+            output.classList.add('hidden'); loader.classList.remove('hidden');
+            const prompt = `Analyze this Resume against the Job Description. 1. Match percentage. 2. 3 Key Strengths. 3. 3 Missing Keywords. 4. Rewrite Summary. Resume: "${resume.substring(0, 2000)}" Job: "${job.substring(0, 1000)}"`;
             const result = await callGemini(prompt);
-
             loader.classList.add('hidden');
-            if(result) {
-                output.innerHTML = marked.parse(result);
-                output.classList.remove('hidden');
-            }
+            if(result) { output.innerHTML = marked.parse(result); output.classList.remove('hidden'); }
         }
     </script>
 </body>
