@@ -43,6 +43,8 @@
         .markdown-prose h3 { font-weight: bold; font-size: 1.25rem; margin-top: 1rem; margin-bottom: 0.5rem; }
         .markdown-prose strong { color: #4F46E5; }
         .markdown-prose p { margin-bottom: 0.75rem; }
+        .markdown-prose pre { background: #f1f5f9; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+        .markdown-prose code { font-family: monospace; color: #d946ef; }
         
         .loader {
             border: 3px solid #f3f3f3;
@@ -103,7 +105,7 @@
         <div id="api-key-banner" class="bg-secondary/10 border-b border-secondary/20 px-6 py-2 flex items-center justify-between text-sm text-yellow-800">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-key"></i>
-                <span>Gemini API Key Required for AI Features</span>
+                <span>Gemini API Key Required (Using Model 2.0)</span>
             </div>
             <div class="flex gap-2">
                 <input type="password" id="global-api-key" placeholder="Paste API Key Here" class="bg-white border border-secondary/30 rounded px-2 py-1 text-xs w-48 focus:outline-primary">
@@ -247,7 +249,7 @@
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div>
                             <div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl text-slate-700 text-sm max-w-[80%]">
-                                Hello! I am your AI interviewer. Tell me what role you are interviewing for, and we can begin.
+                                Hello! I am your AI interviewer powered by <strong>Gemini 2.0</strong>. Tell me what role you are interviewing for, and we can begin.
                             </div>
                         </div>
                     </div>
@@ -366,7 +368,8 @@
                 return null;
             }
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            // UPDATED MODEL: Using gemini-2.0-flash-exp
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
             
             try {
                 const response = await fetch(url, {
@@ -378,10 +381,17 @@
                 });
                 
                 const data = await response.json();
+                
+                if (data.error) {
+                    console.error("API Error:", data.error);
+                    alert("API Error: " + data.error.message);
+                    return null;
+                }
+
                 return data.candidates[0].content.parts[0].text;
             } catch (error) {
-                console.error("Gemini Error:", error);
-                alert("Error connecting to AI. Check your API Key.");
+                console.error("Network/Gemini Error:", error);
+                alert("Error connecting to AI. Check your API Key or Network.");
                 return null;
             }
         }
