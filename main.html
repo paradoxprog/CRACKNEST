@@ -387,42 +387,17 @@
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
         }
 
-        // --- SMART GEMINI FETCH FUNCTION ---
-        // Handles retries and model fallbacks automatically
+        // --- GEMINI FETCH FUNCTION ---
+        // Using the requested Gemini 2.0 Flash endpoint
         async function callGemini(prompt) {
             if(!GEMINI_API_KEY) {
                 apiKeyModal.classList.remove('hidden');
                 return null;
             }
 
-            // 1. Try Specific Stable 1.5 Version First
-            let modelVersion = "gemini-1.5-flash-001"; 
-            let result = await fetchGeminiModel(modelVersion, prompt);
-
-            // 2. If 404 (Not Found), Fallback to Legacy Gemini Pro (1.0)
-            if (result && result.error && result.error.code === 404) {
-                console.warn("Gemini 1.5 not found, falling back to Gemini Pro...");
-                modelVersion = "gemini-pro";
-                result = await fetchGeminiModel(modelVersion, prompt);
-            }
-
-            // 3. Handle Errors or Success
-            if (result && result.error) {
-                console.error("API Error:", result.error);
-                alert(`API Error: ${result.error.message}`);
-                return null;
-            }
-
-            if (result && result.candidates && result.candidates.length > 0) {
-                return result.candidates[0].content.parts[0].text;
-            }
+            // USING THE SPECIFIC REQUESTED URL
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
             
-            return null;
-        }
-
-        // Helper function for the actual fetch
-        async function fetchGeminiModel(model, prompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
             try {
                 const response = await fetch(url, {
                     method: 'POST',
@@ -431,10 +406,19 @@
                         contents: [{ parts: [{ text: prompt }] }]
                     })
                 });
-                return await response.json();
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error("API Error:", data.error);
+                    alert("API Error: " + data.error.message);
+                    return null;
+                }
+
+                return data.candidates[0].content.parts[0].text;
             } catch (error) {
-                console.error("Network Error:", error);
-                alert("Network Error. Check console.");
+                console.error("Network/Gemini Error:", error);
+                alert("Error connecting to AI. Check your API Key or Network.");
                 return null;
             }
         }
