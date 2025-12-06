@@ -14,20 +14,19 @@ export default async function handler(req) {
         const { prompt } = await req.json();
         
         // 1. Get Key from Vercel Environment Variables
-        // You must set GEMINI_API_KEY in Vercel Settings
         const API_KEY = process.env.GEMINI_API_KEY;
 
         if (!API_KEY) {
             return new Response(JSON.stringify({ error: 'Server Config Error: GEMINI_API_KEY is missing in Vercel Settings.' }), { status: 500 });
         }
 
-        // 2. Robust Model Fallback List
-        // We removed 2.0-flash-exp to avoid your quota errors.
+        // 2. Model Priority List
+        // We prioritize your requested model: gemini-2.0-flash
         const models = [
-            'gemini-1.5-flash',      // Best balance of speed/cost
-            'gemini-1.5-flash-001',  // Specific version backup
-            'gemini-1.5-pro',        // Higher quality fallback
-            'gemini-pro'             // Legacy stable fallback (1.0)
+            'gemini-2.0-flash',      // YOUR REQUESTED MODEL
+            'gemini-2.0-flash-exp',  // Fallback for experimental alias
+            'gemini-1.5-flash',      // Stable fallback if 2.0 fails (quota)
+            'gemini-1.5-pro'         
         ];
 
         // 3. Loop through models until one works
