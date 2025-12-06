@@ -1,10 +1,11 @@
 // api/gemini.js
 
 export const config = {
-    runtime: 'edge', // Runs faster on Vercel
+    runtime: 'edge', // Runs faster and cheaper on Vercel
 };
 
 export default async function handler(req) {
+    // Only allow POST requests
     if (req.method !== 'POST') {
         return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
     }
@@ -12,26 +13,27 @@ export default async function handler(req) {
     try {
         const { prompt } = await req.json();
         
-        // Get Key from Vercel Environment Variables
+        // 1. Get Key from Vercel Environment Variables
+        // You must set GEMINI_API_KEY in Vercel Settings
         const API_KEY = process.env.GEMINI_API_KEY;
 
         if (!API_KEY) {
-            return new Response(JSON.stringify({ error: 'Server configuration error: Missing API Key' }), { status: 500 });
+            return new Response(JSON.stringify({ error: 'Server Config Error: GEMINI_API_KEY is missing in Vercel Settings.' }), { status: 500 });
         }
 
-        // --- Smart Fallback Logic (Server Side) ---
-        
-        // List of models to try in order of preference
+        // 2. Robust Model Fallback List
+        // We removed 2.0-flash-exp to avoid your quota errors.
         const models = [
-            'gemini-2.0-flash-exp', // Newest, fast
-            'gemini-1.5-flash',     // Stable, fast
-            'gemini-1.5-flash-001', // Backup version
-            'gemini-pro'            // Legacy backup
+            'gemini-1.5-flash',      // Best balance of speed/cost
+            'gemini-1.5-flash-001',  // Specific version backup
+            'gemini-1.5-pro',        // Higher quality fallback
+            'gemini-pro'             // Legacy stable fallback (1.0)
         ];
 
+        // 3. Loop through models until one works
         for (const model of models) {
             try {
-                console.log(`Attempting to use model: ${model}`);
+                console.log(`Attempting model: ${model}`);
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
                 
                 const response = await fetch(url, {
@@ -44,32 +46,27 @@ export default async function handler(req) {
 
                 const data = await response.json();
 
-                // If successful (no error object in response)
-                if (!data.error) {
-                    return new Response(JSON.stringify(data), {
-                        status: 200,
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+                // If Google returns an error (like Quota or Not Found), throw to catch block
+                if (data.error) {
+                    console.warn(`Model ${model} failed: ${data.error.message}`);
+                    throw new Error(data.error.message);
                 }
 
-                // If specific 404/Not Found error, loop to next model
-                if (data.error.code === 404 || data.error.message.includes('not found')) {
-                    console.warn(`Model ${model} not found/supported, trying next...`);
-                    continue; 
-                }
-
-                // If it's a legitimate error (like quota or bad request), stop and report it
-                throw new Error(data.error.message);
+                // If successful, return data to frontend immediately
+                return new Response(JSON.stringify(data), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
             } catch (err) {
-                // If it's the last model and it failed, throw error
+                // If this was the last model in the list, fail completely
                 if (model === models[models.length - 1]) {
-                    throw err;
+                    console.error("All models failed.");
+                    throw new Error(`All AI models failed. Last error: ${err.message}`);
                 }
+                // Otherwise, continue loop to try next model
             }
         }
-
-        throw new Error('All models failed to respond.');
 
     } catch (error) {
         return new Response(JSON.stringify({ error: error.message }), {
