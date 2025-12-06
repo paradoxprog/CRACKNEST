@@ -439,38 +439,20 @@
     </div>
 
     <!-- Scripts -->
-    <script>
-        // Mobile Menu Toggle
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-
-        // Close menu when clicking a link
-        menu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                menu.classList.add('hidden');
-            });
-        });
-    </script>
-
-    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Use global config if available, otherwise use placeholders
+        // Firebase Configuration
         const firebaseConfig = {
-      apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU",
-      authDomain: "crak-a74d0.firebaseapp.com",
-      projectId: "crak-a74d0",
-      storageBucket: "crak-a74d0.firebasestorage.app",
-      messagingSenderId: "106356918520",
-      appId: "1:106356918520:web:e9affa0adef64574c1530d",
-      measurementId: "G-YFG4XZWP68"
-    };
+            apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU",
+            authDomain: "crak-a74d0.firebaseapp.com",
+            projectId: "crak-a74d0",
+            storageBucket: "crak-a74d0.firebasestorage.app",
+            messagingSenderId: "106356918520",
+            appId: "1:106356918520:web:e9affa0adef64574c1530d",
+            measurementId: "G-YFG4XZWP68"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -486,15 +468,14 @@
         const googleBtn = document.getElementById('google-btn');
         const errorMsg = document.getElementById('auth-error');
         
+        // These are less relevant now since we redirect immediately, 
+        // but kept to prevent errors if elements exist
         const loggedOutView = document.getElementById('logged-out-view');
         const loggedInView = document.getElementById('logged-in-view');
-        const userAvatar = document.getElementById('user-avatar');
-        const userName = document.getElementById('user-name');
-        const logoutBtn = document.getElementById('logout-btn');
 
         let isLoginMode = true;
 
-        // Modal Logic
+        // --- Modal Logic ---
         window.openModal = function() {
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -507,7 +488,7 @@
             authForm.reset();
         }
 
-        // Toggle Login/Signup
+        // --- Toggle Login/Signup ---
         toggleBtn.addEventListener('click', (e) => {
             e.preventDefault();
             isLoginMode = !isLoginMode;
@@ -522,22 +503,22 @@
                 toggleText.innerHTML = 'Already have an account? <button id="toggle-auth" class="text-primary font-bold hover:underline">Sign In</button>';
             }
             
-            // Re-attach event listener to new button
-            document.getElementById('toggle-auth').addEventListener('click', toggleBtn.click.bind(toggleBtn)); // Trick to rebind functionality
+            // Re-bind the new button created in innerHTML
+            document.getElementById('toggle-auth').addEventListener('click', toggleBtn.click.bind(toggleBtn)); 
             errorMsg.classList.add('hidden');
         });
 
-        // Google Auth
+        // --- Google Auth ---
         googleBtn.addEventListener('click', async () => {
             try {
                 await signInWithPopup(auth, provider);
-                closeModal();
+                // The redirection happens automatically in onAuthStateChanged below
             } catch (error) {
                 showError(error.message);
             }
         });
 
-        // Email/Password Auth
+        // --- Email/Password Auth ---
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -549,7 +530,7 @@
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
                 }
-                closeModal();
+                // The redirection happens automatically in onAuthStateChanged below
             } catch (error) {
                 let message = error.message;
                 if(error.code === 'auth/invalid-credential') message = "Invalid email or password.";
@@ -559,32 +540,34 @@
             }
         });
 
-        // Auth State Observer
+        // --- Auth State Observer (REDIRECT LOGIC HERE) ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is signed in
-                loggedOutView.classList.add('hidden');
-                loggedInView.classList.remove('hidden');
+                // User is signed in.
+                console.log("User authenticated. Redirecting to main.html...");
                 
-                const name = user.displayName || user.email.split('@')[0];
-                const initial = name.charAt(0).toUpperCase();
-                
-                userName.textContent = name;
-                userAvatar.textContent = initial;
-                
-                // Hide modal if open
+                // 1. Close modal just in case
                 closeModal();
+
+                // 2. Redirect to main.html
+                window.location.href = "main.html"; 
             } else {
-                // User is signed out
-                loggedOutView.classList.remove('hidden');
-                loggedInView.classList.add('hidden');
+                // User is signed out.
+                // Ensure the "Get Started" / "Login" buttons are visible
+                if(loggedOutView) loggedOutView.classList.remove('hidden');
+                if(loggedInView) loggedInView.classList.add('hidden');
             }
         });
 
-        // Logout
-        logoutBtn.addEventListener('click', async () => {
-            await signOut(auth);
-        });
+        // --- Logout (Optional, if you have a logout button on this page) ---
+        // Note: Usually logout logic will be on main.html, but kept here for safety
+        const logoutBtn = document.getElementById('logout-btn');
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                await signOut(auth);
+                window.location.reload(); // Reload page to reset state
+            });
+        }
 
         function showError(msg) {
             errorMsg.textContent = msg;
