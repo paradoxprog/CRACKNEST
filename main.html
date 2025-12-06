@@ -239,70 +239,9 @@
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU",
-            authDomain: "crak-a74d0.firebaseapp.com",
-            projectId: "crak-a74d0",
-            storageBucket: "crak-a74d0.firebasestorage.app",
-            messagingSenderId: "106356918520",
-            appId: "1:106356918520:web:e9affa0adef64574c1530d",
-            measurementId: "G-YFG4XZWP68"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Auth Guard
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0];
-            } else {
-                // Redirect if not logged in
-                window.location.href = "index.html";
-            }
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            });
-        });
-    </script>
-
     <script>
-        // ============================================
-        //  👇 PASTE YOUR GEMINI API KEY BELOW 👇
-        // ============================================
-        const HARDCODED_API_KEY = "AIzaSyD82H-W86T64I2Q_ay1JvNoSBE0GV9-dAo"; 
-        // Example: const HARDCODED_API_KEY = "AIzaSy...";
-        // ============================================
-
-        let GEMINI_API_KEY = HARDCODED_API_KEY || localStorage.getItem('gemini_api_key') || "";
-        const apiKeyModal = document.getElementById('apikey-modal');
-
-        // Check if key exists on load
-        if (!GEMINI_API_KEY) {
-            apiKeyModal.classList.remove('hidden');
-        }
-
-        function saveKeyFromModal() {
-            const input = document.getElementById('modal-api-input').value;
-            if(input && input.length > 10) {
-                GEMINI_API_KEY = input;
-                localStorage.setItem('gemini_api_key', GEMINI_API_KEY);
-                apiKeyModal.classList.add('hidden');
-            } else {
-                alert("Please enter a valid API Key.");
-            }
-        }
-
         // --- Navigation ---
         function switchTab(tabId) {
-            // Update Sidebar
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.classList.remove('bg-primary', 'text-white');
                 btn.classList.add('text-slate-400');
@@ -312,60 +251,32 @@
                 activeBtn.classList.add('bg-primary', 'text-white');
                 activeBtn.classList.remove('text-slate-400');
             }
-
-            // Update View
             document.querySelectorAll('.content-view').forEach(view => view.classList.add('hidden'));
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
         }
 
-        // --- SMART GEMINI FETCH FUNCTION ---
-        // Handles retries and model fallbacks automatically
+        // --- SECURE BACKEND CALL ---
         async function callGemini(prompt) {
-            if(!GEMINI_API_KEY) {
-                apiKeyModal.classList.remove('hidden');
-                return null;
-            }
-
-            // 1. Try Specific Stable 1.5 Version First
-            let modelVersion = "gemini-1.5-flash-001"; 
-            let result = await fetchGeminiModel(modelVersion, prompt);
-
-            // 2. If 404 (Not Found), Fallback to Legacy Gemini Pro (1.0)
-            if (result && result.error && result.error.code === 404) {
-                console.warn("Gemini 1.5 not found, falling back to Gemini Pro...");
-                modelVersion = "gemini-pro";
-                result = await fetchGeminiModel(modelVersion, prompt);
-            }
-
-            // 3. Handle Errors or Success
-            if (result && result.error) {
-                console.error("API Error:", result.error);
-                alert(`API Error: ${result.error.message}`);
-                return null;
-            }
-
-            if (result && result.candidates && result.candidates.length > 0) {
-                return result.candidates[0].content.parts[0].text;
-            }
-            
-            return null;
-        }
-
-        // Helper function for the actual fetch
-        async function fetchGeminiModel(model, prompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
             try {
-                const response = await fetch(url, {
+                // Call our own Vercel API route (No API Key needed here!)
+                const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
+                    body: JSON.stringify({ prompt: prompt })
                 });
-                return await response.json();
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error("API Error:", data.error);
+                    alert("AI Error: " + data.error);
+                    return null;
+                }
+
+                return data.candidates[0].content.parts[0].text;
             } catch (error) {
                 console.error("Network Error:", error);
-                alert("Network Error. Check console.");
+                alert("Error connecting to server.");
                 return null;
             }
         }
@@ -441,11 +352,9 @@
             const msg = input.value;
             if(!msg) return;
 
-            // User Message
             appendMessage('User', msg);
             input.value = '';
 
-            // Loading State
             const loaderId = 'chat-loader-' + Date.now();
             const windowDiv = document.getElementById('chat-window');
             const loaderDiv = document.createElement('div');
@@ -455,17 +364,13 @@
             windowDiv.appendChild(loaderDiv);
             windowDiv.scrollTop = windowDiv.scrollHeight;
 
-            // Build History Context
             let context = "You are a professional, strict but helpful interviewer. We are conducting a mock interview. Ask one question at a time. After the user answers, critique their answer briefly and then ask the next relevant question. \n\nHistory:\n";
             chatHistory.push(`User: ${msg}`);
-            // Limit context to last 6 exchanges to save tokens
             const recentHistory = chatHistory.slice(-6).join("\n"); 
-            
             const prompt = context + recentHistory + "\nAI:";
 
             const result = await callGemini(prompt);
             
-            // Remove Loader
             document.getElementById(loaderId).remove();
 
             if(result) {
@@ -486,7 +391,6 @@
             chatHistory = [];
         }
 
-        // Allow 'Enter' key in chat
         document.getElementById('chat-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') sendChat();
         });
@@ -523,7 +427,6 @@
                 output.classList.remove('hidden');
             }
         }
-
     </script>
 </body>
 </html>
