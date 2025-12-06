@@ -1,0 +1,15 @@
+{
+  "name": "cracknest-ai",
+  "version": "1.0.0",
+  "description": "CrackNest Interview Platform",
+  "main": "api/gemini.js",
+  "scripts": {
+    "start": "node api/gemini.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
