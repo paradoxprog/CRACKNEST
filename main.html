@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | CrackNest</title>
+    <title>CrackNest | Professional Tools</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,10 +103,7 @@
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-2">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg bg-primary text-white transition">
-                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
-            </button>
-            <button onclick="switchTab('tips')" id="nav-tips" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+            <button onclick="switchTab('tips')" id="nav-tips" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg bg-primary text-white transition">
                 <i class="fa-solid fa-lightbulb w-5"></i> Expert Tips
             </button>
             <button onclick="switchTab('questions')" id="nav-questions" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
@@ -121,7 +118,11 @@
         </nav>
 
         <div class="p-4 border-t border-slate-800">
-            <button id="logout-btn" class="flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition w-full">
+            <div class="mb-4 px-2">
+                <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Logged in as</p>
+                <p id="display-name" class="text-sm font-bold text-white truncate">User</p>
+            </div>
+            <button id="logout-btn" class="flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition w-full px-2">
                 <i class="fa-solid fa-right-from-bracket"></i> Sign Out
             </button>
         </div>
@@ -135,41 +136,7 @@
 
         <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth">
             
-            <div id="view-dashboard" class="content-view space-y-8">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <h1 class="text-3xl font-heading font-bold text-slate-900">Welcome back, <span id="display-name" class="text-primary">User</span>!</h1>
-                        <p class="text-slate-500 mt-2">Track your progress and start your preparation.</p>
-                    </div>
-                </div>
-
-                <h2 class="font-bold text-xl text-slate-800">Quick Actions</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div onclick="switchTab('mock')" class="group cursor-pointer bg-gradient-to-br from-primary to-indigo-700 p-6 rounded-xl text-white shadow-lg shadow-indigo-200 hover:shadow-xl transition">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                                <i class="fa-solid fa-robot"></i>
-                            </div>
-                            <i class="fa-solid fa-arrow-right opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1"></i>
-                        </div>
-                        <h3 class="font-bold text-lg">Start AI Mock Interview</h3>
-                        <p class="text-indigo-100 text-sm mt-1">Practice behavioral questions with real-time feedback.</p>
-                    </div>
-                    
-                    <div onclick="switchTab('resume')" class="group cursor-pointer bg-white border border-slate-200 p-6 rounded-xl hover:border-primary/50 hover:shadow-lg transition">
-                         <div class="flex justify-between items-start mb-4">
-                            <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            </div>
-                            <i class="fa-solid fa-arrow-right text-slate-300 group-hover:text-primary transition"></i>
-                        </div>
-                        <h3 class="font-bold text-slate-900 text-lg">Optimize Resume</h3>
-                        <p class="text-slate-500 text-sm mt-1">Paste your resume text to get ATS suggestions.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-tips" class="content-view hidden space-y-6">
+            <div id="view-tips" class="content-view space-y-6">
                 <div class="max-w-3xl mx-auto">
                     <h2 class="text-2xl font-bold text-slate-900 mb-6">Expert Interview Strategies</h2>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
