@@ -269,7 +269,7 @@
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div>
                             <div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl text-slate-700 text-sm max-w-[80%]">
-                                Hello! I am your AI interviewer powered by <strong>Gemini 2.0</strong>. Tell me what role you are interviewing for, and we can begin.
+                                Hello! I am your AI interviewer. Tell me what role you are interviewing for, and we can begin.
                             </div>
                         </div>
                     </div>
@@ -387,15 +387,42 @@
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
         }
 
-        // --- Gemini Helper Function ---
+        // --- SMART GEMINI FETCH FUNCTION ---
+        // Handles retries and model fallbacks automatically
         async function callGemini(prompt) {
             if(!GEMINI_API_KEY) {
-                apiKeyModal.classList.remove('hidden'); // Show modal if key is missing during call
+                apiKeyModal.classList.remove('hidden');
                 return null;
             }
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            // 1. Try Specific Stable 1.5 Version First
+            let modelVersion = "gemini-1.5-flash-001"; 
+            let result = await fetchGeminiModel(modelVersion, prompt);
+
+            // 2. If 404 (Not Found), Fallback to Legacy Gemini Pro (1.0)
+            if (result && result.error && result.error.code === 404) {
+                console.warn("Gemini 1.5 not found, falling back to Gemini Pro...");
+                modelVersion = "gemini-pro";
+                result = await fetchGeminiModel(modelVersion, prompt);
+            }
+
+            // 3. Handle Errors or Success
+            if (result && result.error) {
+                console.error("API Error:", result.error);
+                alert(`API Error: ${result.error.message}`);
+                return null;
+            }
+
+            if (result && result.candidates && result.candidates.length > 0) {
+                return result.candidates[0].content.parts[0].text;
+            }
             
+            return null;
+        }
+
+        // Helper function for the actual fetch
+        async function fetchGeminiModel(model, prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
             try {
                 const response = await fetch(url, {
                     method: 'POST',
@@ -404,19 +431,10 @@
                         contents: [{ parts: [{ text: prompt }] }]
                     })
                 });
-                
-                const data = await response.json();
-                
-                if (data.error) {
-                    console.error("API Error:", data.error);
-                    alert("API Error: " + data.error.message);
-                    return null;
-                }
-
-                return data.candidates[0].content.parts[0].text;
+                return await response.json();
             } catch (error) {
-                console.error("Network/Gemini Error:", error);
-                alert("Error connecting to AI. Check your API Key or Network.");
+                console.error("Network Error:", error);
+                alert("Network Error. Check console.");
                 return null;
             }
         }
