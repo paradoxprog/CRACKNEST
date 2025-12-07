@@ -1,13 +1,5 @@
 {
-  "version": 2,
   "rewrites": [
-    {
-      "source": "/api/gemini",
-      "destination": "/api/gemini.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
-    }
+    { "source": "/", "destination": "/main.html" }
   ]
 }
