@@ -17,9 +17,9 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: 'Server Config Error: GEMINI_API_KEY is missing.' }), { status: 500 });
         }
 
-        // FIX: Use the EXPLICIT stable version "gemini-1.5-flash-001"
-        // This solves "Not Found" (by being specific) and "Limit: 0" (by using the stable free tier).
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`;
+        // FIX 1: Use the 'v1' (Stable) endpoint instead of 'v1beta'
+        // FIX 2: Use the standard 'gemini-1.5-flash' name (no '001' suffix to avoid alias issues)
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -31,6 +31,7 @@ export default async function handler(req) {
 
         const data = await response.json();
 
+        // Error Handling
         if (data.error) {
             console.error("Gemini API Error:", data.error);
             return new Response(JSON.stringify({ error: data.error.message }), { 
