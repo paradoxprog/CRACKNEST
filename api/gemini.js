@@ -1,54 +1,41 @@
 // api/gemini.js
+export default async function handler(req, res) {
+  // 1. Check if the method is POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-export const config = {
-    runtime: 'edge',
-};
+  // 2. Get the prompt from the frontend
+  const { prompt } = req.body;
 
-export default async function handler(req) {
-    if (req.method !== 'POST') {
-        return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
-    }
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
 
-    try {
-        const { prompt } = await req.json();
-        const apiKey = process.env.GEMINI_API_KEY;
+  // 3. Get the API Key from Environment Variables (Secure)
+  const apiKey = process.env.GEMINI_API_KEY;
 
-        if (!apiKey) {
-            return new Response(JSON.stringify({ error: 'Server Config Error: GEMINI_API_KEY is missing.' }), { status: 500 });
-        }
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
 
-        // FIX 1: Use the 'v1' (Stable) endpoint instead of 'v1beta'
-        // FIX 2: Use the standard 'gemini-1.5-flash' name (no '001' suffix to avoid alias issues)
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  try {
+    // 4. Call Google Gemini API from the Server
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
+    const data = await response.json();
+    
+    // 5. Send the result back to your frontend
+    return res.status(200).json(data);
 
-        const data = await response.json();
-
-        // Error Handling
-        if (data.error) {
-            console.error("Gemini API Error:", data.error);
-            return new Response(JSON.stringify({ error: data.error.message }), { 
-                status: 500,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-    } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Failed to fetch from Gemini' });
+  }
 }
