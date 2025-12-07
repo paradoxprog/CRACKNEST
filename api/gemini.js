@@ -1,68 +1,50 @@
 export default async function handler(req, res) {
-  // 1. CORS Headers - Allow your HTML to talk to this backend
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  // 1. Get the key from Vercel Environment Variables
+  const apiKey = process.env.GEMINI_API_KEY;
 
-  // 2. Handle browser pre-checks (OPTIONS request)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Server Error: API Key missing' });
   }
 
-  // 3. Only allow POST method
+  // 2. Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 4. Get the prompt from main.html
-    const { prompt } = req.body;
-    if (!prompt) {
-      return res.status(400).json({ error: 'Prompt is required' });
-    }
+    // 3. Call Google Gemini
+    // Note: ensure req.body has the structure { contents: [...] } as expected by Gemini
+    // Or if your frontend sends { prompt: "..." }, construct the Gemini body here.
+    // Based on your main.html logic, you are sending { prompt: "..." }, so we map it:
+    
+    const userPrompt = req.body.prompt;
+    
+    // Construct the payload expected by Gemini 2.0 Flash
+    const geminiPayload = {
+      contents: [{
+        parts: [{ text: userPrompt }]
+      }]
+    };
 
-    // 5. Get API Key from Vercel Environment Variables
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'Server Error: GEMINI_API_KEY is not set in Vercel settings.' });
-    }
-
-    // 6. Call Google Gemini API
-    // CRITICAL FIX: Using 'gemini-1.5-flash' which has higher rate limits (15 req/min)
-    // ✅ CORRECT LINE (High Speed)
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
-      })
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiPayload),
+      }
+    );
 
     const data = await response.json();
 
-    // 7. Handle Google Errors (like 429)
     if (!response.ok) {
-      console.error("Google API Error:", data);
-      return res.status(response.status).json({ 
-        error: data.error?.message || 'Error fetching from Gemini' 
-      });
+      return res.status(response.status).json(data);
     }
 
-    // 8. Success
     return res.status(200).json(data);
 
   } catch (error) {
-    console.error('Server Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error(error);
+    return res.status(500).json({ error: 'Failed to communicate with AI service' });
   }
 }
