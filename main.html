@@ -72,6 +72,7 @@
     <div id="loading-screen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
         <h2 class="text-xl font-bold text-slate-700 heading">Loading CrackNest...</h2>
+        <p class="text-slate-500 text-sm mt-2">Initializing Local Environment</p>
         <p id="loading-error" class="text-red-500 mt-2 text-sm hidden"></p>
     </div>
 
@@ -108,7 +109,7 @@
                     <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold" id="sidebar-avatar">U</div>
                     <div>
                         <p class="text-sm font-bold text-white truncate w-32" id="sidebar-name">User</p>
-                        <p class="text-xs text-slate-400">Student</p>
+                        <p class="text-xs text-slate-400">Student (Local)</p>
                     </div>
                 </div>
                 <button id="logout-btn" class="w-full bg-slate-800 hover:bg-red-600/20 text-slate-300 hover:text-red-400 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2">
@@ -565,27 +566,58 @@
     </div>
 
     <!-- FIREBASE & LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // --- Mock Firebase using LocalStorage ---
+        
+        // Mock DB object
+        const db = {}; 
+        
+        // Mock Auth object
+        const auth = {}; 
 
-        // Firebase Setup
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (JSON.parse(localStorage.getItem('firebaseConfig') || '{}'));
-        // Fallback hardcoded if still empty (for local testing/previews without globals)
-        const activeConfig = Object.keys(firebaseConfig).length > 0 ? firebaseConfig : {
-            apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU",
-            authDomain: "crak-a74d0.firebaseapp.com",
-            projectId: "crak-a74d0",
-            appId: "1:106356918520:web:e9affa0adef64574c1530d"
+        // Simple 'doc' function creates a key string from arguments
+        const doc = (dbInstance, ...pathSegments) => {
+            return pathSegments.join('_'); // e.g., "artifacts_cracknest-v1_users_localUser_profile_data"
         };
 
-        const app = initializeApp(activeConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Mock 'getDoc'
+        const getDoc = async (docPath) => {
+            const stored = localStorage.getItem(docPath);
+            return {
+                exists: () => stored !== null,
+                data: () => stored ? JSON.parse(stored) : undefined
+            };
+        };
+
+        // Mock 'setDoc'
+        const setDoc = async (docPath, data) => {
+            localStorage.setItem(docPath, JSON.stringify(data));
+        };
+
+        // Mock 'signOut'
+        const signOut = async () => {
+            // Since we are mocking a "always logged in" state for offline, 
+            // sign out effectively just reloads to the "index" (login) page.
+            window.location.href = "index.html";
+        };
+
+        // Mock 'onAuthStateChanged'
+        // We simulate a logged-in user immediately for the offline version
+        // This bypasses the need for a real authentication server.
+        const onAuthStateChanged = (authInstance, callback) => {
+            setTimeout(() => {
+                const mockUser = {
+                    uid: 'offline_user_123',
+                    email: 'student@cracknest.local',
+                    displayName: 'Guest Student'
+                };
+                callback(mockUser);
+            }, 500); // Simulate network delay
+            return () => {}; // Unsubscribe function
+        };
+
         
-        // Correct App ID usage
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'cracknest-v1'; 
+        const appId = 'cracknest-v1'; 
 
         // Global State
         let currentUser = null;
@@ -643,6 +675,7 @@
 
                 try {
                     // Check for existing profile AND baseline status
+                    // These use our Mock 'doc' and 'getDoc' functions which read from LocalStorage
                     const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const baselineRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'baseline');
                     
@@ -729,6 +762,7 @@
             btn.textContent = "Saving...";
             
             try {
+                // Using mock setDoc -> writes to LocalStorage
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), data);
                 userProfile = data;
                 // Move to Baseline, keep navigation locked
@@ -797,7 +831,7 @@
             document.getElementById('res-score').textContent = `${finalPct}%`;
             document.getElementById('res-level').textContent = finalPct > 70 ? "Advanced" : (finalPct > 40 ? "Interm." : "Beginner");
             
-            // Save Score
+            // Save Score (Mock setDoc -> LocalStorage)
             setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'baseline'), { score: finalPct, date: new Date().toISOString() });
         }
 
