@@ -120,7 +120,7 @@
         <main class="flex-1 flex flex-col h-full bg-slate-50 relative">
             
             <!-- Mobile Header -->
-            <header class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:hidden shrink-0">
+            <header id="mobile-header" class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:hidden shrink-0">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-graduation-cap text-primary text-xl"></i>
                     <span class="font-bold text-slate-800">CrackNest</span>
@@ -145,6 +145,7 @@
                         </div>
                         
                         <form id="profile-form" class="space-y-6">
+                            <!-- Personal Info -->
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
@@ -155,16 +156,11 @@
                                     <input type="text" id="p-degree" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="B.Tech CSE">
                                 </div>
                             </div>
-                            
+
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Target Role</label>
-                                    <select id="p-role" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none">
-                                        <option value="SDE">Software Developer (SDE)</option>
-                                        <option value="DA">Data Analyst</option>
-                                        <option value="WEB">Web Developer</option>
-                                        <option value="QA">QA Engineer</option>
-                                    </select>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Year of Passing</label>
+                                    <input type="number" id="p-year" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="2025">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
@@ -175,9 +171,39 @@
                                 </div>
                             </div>
 
+                            <!-- Career Target -->
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Career Field</label>
+                                    <select id="p-field" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none">
+                                        <option value="IT">IT / Software</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="HR">Human Resources</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Engineering">Core Engineering</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Specific Role</label>
+                                    <input type="text" id="p-role" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="e.g. Software Developer">
+                                </div>
+                            </div>
+                            
+                            <!-- Skills & Certs -->
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Top Skills (Comma separated)</label>
-                                <input type="text" id="p-skills" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="Java, Python, SQL...">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Certifications (if any)</label>
+                                <input type="text" id="p-certs" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="AWS, PMP, etc.">
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Languages Known</label>
+                                    <input type="text" id="p-langs" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="English, Hindi...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Top Skills</label>
+                                    <input type="text" id="p-skills" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="Java, Python, SQL...">
+                                </div>
                             </div>
 
                             <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/30">
@@ -566,6 +592,9 @@
         // --- DOM Elements ---
         const loadingScreen = document.getElementById('loading-screen');
         const appContainer = document.getElementById('app-container');
+        const sidebar = document.getElementById('sidebar');
+        const mobileHeader = document.getElementById('mobile-header');
+        
         const views = {
             setup: document.getElementById('view-profile-setup'),
             baseline: document.getElementById('view-baseline-test'),
@@ -577,7 +606,17 @@
         };
         const navItems = document.querySelectorAll('.nav-item');
 
-        // --- Navigation Logic ---
+        // --- Navigation Control ---
+        function toggleNavigation(show) {
+            if (show) {
+                sidebar.classList.remove('!hidden');
+                mobileHeader.classList.remove('!hidden');
+            } else {
+                sidebar.classList.add('!hidden');
+                mobileHeader.classList.add('!hidden');
+            }
+        }
+
         window.navTo = (target) => {
             // Hide all
             Object.values(views).forEach(el => el.classList.add('hidden'));
@@ -598,16 +637,34 @@
                 document.getElementById('sidebar-avatar').textContent = user.email[0].toUpperCase();
                 document.getElementById('sidebar-name').textContent = user.displayName || user.email.split('@')[0];
 
-                // Check for existing profile
                 try {
-                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
-                    const docSnap = await getDoc(docRef);
+                    // Check for existing profile AND baseline status
+                    const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    const baselineRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'baseline');
+                    
+                    const [profileSnap, baselineSnap] = await Promise.all([getDoc(profileRef), getDoc(baselineRef)]);
 
                     loadingScreen.classList.add('hidden');
                     appContainer.classList.remove('hidden');
 
-                    if (docSnap.exists()) {
-                        userProfile = docSnap.data();
+                    if (!profileSnap.exists()) {
+                        // Case 1: No Profile -> Force Setup
+                        console.log("No profile found. Enforcing setup.");
+                        toggleNavigation(false); // Hide sidebar
+                        navTo('setup');
+                    } else if (!baselineSnap.exists()) {
+                        // Case 2: Profile Exists, No Baseline -> Force Baseline
+                        console.log("Profile found, but no baseline. Enforcing test.");
+                        userProfile = profileSnap.data();
+                        toggleNavigation(false); // Hide sidebar
+                        navTo('baseline');
+                    } else {
+                        // Case 3: All Done -> Show Dashboard
+                        console.log("User ready. Loading dashboard.");
+                        userProfile = profileSnap.data();
+                        baselineScore = baselineSnap.data().score;
+                        
+                        toggleNavigation(true); // Show sidebar
                         loadDashboardData();
                         navTo('dashboard');
                         
@@ -615,8 +672,6 @@
                         document.getElementById('res-name').value = userProfile.name || "";
                         document.getElementById('res-skills-input').value = userProfile.skills || "";
                         window.updateResume();
-                    } else {
-                        navTo('setup'); // New user flow
                     }
                 } catch (e) {
                     console.error("Profile Load Error", e);
@@ -625,14 +680,11 @@
             } else {
                 // Not logged in -> Redirect to Index
                 try {
-                    // Attempt robust redirection
                     const target = "index.html";
-                    // Using replace to avoid back-button loops
                     window.location.replace(target);
                 } catch (e) {
                     console.warn("Auto-redirect failed:", e);
                     loadingScreen.classList.add('hidden');
-                    // Fallback UI
                     document.body.innerHTML = `
                         <div class="flex flex-col items-center justify-center h-screen bg-slate-50 text-slate-800">
                             <div class="text-center space-y-4">
@@ -657,22 +709,28 @@
             const data = {
                 name: document.getElementById('p-name').value,
                 degree: document.getElementById('p-degree').value,
-                role: document.getElementById('p-role').value,
+                year: document.getElementById('p-year').value,
                 exp: document.getElementById('p-exp').value,
+                field: document.getElementById('p-field').value,
+                role: document.getElementById('p-role').value,
+                certs: document.getElementById('p-certs').value,
+                langs: document.getElementById('p-langs').value,
                 skills: document.getElementById('p-skills').value,
                 joinedAt: new Date().toISOString()
             };
 
             const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
             btn.textContent = "Saving...";
             
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), data);
                 userProfile = data;
-                navTo('baseline'); // Proceed to next step
+                // Move to Baseline, keep navigation locked
+                navTo('baseline'); 
             } catch (err) {
                 alert("Error saving profile: " + err.message);
-                btn.textContent = "Try Again";
+                btn.textContent = originalText;
             }
         });
 
@@ -739,6 +797,7 @@
         }
 
         window.finishBaseline = () => {
+            toggleNavigation(true); // Unlock Sidebar now
             loadDashboardData();
             navTo('dashboard');
         }
