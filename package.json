@@ -1,12 +1,17 @@
 {
-  "name": "cracknest-app",
+  "name": "cracknest",
   "version": "1.0.0",
-  "type": "module",
+  "description": "AI-Powered Interview Prep Platform",
+  "private": true,
   "scripts": {
-    "start": "echo 'App is running'"
+    "start": "npx serve ."
   },
-  "dependencies": {},
   "engines": {
-    "node": "20.x"
-  }
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "interview",
+    "ai",
+    "prep"
+  ]
 }
