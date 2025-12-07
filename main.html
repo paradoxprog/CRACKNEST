@@ -452,7 +452,7 @@
     <!-- FIREBASE & GEMINI LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const firebaseConfig = { apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU", authDomain: "crak-a74d0.firebaseapp.com", projectId: "crak-a74d0", storageBucket: "crak-a74d0.firebasestorage.app", messagingSenderId: "106356918520", appId: "1:106356918520:web:e9affa0adef64574c1530d", measurementId: "G-YFG4XZWP68" };
@@ -471,6 +471,18 @@
         
         // Use a unique app ID for Firestore paths
         window.appId = typeof __app_id !== 'undefined' ? __app_id : 'cracknest-app-v1';
+
+        // --- AUTH INIT (CRITICAL FIX) ---
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                try {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } catch (e) {
+                    console.error("Token auth failed", e);
+                }
+            }
+        };
+        initAuth();
 
         onAuthStateChanged(auth, async (user) => {
             if (user) { 
@@ -526,7 +538,7 @@
                 }
             } catch (error) {
                 console.error("Error syncing data:", error);
-                alert("Failed to load your data. Please refresh.");
+                alert("Data Load Error: " + error.message);
             }
         }
         
