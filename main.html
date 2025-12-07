@@ -500,7 +500,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) { 
                 document.getElementById('auth-overlay').classList.add('hidden');
-                document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0] || "User"; 
+                document.getElementById('display-name').textContent = user.displayName || (user.email ? user.email.split('@')[0] : "User"); 
                 
                 // Show loading state
                 document.getElementById('loading-overlay').classList.remove('hidden');
@@ -579,7 +579,7 @@
     </script>
 
     <script>
-        const apiKey = "AIzaSyCs4lBn49sCxcbgBou2xxlkWo0UHY60WBc"; // System injects key at runtime
+        const apiKey = ""; // System injects key at runtime
 
         // --- GEMINI API CALLER ---
         async function callGemini(prompt, isJson = false) {
