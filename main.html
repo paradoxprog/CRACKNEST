@@ -65,6 +65,12 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-700 h-screen flex overflow-hidden">
 
+    <!-- LOADING OVERLAY -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm z-[200] flex flex-col items-center justify-center">
+        <div class="loader w-12 h-12 border-4 mb-4"></div>
+        <p class="text-slate-500 font-medium" id="loading-text">Loading your dashboard...</p>
+    </div>
+
     <!-- AUTH OVERLAY -->
     <div id="auth-overlay" class="hidden fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center text-white">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700">
@@ -122,7 +128,7 @@
                 <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold" id="user-initials">U</div>
                 <div class="overflow-hidden">
                     <p id="display-name" class="text-sm font-bold text-white truncate">Student</p>
-                    <p class="text-xs text-slate-400 truncate" id="user-role-display">Role pending...</p>
+                    <p class="text-xs text-slate-400 truncate" id="user-role-display">Loading role...</p>
                 </div>
             </div>
             <button id="logout-btn" class="flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition w-full px-2">
@@ -246,6 +252,14 @@
                     </div>
                 </div>
 
+                <!-- Performance Chart -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-lg mb-4">Performance History</h3>
+                    <div class="h-64">
+                         <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
                 <div class="grid md:grid-cols-2 gap-6">
                     <div onclick="switchTab('mock')" class="group bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-xl shadow-lg text-white cursor-pointer transition transform hover:scale-[1.02]">
                         <div class="flex justify-between items-start">
@@ -318,7 +332,6 @@
                         </div>
                         <button onclick="generateTest('Technical', 'Intermediate')" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Generate Test</button>
                     </div>
-                    <!-- Level 3 Added for completeness -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xl">3</div>
@@ -402,17 +415,36 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const firebaseConfig = { apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU", authDomain: "crak-a74d0.firebaseapp.com", projectId: "crak-a74d0", storageBucket: "crak-a74d0.firebasestorage.app", messagingSenderId: "106356918520", appId: "1:106356918520:web:e9affa0adef64574c1530d", measurementId: "G-YFG4XZWP68" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         
-        onAuthStateChanged(auth, (user) => {
+        // Expose db and auth to window for non-module scripts
+        window.db = db;
+        window.auth = auth;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.updateDoc = updateDoc;
+        window.arrayUnion = arrayUnion;
+        
+        // Use a unique app ID for Firestore paths
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'cracknest-app-v1';
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) { 
                 document.getElementById('auth-overlay').classList.add('hidden');
                 document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0]; 
-                document.getElementById('dash-name').textContent = user.displayName || "Student";
-                checkUserFlow();
+                
+                // Show loading state
+                document.getElementById('loading-overlay').classList.remove('hidden');
+                
+                await syncUserData(user);
+                
+                document.getElementById('loading-overlay').classList.add('hidden');
             } else { 
                 document.getElementById('auth-overlay').classList.remove('hidden');
             }
@@ -421,6 +453,47 @@
         document.getElementById('logout-btn').addEventListener('click', () => { 
             signOut(auth).then(() => { document.getElementById('auth-overlay').classList.remove('hidden'); }); 
         });
+
+        async function syncUserData(user) {
+            try {
+                // Fetch Profile
+                const profileRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'profile');
+                const profileSnap = await getDoc(profileRef);
+                
+                // Fetch Baseline/Progress
+                const baselineRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'baseline');
+                const baselineSnap = await getDoc(baselineRef);
+
+                // Initial State Reset
+                document.querySelectorAll('.content-view').forEach(el => el.classList.add('hidden'));
+                document.getElementById('view-profile-setup').classList.add('hidden');
+                document.getElementById('view-baseline').classList.add('hidden');
+                document.getElementById('sidebar').classList.add('hidden');
+
+                if (!profileSnap.exists()) {
+                    document.getElementById('view-profile-setup').classList.remove('hidden');
+                } else if (!baselineSnap.exists()) {
+                    window.currentUserProfile = profileSnap.data();
+                    document.getElementById('view-baseline').classList.remove('hidden');
+                } else {
+                    document.getElementById('sidebar').classList.remove('hidden');
+                    window.currentUserProfile = profileSnap.data();
+                    window.currentUserBaseline = baselineSnap.data();
+                    
+                    document.getElementById('dash-name').textContent = window.currentUserProfile.name || "Student";
+                    document.getElementById('user-role-display').textContent = window.currentUserProfile.role;
+                    
+                    switchTab('dashboard');
+                    loadRealDashboardStats();
+                }
+            } catch (error) {
+                console.error("Error syncing data:", error);
+                alert("Failed to load your data. Please refresh.");
+            }
+        }
+        
+        // Expose sync function
+        window.syncUserData = syncUserData;
     </script>
 
     <script>
@@ -454,43 +527,30 @@
             }
         }
 
-        // --- 1. STATE MANAGEMENT ---
-        function checkUserFlow() {
-            const profile = localStorage.getItem('cn_profile');
-            const baseline = localStorage.getItem('cn_baseline');
-
-            document.querySelectorAll('.content-view').forEach(el => el.classList.add('hidden'));
-            document.getElementById('view-profile-setup').classList.add('hidden');
-            document.getElementById('view-baseline').classList.add('hidden');
-            document.getElementById('sidebar').classList.add('hidden'); 
-
-            if (!profile) {
-                document.getElementById('view-profile-setup').classList.remove('hidden');
-            } else if (!baseline) {
-                document.getElementById('view-baseline').classList.remove('hidden');
-            } else {
-                document.getElementById('sidebar').classList.remove('hidden');
-                switchTab('dashboard');
-                loadDashboardStats();
-            }
-        }
-
-        // --- 2. PROFILE HANDLER ---
-        document.getElementById('profile-form').addEventListener('submit', (e) => {
+        // --- 1. PROFILE HANDLER (FIRESTORE) ---
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            
             const data = {
                 name: document.getElementById('p-name').value,
                 role: document.getElementById('p-role').value,
                 field: document.getElementById('p-field').value,
                 exp: document.getElementById('p-exp').value
             };
-            localStorage.setItem('cn_profile', JSON.stringify(data));
-            checkUserFlow();
+            
+            const user = window.auth.currentUser;
+            if(user) {
+                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'profile'), data);
+                await window.syncUserData(user); // Move flow forward
+            }
         });
 
-        // --- 3. DYNAMIC BASELINE TEST ---
+        // --- 2. DYNAMIC BASELINE TEST (FIRESTORE) ---
         async function startBaselineTest() {
-            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            const profile = window.currentUserProfile;
             const btn = document.querySelector('button[onclick="startBaselineTest()"]');
             
             document.getElementById('test-intro').classList.add('hidden');
@@ -531,7 +591,6 @@
             const formData = new FormData(e.target);
             let userAnswers = [];
             
-            // Collect answers for analysis
             for(let i=0; i<3; i++) {
                 userAnswers.push({
                     question: formData.get(`q${i}_text`),
@@ -543,7 +602,6 @@
             const btn = e.target.querySelector('button[type="submit"]');
             btn.innerHTML = '<div class="loader w-5 h-5 border-2 border-white"></div> AI Analyzing...';
             
-            // Ask AI to score and analyze
             const prompt = `Analyze these test results for a student.
             Data: ${JSON.stringify(userAnswers)}
             Return STRICT JSON: { "score": 0-100 (integer), "strengths": ["string", "string"], "weaknesses": ["string", "string"], "goal": "One sentence daily goal" }`;
@@ -551,28 +609,55 @@
             const analysis = await callGemini(prompt, true);
             
             if(analysis) {
-                localStorage.setItem('cn_baseline', JSON.stringify(analysis));
-                checkUserFlow();
+                // Initialize score history with first score
+                analysis.history = [{ date: new Date().toLocaleDateString(), score: analysis.score }];
+                
+                const user = window.auth.currentUser;
+                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'baseline'), analysis);
+                await window.syncUserData(user);
             }
         });
 
-        // --- 4. DASHBOARD STATS ---
-        async function loadDashboardStats() {
-            const profile = JSON.parse(localStorage.getItem('cn_profile'));
-            const baseline = JSON.parse(localStorage.getItem('cn_baseline'));
-
-            if(profile) document.getElementById('user-role-display').textContent = profile.role;
+        // --- 3. DASHBOARD STATS (REAL TIME) ---
+        function loadRealDashboardStats() {
+            const baseline = window.currentUserBaseline;
             if(baseline) {
+                // Animate numbers?
                 document.getElementById('dash-score').textContent = baseline.score;
                 document.getElementById('dash-strengths').innerHTML = baseline.strengths.map(s => `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">${s}</span>`).join('');
                 document.getElementById('dash-weaknesses').innerHTML = baseline.weaknesses.map(w => `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">${w}</span>`).join('');
                 document.getElementById('dash-goal').textContent = baseline.goal;
+
+                // Load Real Chart
+                const ctx = document.getElementById('performanceChart');
+                
+                // Prepare Data from History
+                const labels = baseline.history ? baseline.history.map((h, i) => `Test ${i+1}`) : ['Baseline'];
+                const dataPoints = baseline.history ? baseline.history.map(h => h.score) : [baseline.score];
+
+                if(window.myChart) window.myChart.destroy();
+                
+                window.myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Readiness Score',
+                            data: dataPoints,
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
             }
         }
 
-        // --- 5. TRAINING & TESTS ---
+        // --- 4. TRAINING & TESTS ---
         async function generateTraining(topic) {
-            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            const profile = window.currentUserProfile;
             openUniversalModal(`AI Lesson: ${topic}`);
             document.getElementById('modal-content').innerHTML = '<div class="flex justify-center"><div class="loader w-10 h-10 border-4 border-primary"></div></div>';
             
@@ -588,21 +673,18 @@
             document.getElementById('modal-content').innerHTML = marked.parse(content);
         }
 
-        // Updated Interactive Test Generation
         async function generateTest(topic, level) {
-            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            const profile = window.currentUserProfile;
             openUniversalModal(`${level} ${topic} Test`);
             document.getElementById('modal-content').innerHTML = '<div class="flex justify-center"><div class="loader w-10 h-10 border-4 border-primary"></div></div>';
             
             const prompt = `Generate 3 multiple choice questions for a ${level} level "${topic}" test for a ${profile.role}. 
-            Return STRICT JSON array: [{"question": "...", "options": ["Op1", "Op2", "Op3", "Op4"], "correctIndex": 0}] 
-            (0 for first option, 1 for second, etc.)`;
+            Return STRICT JSON array: [{"question": "...", "options": ["Op1", "Op2", "Op3", "Op4"], "correctIndex": 0}]`;
             
             const questions = await callGemini(prompt, true);
             
             if (questions) {
                 let html = `<form id="practice-test-form" class="space-y-6">`;
-                
                 questions.forEach((q, index) => {
                     html += `
                     <div class="test-question-container" data-correct="${q.correctIndex}">
@@ -626,7 +708,6 @@
                 
                 document.getElementById('modal-content').innerHTML = html;
                 
-                // Attach handler specifically to this new form
                 document.getElementById('practice-test-form').addEventListener('submit', (e) => {
                     e.preventDefault();
                     submitPracticeTest(questions.length);
@@ -634,7 +715,7 @@
             }
         }
 
-        function submitPracticeTest(totalQuestions) {
+        async function submitPracticeTest(totalQuestions) {
             let score = 0;
             const containers = document.querySelectorAll('.test-question-container');
             
@@ -644,7 +725,6 @@
                 const feedback = container.querySelector('.feedback-msg');
                 const options = container.querySelectorAll('.option-label');
                 
-                // Reset styles
                 options.forEach(opt => opt.classList.remove('correct-answer', 'wrong-answer'));
                 feedback.classList.add('hidden');
                 feedback.classList.remove('text-green-600', 'text-red-600');
@@ -658,7 +738,7 @@
                         feedback.classList.add('text-green-600');
                     } else {
                         options[userIndex].classList.add('wrong-answer');
-                        options[correctIndex].classList.add('correct-answer'); // Show correct one
+                        options[correctIndex].classList.add('correct-answer');
                         feedback.textContent = "Incorrect.";
                         feedback.classList.add('text-red-600');
                     }
@@ -666,11 +746,36 @@
                 }
             });
 
+            const percentage = Math.round((score / totalQuestions) * 100);
             const resultDiv = document.getElementById('test-results');
-            resultDiv.innerHTML = `You scored ${score} / ${totalQuestions}`;
+            resultDiv.innerHTML = `You scored ${score} / ${totalQuestions} (${percentage}%)`;
             resultDiv.classList.remove('hidden');
-            if(score === totalQuestions) resultDiv.classList.add('text-green-600');
-            else resultDiv.classList.add('text-primary');
+            
+            // UPDATE FIRESTORE WITH NEW SCORE
+            const user = window.auth.currentUser;
+            if(user) {
+                // Update local baseline state optimistically
+                const currentScore = window.currentUserBaseline.score;
+                // Weighted average: new score counts for 30%, old score for 70% to smooth progress
+                const newAggregateScore = Math.round((currentScore * 0.7) + (percentage * 0.3));
+                
+                const newHistoryEntry = { date: new Date().toLocaleDateString(), score: newAggregateScore };
+                
+                // Update local state
+                window.currentUserBaseline.score = newAggregateScore;
+                if(!window.currentUserBaseline.history) window.currentUserBaseline.history = [];
+                window.currentUserBaseline.history.push(newHistoryEntry);
+                
+                // Refresh dashboard immediately
+                loadRealDashboardStats();
+                
+                // Persist to Firestore
+                const baselineRef = window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'baseline');
+                await window.updateDoc(baselineRef, {
+                    score: newAggregateScore,
+                    history: window.arrayUnion(newHistoryEntry)
+                });
+            }
         }
 
         function openUniversalModal(title) {
@@ -685,13 +790,12 @@
             const input = document.getElementById('chat-input');
             const msg = input.value;
             const mode = document.getElementById('mock-mode').value;
-            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            const profile = window.currentUserProfile;
             
             if(!msg) return;
             appendMessage('User', msg); 
             input.value = '';
             
-            // Loading bubble
             const windowDiv = document.getElementById('chat-window');
             const loaderDiv = document.createElement('div');
             loaderDiv.className = "flex gap-3 mb-2";
@@ -737,7 +841,7 @@
         // --- 7. RESUME AI ---
         async function aiImproveSummary() {
             const summary = document.getElementById('res-summary').value;
-            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            const profile = window.currentUserProfile;
             if(!summary) { alert("Write a draft summary first!"); return; }
             
             const btn = document.querySelector('button[onclick="aiImproveSummary()"]');
@@ -754,7 +858,7 @@
             btn.innerHTML = originalText;
         }
 
-        // Event listeners for resume preview
+        // Event listeners
         document.getElementById('res-name').addEventListener('input', (e) => document.getElementById('prev-name').innerText = e.target.value || "Your Name");
         document.getElementById('res-email').addEventListener('input', (e) => document.getElementById('prev-email').innerText = e.target.value || "email@example.com");
         document.getElementById('res-summary').addEventListener('input', (e) => document.getElementById('prev-summary').innerText = e.target.value || "Summary...");
