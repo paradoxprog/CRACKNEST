@@ -38,12 +38,8 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
         .heading { font-family: 'Poppins', sans-serif; }
-        
-        /* Hide scrollbar for clean UI */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Loader */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4F46E5;
@@ -53,17 +49,19 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Resume Print Styles */
         @media print {
             body * { visibility: hidden; }
             #resume-preview, #resume-preview * { visibility: visible; }
             #resume-preview { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; border: none; box-shadow: none; }
         }
-
-        /* Chat Animations */
         .message-enter { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Graph Bars */
+        .bar-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; gap: 8px; padding-top: 20px; }
+        .bar { width: 100%; background: #4F46E5; border-radius: 4px 4px 0 0; transition: height 0.5s ease; position: relative; min-width: 20px; }
+        .bar:hover { opacity: 0.8; }
+        .bar:hover::after { content: attr(data-score) '%'; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; z-index: 10; white-space: nowrap; }
     </style>
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex flex-col">
@@ -99,7 +97,6 @@
                 <button onclick="navTo('interview')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="interview">
                     <i class="fa-solid fa-robot w-6"></i> AI Interview
                 </button>
-                <!-- Re-enabled Profile Button for Editing -->
                 <button onclick="navTo('setup', true)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="setup">
                     <i class="fa-solid fa-user-pen w-6"></i> My Profile
                 </button>
@@ -187,6 +184,8 @@
                                         <option value="HR">Human Resources</option>
                                         <option value="Finance">Finance</option>
                                         <option value="Engineering">Core Engineering</option>
+                                        <option value="Accounting">Accounting / CA</option>
+                                        <option value="Data">Data Science</option>
                                     </select>
                                 </div>
                                 <div>
@@ -281,7 +280,7 @@
                         </div>
                         <div class="flex gap-3">
                             <span class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 shadow-sm">
-                                <i class="fa-solid fa-fire text-orange-500 mr-2"></i> 3 Day Streak
+                                <i class="fa-solid fa-fire text-orange-500 mr-2"></i> <span id="dash-streak">3</span> Day Streak
                             </span>
                         </div>
                     </div>
@@ -293,9 +292,9 @@
                                 <h3 class="font-bold text-slate-700">Interview Readiness</h3>
                                 <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fa-solid fa-battery-full"></i></div>
                             </div>
-                            <div class="text-3xl font-bold text-slate-900 mb-2" id="dash-score">0%</div>
+                            <div class="text-3xl font-bold text-slate-900 mb-2" id="dash-readiness">0%</div>
                             <div class="w-full bg-slate-100 rounded-full h-2">
-                                <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="dash-score-bar"></div>
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="dash-readiness-bar"></div>
                             </div>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
@@ -303,7 +302,7 @@
                                 <h3 class="font-bold text-slate-700">Modules Completed</h3>
                                 <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-solid fa-list-check"></i></div>
                             </div>
-                            <div class="text-3xl font-bold text-slate-900 mb-2">2<span class="text-base text-slate-400 font-normal">/12</span></div>
+                            <div class="text-3xl font-bold text-slate-900 mb-2"><span id="dash-modules">0</span><span class="text-base text-slate-400 font-normal">/12</span></div>
                             <p class="text-xs text-slate-500">Keep pushing!</p>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
@@ -311,12 +310,12 @@
                                 <h3 class="font-bold text-slate-700">Target Role</h3>
                                 <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fa-solid fa-crosshairs"></i></div>
                             </div>
-                            <div class="text-xl font-bold text-slate-900 mb-2" id="dash-role">Not Set</div>
-                            <p class="text-xs text-slate-500">Software Engineering Path</p>
+                            <div class="text-xl font-bold text-slate-900 mb-2 truncate" id="dash-role">Not Set</div>
+                            <div class="inline-block px-2 py-1 bg-indigo-50 text-primary text-xs font-bold rounded" id="dash-path">Career Path</div>
                         </div>
                     </div>
 
-                    <!-- Recommended Actions -->
+                    <!-- Recommended Actions & Graph -->
                     <div class="grid lg:grid-cols-2 gap-8">
                         <!-- Next Steps -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
@@ -325,7 +324,7 @@
                                 <div class="flex items-center gap-4 p-4 rounded-lg bg-indigo-50 border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition" onclick="navTo('interview')">
                                     <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center"><i class="fa-solid fa-robot"></i></div>
                                     <div class="flex-1">
-                                        <h4 class="font-bold text-slate-800">Practice HR Introduction</h4>
+                                        <h4 class="font-bold text-slate-800">Practice Role Interview</h4>
                                         <p class="text-xs text-slate-500">AI Mock Interview • 5 mins</p>
                                     </div>
                                     <i class="fa-solid fa-chevron-right text-indigo-400"></i>
@@ -333,22 +332,33 @@
                                 <div class="flex items-center gap-4 p-4 rounded-lg bg-white border border-slate-100 cursor-pointer hover:bg-slate-50 transition" onclick="navTo('training')">
                                     <div class="w-10 h-10 rounded-lg bg-orange-500 text-white flex items-center justify-center"><i class="fa-solid fa-calculator"></i></div>
                                     <div class="flex-1">
-                                        <h4 class="font-bold text-slate-800">Aptitude: Time & Work</h4>
-                                        <p class="text-xs text-slate-500">Training • 15 mins</p>
+                                        <h4 class="font-bold text-slate-800">Technical Concepts</h4>
+                                        <p class="text-xs text-slate-500">AI Training • 15 mins</p>
                                     </div>
                                     <i class="fa-solid fa-chevron-right text-slate-300"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Progress Graph Placeholder -->
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col items-center justify-center text-center">
-                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                                <i class="fa-solid fa-chart-line text-slate-400 text-2xl"></i>
+                        <!-- Performance Graph -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-slate-700">Performance Analytics</h3>
+                                <i class="fa-solid fa-chart-simple text-slate-300"></i>
                             </div>
-                            <h3 class="font-bold text-slate-700">Performance Analytics</h3>
-                            <p class="text-sm text-slate-500 mb-4">Take more tests to unlock detailed graphs.</p>
-                            <button onclick="navTo('tests')" class="text-primary text-sm font-bold hover:underline">Go to Test Series</button>
+                            <div class="flex-1 flex flex-col justify-end" id="dash-graph-container">
+                                <div class="text-center py-8 text-slate-400 text-sm" id="empty-graph-msg">
+                                    <p>Take tests to unlock analytics.</p>
+                                </div>
+                                <div class="bar-container hidden" id="score-bars">
+                                    <!-- Bars injected via JS -->
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-50 flex justify-between text-xs text-slate-400">
+                                <span>Recent Tests</span>
+                                <span>Latest</span>
+                            </div>
+                            <button onclick="navTo('tests')" class="mt-4 text-primary text-sm font-bold hover:underline text-center w-full">Go to Test Series</button>
                         </div>
                     </div>
                 </div>
@@ -408,14 +418,14 @@
                     </div>
                 </div>
 
-                <!-- 8. ACTIVE TRAINING VIEW (New) -->
+                <!-- 8. ACTIVE TRAINING VIEW -->
                 <div id="view-active-training" class="view-section hidden h-[calc(100vh-8rem)] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
                     <div class="bg-indigo-600 p-4 text-white flex justify-between items-center shrink-0">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-chalkboard-user text-2xl"></i>
                             <div>
                                 <h3 class="font-bold text-lg" id="training-title">Technical Training</h3>
-                                <p class="text-xs text-indigo-200" id="training-subtitle">Personalized for Software Developer</p>
+                                <p class="text-xs text-indigo-200" id="training-subtitle">Personalized</p>
                             </div>
                         </div>
                         <button onclick="navTo('training')" class="text-white hover:bg-indigo-700 p-2 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
@@ -476,7 +486,7 @@
                     </div>
                 </div>
 
-                <!-- 9. ACTIVE TEST VIEW (New) -->
+                <!-- 9. ACTIVE TEST VIEW -->
                 <div id="view-active-test" class="view-section hidden max-w-3xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div class="bg-slate-900 p-6 text-white text-center">
@@ -501,7 +511,7 @@
                                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-4" id="test-feedback">
                                         <!-- AI Correction -->
                                     </div>
-                                    <button onclick="navTo('tests')" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold">Return to Tests</button>
+                                    <button onclick="navTo('dashboard')" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold">Go to Dashboard</button>
                                 </div>
                             </div>
                         </div>
@@ -673,7 +683,7 @@
         let currentUser = null;
         let userProfile = null;
         let baselineScore = 0;
-        let baselineQuestions = []; // Changed from const questions to let baselineQuestions
+        let baselineQuestions = [];
         let activeTestQuestions = [];
         let activeTrainingModule = "";
 
@@ -754,17 +764,18 @@
                     appContainer.classList.remove('hidden');
 
                     if (!profileSnap.exists()) {
-                        console.log("No profile found. Enforcing setup.");
                         toggleNavigation(false);
                         navTo('setup');
                     } else if (!baselineSnap.exists()) {
-                        console.log("Profile found, but no baseline. Enforcing test.");
                         userProfile = profileSnap.data();
                         toggleNavigation(false); 
-                        startBaselineAssessment(); // Changed from navTo('baseline') to startBaselineAssessment()
+                        startBaselineAssessment();
                     } else {
-                        console.log("User ready. Loading dashboard.");
                         userProfile = profileSnap.data();
+                        // Initialize history/modules if missing
+                        if (!userProfile.testHistory) userProfile.testHistory = [];
+                        if (!userProfile.modulesCompleted) userProfile.modulesCompleted = 0;
+                        
                         baselineScore = baselineSnap.data().score;
                         toggleNavigation(true);
                         loadDashboardData();
@@ -806,7 +817,10 @@
                 certs: document.getElementById('p-certs').value,
                 langs: document.getElementById('p-langs').value,
                 skills: document.getElementById('p-skills').value,
-                joinedAt: userProfile?.joinedAt || new Date().toISOString()
+                joinedAt: userProfile?.joinedAt || new Date().toISOString(),
+                // Preserve History
+                testHistory: userProfile?.testHistory || [],
+                modulesCompleted: userProfile?.modulesCompleted || 0
             };
 
             const btn = e.target.querySelector('button');
@@ -817,12 +831,11 @@
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), data);
                 userProfile = data;
                 
-                // If this was an edit (sidebar visible), go to dashboard. Else, proceed to baseline.
                 if (sidebar.classList.contains('!hidden') || sidebar.style.display !== 'none' && !sidebar.classList.contains('hidden')) {
                      alert("Profile Updated Successfully!");
                      navTo('dashboard');
                 } else {
-                     startBaselineAssessment(); // Changed from navTo('baseline') to startBaselineAssessment()
+                     startBaselineAssessment(); 
                 }
             } catch (err) {
                 alert("Error saving profile: " + err.message);
@@ -835,32 +848,25 @@
         let currentQIndex = 0;
         let score = 0;
 
-        // New function to handle AI Generation for Baseline Test
         async function startBaselineAssessment() {
             navTo('baseline');
-            
-            // Show loading state
             document.getElementById('quiz-container').innerHTML = `
                 <div class="text-center py-12">
                     <div class="loader mx-auto mb-4"></div>
                     <h3 class="text-xl font-bold text-slate-700">Generating Your Assessment</h3>
-                    <p class="text-slate-500">AI is crafting questions based on your profile (${userProfile.role})...</p>
+                    <p class="text-slate-500">AI is crafting questions based on your profile...</p>
                 </div>
             `;
             document.getElementById('quiz-footer').classList.add('hidden');
 
             const prompt = `Generate 5 multiple choice questions for a baseline skill assessment for a ${userProfile.role} in ${userProfile.field}. 
-            Experience level: ${userProfile.exp}.
-            Include: 2 Technical (Role specific), 1 Aptitude, 1 Verbal, 1 Situational.
-            Format strictly as a JSON array of objects with keys: "q" (question text), "options" (array of 4 strings), "a" (index of correct answer 0-3).
-            Return ONLY the JSON.`;
+            Format strictly as a JSON array of objects with keys: "q", "options" (4 strings), "a" (index 0-3). Return ONLY JSON.`;
 
             try {
                 const text = await callGemini(prompt);
                 const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
                 baselineQuestions = JSON.parse(cleaned);
                 
-                // Restore UI Structure
                 document.getElementById('quiz-container').innerHTML = `
                     <div class="mb-6">
                         <span class="text-xs font-bold text-primary uppercase tracking-wide">Question <span id="q-current">1</span> of <span id="q-total">10</span></span>
@@ -875,28 +881,8 @@
                 loadQuestion();
 
             } catch (e) {
-                console.error("Baseline Generation Error", e);
-                // Fallback to static if AI fails
-                baselineQuestions = [
-                    { q: "Time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n^2)", "O(1)"], a: 1 },
-                    { q: "Which is a NoSQL DB?", options: ["MySQL", "MongoDB", "PostgreSQL", "Oracle"], a: 1 },
-                    { q: "Identify the noun: 'The cat runs.'", options: ["The", "Cat", "Runs", "Fast"], a: 1 },
-                    { q: "Next in series: 2, 4, 8...", options: ["10", "12", "16", "20"], a: 2 },
-                    { q: "Conflict resolution step 1?", options: ["Ignore", "Listen", "Argue", "Escalate"], a: 1 }
-                ];
-                // Restore UI Structure for fallback
-                document.getElementById('quiz-container').innerHTML = `
-                    <div class="mb-6">
-                        <span class="text-xs font-bold text-primary uppercase tracking-wide">Question <span id="q-current">1</span> of <span id="q-total">10</span></span>
-                        <h3 class="text-lg font-medium text-slate-900 mt-2" id="q-text"></h3>
-                    </div>
-                    <div class="space-y-3" id="q-options"></div>
-                `;
-                document.getElementById('quiz-footer').classList.remove('hidden');
-                
-                currentQIndex = 0;
-                score = 0;
-                loadQuestion();
+                baselineQuestions = [{ q: "What is 2+2?", options: ["3", "4", "5", "6"], a: 1 }];
+                currentQIndex = 0; score = 0; loadQuestion();
             }
         }
 
@@ -910,9 +896,7 @@
             document.getElementById('q-total').textContent = baselineQuestions.length;
             document.getElementById('q-text').textContent = q.q;
             document.getElementById('q-options').innerHTML = q.options.map((opt, i) => `
-                <div onclick="selectOption(${i})" class="opt-btn p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition" id="opt-${i}">
-                    ${opt}
-                </div>
+                <div onclick="selectOption(${i})" class="opt-btn p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition" id="opt-${i}">${opt}</div>
             `).join('');
             
             const pct = ((currentQIndex) / baselineQuestions.length) * 100;
@@ -943,7 +927,7 @@
             const finalPct = Math.round((score / baselineQuestions.length) * 100);
             baselineScore = finalPct;
             document.getElementById('res-score').textContent = `${finalPct}%`;
-            document.getElementById('res-level').textContent = finalPct > 70 ? "Advanced" : (finalPct > 40 ? "Interm." : "Beginner");
+            document.getElementById('res-level').textContent = finalPct > 70 ? "Advanced" : "Beginner";
             setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'baseline'), { score: finalPct, date: new Date().toISOString() });
         }
 
@@ -953,15 +937,52 @@
             navTo('dashboard');
         }
 
-        // --- 3. Dashboard Logic ---
+        // --- 3. DYNAMIC DASHBOARD LOGIC (Updated) ---
         function loadDashboardData() {
             if (!userProfile) return;
             const nameEl = document.getElementById('dash-name');
             const roleEl = document.getElementById('dash-role');
+            const pathEl = document.getElementById('dash-path');
+            const modulesEl = document.getElementById('dash-modules');
+            const readinessEl = document.getElementById('dash-readiness');
+            
             if (nameEl) nameEl.textContent = userProfile.name ? userProfile.name.split(' ')[0] : 'Student';
             if (roleEl) roleEl.textContent = userProfile.role || 'Not Set';
-            document.getElementById('dash-score').textContent = `${baselineScore}%`;
-            document.getElementById('dash-score-bar').style.width = `${baselineScore}%`;
+            
+            // Dynamic Path Correction
+            if (pathEl) pathEl.textContent = userProfile.field ? `${userProfile.field} Path` : 'Career Path';
+
+            const completedCount = (userProfile.modulesCompleted || 0);
+            if (modulesEl) modulesEl.textContent = completedCount;
+
+            // Readiness Score Calculation
+            let totalScore = baselineScore;
+            let count = 1;
+            if (userProfile.testHistory) {
+                userProfile.testHistory.forEach(t => {
+                    totalScore += t.score;
+                    count++;
+                });
+            }
+            const readiness = Math.round(totalScore / count);
+            if (readinessEl) readinessEl.textContent = `${readiness}%`;
+            document.getElementById('dash-readiness-bar').style.width = `${readiness}%`;
+
+            // Performance Graph Logic
+            const graphContainer = document.getElementById('score-bars');
+            const emptyMsg = document.getElementById('empty-graph-msg');
+            
+            if (userProfile.testHistory && userProfile.testHistory.length > 0) {
+                emptyMsg.classList.add('hidden');
+                graphContainer.classList.remove('hidden');
+                const recentTests = userProfile.testHistory.slice(-5);
+                graphContainer.innerHTML = recentTests.map(t => `
+                    <div class="bar" style="height: ${t.score}%;" data-score="${t.score}" title="Score: ${t.score}%"></div>
+                `).join('');
+            } else {
+                emptyMsg.classList.remove('hidden');
+                graphContainer.classList.add('hidden');
+            }
         }
 
         // --- 4. Resume Logic ---
@@ -970,23 +991,13 @@
             document.getElementById('prev-name').textContent = document.getElementById('res-name').value || userProfile.name || "Your Name";
             document.getElementById('prev-email').textContent = document.getElementById('res-email').value || "email@example.com";
             document.getElementById('prev-phone').textContent = document.getElementById('res-phone').value || "Phone";
-            
-            // Auto fill skills if empty
             if(!document.getElementById('res-skills-input').value && userProfile.skills) {
                 document.getElementById('res-skills-input').value = userProfile.skills;
             }
-            
             const skills = document.getElementById('res-skills-input').value.split(',');
             document.getElementById('prev-skills').innerHTML = skills.map(s => s.trim() ? `<span class="bg-slate-200 px-2 py-1 rounded text-xs">${s.trim()}</span>` : "").join('');
-            
             const summary = document.getElementById('res-summary').value;
             if(summary) document.getElementById('prev-summary').textContent = summary;
-            
-            const exp = document.getElementById('res-exp').value;
-            if(exp) document.getElementById('prev-exp').innerText = exp;
-            
-            const edu = document.getElementById('res-edu').value;
-            if(edu) document.getElementById('prev-edu').innerText = edu;
         };
 
         // --- 5. AI Features (Gemini) ---
@@ -1002,9 +1013,7 @@
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
@@ -1014,20 +1023,18 @@
             }
         }
 
-        // Resume AI
         window.improveSummary = async () => {
             const current = document.getElementById('res-summary').value;
             if(!current) return alert("Write a draft summary first!");
             const originalText = document.getElementById('ai-suggestion-text').innerText;
             document.getElementById('ai-suggestion-text').innerText = "AI is thinking...";
-            const prompt = `Rewrite this resume summary for a ${userProfile?.role || 'candidate'} with skills in ${userProfile?.skills || 'general skills'}. Make it impactful and ATS friendly: "${current}"`;
+            const prompt = `Rewrite this resume summary for a ${userProfile?.role} with skills ${userProfile?.skills}: "${current}"`;
             const improved = await callGemini(prompt);
             document.getElementById('res-summary').value = improved;
-            document.getElementById('ai-suggestion-text').innerText = "Summary updated! " + originalText;
+            document.getElementById('ai-suggestion-text').innerText = "Summary updated!";
             updateResume();
         }
 
-        // Interview AI
         const chatForm = document.getElementById('chat-form');
         const chatHistory = document.getElementById('chat-history');
         
@@ -1039,7 +1046,7 @@
             appendMessage('user', msg);
             input.value = '';
             const mode = document.getElementById('interview-mode').value;
-            const context = `You are a strict but helpful ${mode} interviewer for the role of ${userProfile?.role || 'candidate'}. The candidate has ${userProfile?.exp || 'unknown'} experience. The candidate says: "${msg}". Respond with a follow-up question or feedback. Keep it under 50 words.`;
+            const context = `You are a strict ${mode} interviewer for ${userProfile?.role}. Candidate says: "${msg}". Respond in <50 words.`;
             const loadingId = appendMessage('ai', '...');
             const reply = await callGemini(context);
             document.getElementById(loadingId).innerText = reply;
@@ -1067,34 +1074,28 @@
         window.startAITest = async (level, type) => {
             navTo('activeTest');
             document.getElementById('test-title').textContent = `${type} Assessment (Level ${level})`;
-            document.getElementById('test-subtitle').textContent = `Customized for ${userProfile?.role || 'General'} | Generating...`;
-            document.getElementById('test-loader').classList.remove('hidden');
+            document.getElementById('test-subtitle').textContent = `Customized for ${userProfile?.role || 'General'}...`;
+            document.getElementById('ai-test-container').querySelector('#test-loader').classList.remove('hidden');
             document.getElementById('test-questions-area').classList.add('hidden');
             document.getElementById('test-results-area').classList.add('hidden');
             document.getElementById('test-footer').classList.add('hidden');
 
-            const prompt = `Generate 5 multiple choice questions for a ${type} test for a ${userProfile?.role || 'Software Engineer'} with ${userProfile?.exp} experience. Level ${level}.
-            Format as JSON array: [{"q": "Question?", "options": ["A", "B", "C", "D"], "a": 0}] (a is index of correct answer). strictly return only JSON.`;
+            const prompt = `Generate 5 multiple choice questions for a ${type} test for a ${userProfile?.role}. Level ${level}.
+            Format as JSON array: [{"q": "Question?", "options": ["A", "B", "C", "D"], "a": 0}] (a is index). Return ONLY JSON.`;
 
-            let questions = [];
             try {
                 const response = await callGemini(prompt);
                 const cleaned = response.replace(/```json/g, '').replace(/```/g, '').trim();
-                questions = JSON.parse(cleaned);
-                activeTestQuestions = questions;
+                activeTestQuestions = JSON.parse(cleaned);
             } catch (e) {
-                console.error("JSON Parse Error", e);
-                // Fallback mock questions
-                questions = [
-                    { q: `What is a key concept in ${userProfile?.role || 'this field'}?`, options: ["Abstraction", "Photosynthesis", "Gravity", "Taxes"], a: 0 },
-                    { q: "Which tool is commonly used?", options: ["Hammer", "Git", "Blender", "Spatula"], a: 1 }
+                activeTestQuestions = [
+                    { q: `Concept in ${userProfile?.field}?`, options: ["A", "B", "C", "D"], a: 0 },
+                    { q: "Another Question?", options: ["1", "2", "3", "4"], a: 1 }
                 ];
-                activeTestQuestions = questions;
             }
 
-            // Render Questions
             const area = document.getElementById('test-questions-area');
-            area.innerHTML = questions.map((q, i) => `
+            area.innerHTML = activeTestQuestions.map((q, i) => `
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <p class="font-bold mb-3">${i+1}. ${q.q}</p>
                     <div class="space-y-2">
@@ -1108,38 +1109,42 @@
                 </div>
             `).join('');
 
-            document.getElementById('test-loader').classList.add('hidden');
+            document.getElementById('ai-test-container').querySelector('#test-loader').classList.add('hidden');
             area.classList.remove('hidden');
             document.getElementById('test-footer').classList.remove('hidden');
         };
 
         window.submitAITest = async () => {
             let score = 0;
-            let userAnswers = [];
-            
             activeTestQuestions.forEach((q, i) => {
                 const selected = document.querySelector(`input[name="q${i}"]:checked`);
-                const val = selected ? parseInt(selected.value) : -1;
-                if(val === q.a) score++;
-                userAnswers.push({ question: q.q, selected: val === -1 ? "Skipped" : q.options[val], correct: q.options[q.a] });
+                if(selected && parseInt(selected.value) === q.a) score++;
             });
+
+            const percentage = Math.round((score / activeTestQuestions.length) * 100);
+
+            // Update Profile History
+            if (!userProfile.testHistory) userProfile.testHistory = [];
+            userProfile.testHistory.push({
+                date: new Date().toISOString(),
+                score: percentage,
+                total: activeTestQuestions.length,
+                type: document.getElementById('test-title').textContent
+            });
+            userProfile.modulesCompleted = (userProfile.modulesCompleted || 0) + 1;
+
+            await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), userProfile);
 
             document.getElementById('test-questions-area').classList.add('hidden');
             document.getElementById('test-footer').classList.add('hidden');
             
             const resultsArea = document.getElementById('test-results-area');
             resultsArea.classList.remove('hidden');
-            document.getElementById('test-score-display').textContent = `${score}/${activeTestQuestions.length}`;
+            document.getElementById('test-score-display').textContent = `${percentage}%`;
             
-            // Get AI Feedback
-            document.getElementById('test-feedback').innerHTML = "<div class='loader mx-auto'></div><p class='text-center'>AI is analyzing your performance...</p>";
-            
-            const feedbackPrompt = `I took a test for ${userProfile?.role}. Score: ${score}/${activeTestQuestions.length}.
-            Here are my answers vs correct ones: ${JSON.stringify(userAnswers)}.
-            Give me a short, encouraging feedback and explain the wrong answers concisely.`;
-            
+            const feedbackPrompt = `I got ${score}/${activeTestQuestions.length} on a ${userProfile.role} test. Give short feedback.`;
             const feedback = await callGemini(feedbackPrompt);
-            document.getElementById('test-feedback').innerHTML = `<p class="leading-relaxed">${feedback.replace(/\n/g, '<br>')}</p>`;
+            document.getElementById('test-feedback').innerHTML = `<p>${feedback}</p>`;
         };
 
         // --- 7. AI Training Hub Logic ---
@@ -1153,31 +1158,22 @@
 
         window.generateTrainingContent = async () => {
             const container = document.getElementById('training-content');
-            container.innerHTML = `<div class='text-center py-10'><div class='loader mx-auto mb-4'></div><p class='text-slate-500'>AI Trainer is preparing a lesson on ${activeTrainingModule}...</p></div>`;
-            
-            const prompt = `Act as an expert corporate trainer for a ${userProfile?.role} in the ${userProfile?.field} field.
-            Teach me a specific, important concept related to ${activeTrainingModule} (Skills: ${userProfile?.skills}).
-            Explain it simply, give a real-world example, and then ask me a thought-provoking question about it.
-            Format with HTML tags like <h3>, <p>, <ul> for readability.`;
-
+            container.innerHTML = `<div class='text-center py-10'><div class='loader mx-auto mb-4'></div><p class='text-slate-500'>AI Trainer is preparing lesson...</p></div>`;
+            const prompt = `Teach a ${userProfile?.role} about ${activeTrainingModule}. Short lesson + 1 quiz question. HTML format.`;
             const content = await callGemini(prompt);
             container.innerHTML = content;
+            
+            // Increment module
+            userProfile.modulesCompleted = (userProfile.modulesCompleted || 0) + 1;
+            setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), userProfile);
         };
 
         // Logout
         document.getElementById('logout-btn').addEventListener('click', () => {
             signOut(auth).then(() => {
-                try {
-                    window.location.href = "index.html";
-                } catch(e) {
-                    console.error("Logout redirect error:", e);
-                    window.location.reload(); 
-                }
+                try { window.location.href = "index.html"; } catch(e) { window.location.reload(); }
             });
         });
-
-        // Initialize Baseline Test (Ensure it's ready)
-        // loadQuestion(); // Removed initial call as it is now handled by startBaselineAssessment
     </script>
 </body>
 </html>
