@@ -519,12 +519,12 @@
 
         async function syncUserData(user) {
             try {
-                // Fetch Profile
-                const profileRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'profile');
+                // Fetch Profile - FIXED PATH (6 segments)
+                const profileRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'data', 'profile');
                 const profileSnap = await getDoc(profileRef);
                 
-                // Fetch Baseline/Progress
-                const baselineRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'baseline');
+                // Fetch Baseline/Progress - FIXED PATH (6 segments)
+                const baselineRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'data', 'baseline');
                 const baselineSnap = await getDoc(baselineRef);
 
                 // Initial State Reset
@@ -618,7 +618,8 @@
                     return;
                 }
 
-                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'profile'), data);
+                // FIXED PATH (6 segments)
+                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'data', 'profile'), data);
                 console.log("Profile Saved Successfully");
                 await window.syncUserData(user); // Move flow forward
             } catch (error) {
@@ -693,7 +694,8 @@
                 analysis.history = [{ date: new Date().toLocaleDateString(), score: analysis.score }];
                 
                 const user = window.auth.currentUser;
-                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'baseline'), analysis);
+                // FIXED PATH (6 segments)
+                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'data', 'baseline'), analysis);
                 await window.syncUserData(user);
             }
         });
@@ -850,7 +852,8 @@
                 loadRealDashboardStats();
                 
                 // Persist to Firestore
-                const baselineRef = window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'baseline');
+                // FIXED PATH (6 segments)
+                const baselineRef = window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'data', 'baseline');
                 await window.updateDoc(baselineRef, {
                     score: newAggregateScore,
                     history: window.arrayUnion(newHistoryEntry)
