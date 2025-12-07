@@ -1053,6 +1053,7 @@
                 }
 
                 const data = await response.json();
+                console.log("Vercel API Response:", data);
                 
                 // Return the text exactly as the old function did
                 if (data.candidates && data.candidates[0].content) {
