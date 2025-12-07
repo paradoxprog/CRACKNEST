@@ -72,6 +72,7 @@
     <div id="loading-screen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
         <h2 class="text-xl font-bold text-slate-700 heading">Loading CrackNest...</h2>
+        <p id="loading-error" class="text-red-500 mt-2 text-sm hidden"></p>
     </div>
 
     <!-- MAIN APP LAYOUT (Hidden initially) -->
@@ -570,8 +571,8 @@
         import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase Setup
-        const firebaseConfig = JSON.parse(localStorage.getItem('firebaseConfig') || '{}');
-        // Fallback if localstorage empty (Development/Preview safety)
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (JSON.parse(localStorage.getItem('firebaseConfig') || '{}'));
+        // Fallback hardcoded if still empty (for local testing/previews without globals)
         const activeConfig = Object.keys(firebaseConfig).length > 0 ? firebaseConfig : {
             apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU",
             authDomain: "crak-a74d0.firebaseapp.com",
@@ -582,7 +583,9 @@
         const app = initializeApp(activeConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = "cracknest-v1"; // Logical namespace for artifacts
+        
+        // Correct App ID usage
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'cracknest-v1'; 
 
         // Global State
         let currentUser = null;
@@ -591,6 +594,7 @@
 
         // --- DOM Elements ---
         const loadingScreen = document.getElementById('loading-screen');
+        const loadingError = document.getElementById('loading-error');
         const appContainer = document.getElementById('app-container');
         const sidebar = document.getElementById('sidebar');
         const mobileHeader = document.getElementById('mobile-header');
@@ -675,7 +679,8 @@
                     }
                 } catch (e) {
                     console.error("Profile Load Error", e);
-                    loadingScreen.innerHTML = `<p class="text-red-500">Error loading profile. Refresh.</p>`;
+                    loadingError.textContent = `Error: ${e.message}. Please refresh.`;
+                    loadingError.classList.remove('hidden');
                 }
             } else {
                 // Not logged in -> Redirect to Index
