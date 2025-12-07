@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CrackNest | Student Dashboard</title>
     
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
@@ -31,6 +34,7 @@
         }
     </script>
 
+    <!-- Custom Styles -->
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
         .heading { font-family: 'Poppins', sans-serif; }
@@ -62,6 +66,7 @@
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex flex-col">
 
+    <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
         <h2 class="text-xl font-bold text-slate-700 heading">Loading CrackNest...</h2>
@@ -69,8 +74,10 @@
         <p id="loading-error" class="text-red-500 mt-2 text-sm hidden"></p>
     </div>
 
+    <!-- MAIN APP LAYOUT (Hidden initially) -->
     <div id="app-container" class="flex h-full hidden">
         
+        <!-- SIDEBAR -->
         <aside class="w-64 bg-slate-900 text-white flex-col hidden md:flex transition-all duration-300" id="sidebar">
             <div class="p-6 border-b border-slate-700 flex items-center gap-3">
                 <img src="logo.jpg" alt="Logo" class="w-8 h-8 object-contain">
@@ -112,8 +119,10 @@
             </div>
         </aside>
 
+        <!-- MAIN CONTENT AREA -->
         <main class="flex-1 flex flex-col h-full bg-slate-50 relative">
             
+            <!-- Mobile Header -->
             <header id="mobile-header" class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:hidden shrink-0">
                 <div class="flex items-center gap-2">
                     <img src="logo.jpg" alt="Logo" class="w-8 h-8 object-contain">
@@ -124,8 +133,10 @@
                 </button>
             </header>
 
+            <!-- DYNAMIC VIEWS -->
             <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
 
+                <!-- 1. PROFILE SETUP / EDIT VIEW -->
                 <div id="view-profile-setup" class="view-section hidden max-w-2xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
                         <div class="text-center mb-8">
@@ -137,6 +148,7 @@
                         </div>
                         
                         <form id="profile-form" class="space-y-6">
+                            <!-- Personal Info -->
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
@@ -162,6 +174,7 @@
                                 </div>
                             </div>
 
+                            <!-- Career Target -->
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Career Field</label>
@@ -181,6 +194,7 @@
                                 </div>
                             </div>
                             
+                            <!-- Skills & Certs -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Certifications (if any)</label>
                                 <input type="text" id="p-certs" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="AWS, PMP, etc.">
@@ -204,6 +218,7 @@
                     </div>
                 </div>
 
+                <!-- 2. BASELINE TEST VIEW -->
                 <div id="view-baseline-test" class="view-section hidden max-w-3xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div class="bg-indigo-600 p-6 text-white text-center">
@@ -217,7 +232,8 @@
                                     <h3 class="text-lg font-medium text-slate-900 mt-2" id="q-text">Question text goes here?</h3>
                                 </div>
                                 <div class="space-y-3" id="q-options">
-                                    </div>
+                                    <!-- Options injected here -->
+                                </div>
                             </div>
                             <div id="quiz-results" class="hidden text-center space-y-6">
                                 <div class="w-24 h-24 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-4xl mx-auto">
@@ -253,7 +269,9 @@
                     </div>
                 </div>
 
+                <!-- 3. DASHBOARD VIEW -->
                 <div id="view-dashboard" class="view-section hidden space-y-8">
+                    <!-- Welcome Header -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h1 class="text-2xl md:text-3xl font-bold heading text-slate-900">Welcome, <span id="dash-name" class="text-primary">Student</span>! 👋</h1>
@@ -266,6 +284,7 @@
                         </div>
                     </div>
 
+                    <!-- Stats Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <div class="flex items-center justify-between mb-4">
@@ -295,7 +314,9 @@
                         </div>
                     </div>
 
+                    <!-- Recommended Actions & Graph -->
                     <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Next Steps -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                             <h3 class="font-bold text-lg mb-4 heading">Recommended for You</h3>
                             <div class="space-y-4">
@@ -318,6 +339,7 @@
                             </div>
                         </div>
 
+                        <!-- Performance Graph -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-bold text-slate-700">Performance Analytics</h3>
@@ -328,7 +350,8 @@
                                     <p>Take tests to unlock analytics.</p>
                                 </div>
                                 <div class="bar-container hidden" id="score-bars">
-                                    </div>
+                                    <!-- Bars injected via JS -->
+                                </div>
                             </div>
                             <div class="mt-4 pt-4 border-t border-slate-50 flex justify-between text-xs text-slate-400">
                                 <span>Recent Tests</span>
@@ -339,10 +362,12 @@
                     </div>
                 </div>
 
+                <!-- 4. TRAINING VIEW -->
                 <div id="view-training" class="view-section hidden space-y-6">
                     <h2 class="text-2xl font-bold heading text-slate-900">Training Hub</h2>
                     
                     <div class="grid md:grid-cols-3 gap-6">
+                        <!-- Aptitude -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
                             <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
                                 <i class="fa-solid fa-brain text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
@@ -358,6 +383,7 @@
                             </div>
                         </div>
 
+                        <!-- Technical (Dynamic List) -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
                             <div class="h-32 bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-center">
                                 <i class="fa-solid fa-code text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
@@ -373,6 +399,7 @@
                             </div>
                         </div>
 
+                        <!-- HR -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
                             <div class="h-32 bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
                                 <i class="fa-solid fa-users text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
@@ -390,6 +417,7 @@
                     </div>
                 </div>
 
+                <!-- 8. ACTIVE TRAINING VIEW -->
                 <div id="view-active-training" class="view-section hidden h-[calc(100vh-8rem)] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
                     <div class="bg-indigo-600 p-4 text-white flex justify-between items-center shrink-0">
                         <div class="flex items-center gap-3">
@@ -402,6 +430,7 @@
                         <button onclick="navTo('training')" class="text-white hover:bg-indigo-700 p-2 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="flex-1 overflow-y-auto p-6 space-y-6" id="training-content">
+                        <!-- AI Generated Content Goes Here -->
                         <div class="animate-pulse space-y-4">
                             <div class="h-4 bg-slate-200 rounded w-3/4"></div>
                             <div class="h-4 bg-slate-200 rounded w-1/2"></div>
@@ -415,10 +444,12 @@
                     </div>
                 </div>
 
+                <!-- 5. TEST SERIES VIEW -->
                 <div id="view-tests" class="view-section hidden space-y-6">
                     <h2 class="text-2xl font-bold heading text-slate-900">Test Series</h2>
                     
                     <div class="space-y-4">
+                        <!-- Level 1 -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-6">
                             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xl font-bold">1</div>
                             <div class="flex-1 text-center md:text-left">
@@ -428,6 +459,7 @@
                             <button onclick="startAITest(1, 'Aptitude')" class="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-700 transition">Take Test</button>
                         </div>
 
+                        <!-- Level 2 -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-6">
                             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xl font-bold">2</div>
                             <div class="flex-1 text-center md:text-left">
@@ -439,6 +471,7 @@
                             <button onclick="startAITest(2, 'Technical')" class="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-700 transition">Take Test</button>
                         </div>
 
+                        <!-- Level 3 -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-6">
                             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xl font-bold">3</div>
                             <div class="flex-1 text-center md:text-left">
@@ -452,6 +485,7 @@
                     </div>
                 </div>
 
+                <!-- 9. ACTIVE TEST VIEW -->
                 <div id="view-active-test" class="view-section hidden max-w-3xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div class="bg-slate-900 p-6 text-white text-center">
@@ -465,14 +499,16 @@
                                     <p class="text-slate-600">AI is crafting questions for your profile...</p>
                                 </div>
                                 <div id="test-questions-area" class="hidden space-y-6">
-                                    </div>
+                                    <!-- Questions injected here -->
+                                </div>
                                 <div id="test-results-area" class="hidden space-y-6">
                                     <div class="text-center">
                                         <div class="text-4xl font-bold text-primary mb-2" id="test-score-display">--/--</div>
                                         <p class="text-slate-500">Your Score</p>
                                     </div>
                                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-4" id="test-feedback">
-                                        </div>
+                                        <!-- AI Correction -->
+                                    </div>
                                     <button onclick="navTo('dashboard')" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold">Go to Dashboard</button>
                                 </div>
                             </div>
@@ -483,6 +519,7 @@
                     </div>
                 </div>
 
+                <!-- 6. AI INTERVIEW VIEW -->
                 <div id="view-interview" class="view-section hidden h-[calc(100vh-8rem)] flex flex-col">
                     <div class="bg-white border border-slate-200 rounded-t-xl p-4 flex justify-between items-center shadow-sm shrink-0">
                         <div class="flex items-center gap-3">
@@ -501,6 +538,7 @@
                     </div>
                     
                     <div id="chat-history" class="flex-1 bg-slate-50 border-x border-slate-200 overflow-y-auto p-4 space-y-4">
+                        <!-- Messages go here -->
                         <div class="flex gap-3 max-w-[80%]">
                             <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xs"><i class="fa-solid fa-robot"></i></div>
                             <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 shadow-sm">
@@ -519,8 +557,10 @@
                     </div>
                 </div>
 
+                <!-- 7. RESUME BUILDER VIEW -->
                 <div id="view-resume" class="view-section hidden">
                     <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Editor -->
                         <div class="space-y-6">
                             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                                 <h2 class="text-xl font-bold heading mb-4">Resume Details</h2>
@@ -559,6 +599,7 @@
                             </button>
                         </div>
 
+                        <!-- Preview -->
                         <div class="bg-white shadow-2xl p-8 min-h-[800px] text-sm text-slate-800" id="resume-preview">
                             <div class="border-b-2 border-slate-800 pb-4 mb-6">
                                 <h1 class="text-3xl font-bold uppercase tracking-wide text-slate-900" id="prev-name">Your Name</h1>
@@ -585,7 +626,8 @@
                             <div class="mb-6">
                                 <h3 class="font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 mb-2 pb-1">Skills</h3>
                                 <div class="flex flex-wrap gap-2" id="prev-skills">
-                                    </div>
+                                    <!-- Pills -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -595,6 +637,7 @@
         </main>
     </div>
 
+    <!-- FIREBASE & LOGIC -->
     <script>
         // --- Mock Firebase using LocalStorage ---
         const db = {}; 
