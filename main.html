@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrackNest | Student Dashboard</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#F59E0B', // Amber 500
+                        dark: '#0F172A', // Slate 900
+                        light: '#F8FAFC', // Slate 50
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .heading { font-family: 'Poppins', sans-serif; }
+        
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Loader */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4F46E5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Resume Print Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #resume-preview, #resume-preview * { visibility: visible; }
+            #resume-preview { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; border: none; box-shadow: none; }
+        }
+
+        /* Chat Animations */
+        .message-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-slate-800 h-screen overflow-hidden flex flex-col">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
+        <div class="loader mb-4"></div>
+        <h2 class="text-xl font-bold text-slate-700 heading">Loading CrackNest...</h2>
+    </div>
+
+    <!-- MAIN APP LAYOUT (Hidden initially) -->
+    <div id="app-container" class="flex h-full hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-slate-900 text-white flex-col hidden md:flex transition-all duration-300" id="sidebar">
+            <div class="p-6 border-b border-slate-700 flex items-center gap-3">
+                <i class="fa-solid fa-graduation-cap text-secondary text-2xl"></i>
+                <span class="text-xl font-bold heading">CrackNest</span>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+                <button onclick="navTo('dashboard')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="dashboard">
+                    <i class="fa-solid fa-chart-pie w-6"></i> Dashboard
+                </button>
+                <button onclick="navTo('training')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="training">
+                    <i class="fa-solid fa-book-open w-6"></i> Training Hub
+                </button>
+                <button onclick="navTo('tests')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="tests">
+                    <i class="fa-solid fa-list-check w-6"></i> Test Series
+                </button>
+                <button onclick="navTo('interview')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="interview">
+                    <i class="fa-solid fa-robot w-6"></i> AI Interview
+                </button>
+                <button onclick="navTo('resume')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white" data-target="resume">
+                    <i class="fa-solid fa-file-pdf w-6"></i> Resume Builder
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-700">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold" id="sidebar-avatar">U</div>
+                    <div>
+                        <p class="text-sm font-bold text-white truncate w-32" id="sidebar-name">User</p>
+                        <p class="text-xs text-slate-400">Student</p>
+                    </div>
+                </div>
+                <button id="logout-btn" class="w-full bg-slate-800 hover:bg-red-600/20 text-slate-300 hover:text-red-400 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col h-full bg-slate-50 relative">
+            
+            <!-- Mobile Header -->
+            <header class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:hidden shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-primary text-xl"></i>
+                    <span class="font-bold text-slate-800">CrackNest</span>
+                </div>
+                <button class="text-slate-600" onclick="document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('sidebar').classList.toggle('absolute'); document.getElementById('sidebar').classList.toggle('z-50'); document.getElementById('sidebar').classList.toggle('h-full');">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </header>
+
+            <!-- DYNAMIC VIEWS -->
+            <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+
+                <!-- 1. PROFILE SETUP VIEW -->
+                <div id="view-profile-setup" class="view-section hidden max-w-2xl mx-auto">
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 bg-indigo-100 text-primary rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold heading text-slate-900">Let's Get You Set Up</h2>
+                            <p class="text-slate-500">Tell us about yourself so we can personalize your prep.</p>
+                        </div>
+                        
+                        <form id="profile-form" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                                    <input type="text" id="p-name" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="John Doe">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Degree / Stream</label>
+                                    <input type="text" id="p-degree" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="B.Tech CSE">
+                                </div>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Target Role</label>
+                                    <select id="p-role" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none">
+                                        <option value="SDE">Software Developer (SDE)</option>
+                                        <option value="DA">Data Analyst</option>
+                                        <option value="WEB">Web Developer</option>
+                                        <option value="QA">QA Engineer</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
+                                    <select id="p-exp" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none">
+                                        <option value="Fresher">Fresher (Student)</option>
+                                        <option value="Experienced">Experienced (1-3 yrs)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Top Skills (Comma separated)</label>
+                                <input type="text" id="p-skills" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none" placeholder="Java, Python, SQL...">
+                            </div>
+
+                            <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/30">
+                                Save & Start Baseline Test
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 2. BASELINE TEST VIEW -->
+                <div id="view-baseline-test" class="view-section hidden max-w-3xl mx-auto">
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                        <div class="bg-indigo-600 p-6 text-white text-center">
+                            <h2 class="text-2xl font-bold heading">Baseline Skill Assessment</h2>
+                            <p class="text-indigo-200 text-sm">Let's find your starting point.</p>
+                        </div>
+                        <div class="p-8">
+                            <div id="quiz-container">
+                                <!-- Dynamic Question Content -->
+                                <div class="mb-6">
+                                    <span class="text-xs font-bold text-primary uppercase tracking-wide">Question <span id="q-current">1</span> of <span id="q-total">10</span></span>
+                                    <h3 class="text-lg font-medium text-slate-900 mt-2" id="q-text">Question text goes here?</h3>
+                                </div>
+                                <div class="space-y-3" id="q-options">
+                                    <!-- Options injected here -->
+                                </div>
+                            </div>
+                            <div id="quiz-results" class="hidden text-center space-y-6">
+                                <div class="w-24 h-24 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-4xl mx-auto">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-slate-900">Assessment Complete!</h3>
+                                    <p class="text-slate-600">Your custom roadmap is ready.</p>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 text-center max-w-sm mx-auto">
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="text-xl font-bold text-primary" id="res-score">0%</div>
+                                        <div class="text-xs text-slate-500">Score</div>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="text-xl font-bold text-secondary" id="res-level">Beginner</div>
+                                        <div class="text-xs text-slate-500">Level</div>
+                                    </div>
+                                    <div class="p-3 bg-slate-50 rounded-lg">
+                                        <div class="text-xl font-bold text-green-600">Yes</div>
+                                        <div class="text-xs text-slate-500">Roadmap</div>
+                                    </div>
+                                </div>
+                                <button onclick="finishBaseline()" class="px-8 py-3 bg-primary text-white rounded-lg font-bold hover:bg-indigo-700 transition">Go to Dashboard</button>
+                            </div>
+                        </div>
+                        <div class="px-8 py-4 bg-slate-50 border-t flex justify-between items-center" id="quiz-footer">
+                            <div class="w-full bg-slate-200 h-2 rounded-full mr-4">
+                                <div id="quiz-progress" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <button id="next-q-btn" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 disabled:opacity-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. DASHBOARD VIEW -->
+                <div id="view-dashboard" class="view-section hidden space-y-8">
+                    <!-- Welcome Header -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold heading text-slate-900">Welcome, <span id="dash-name" class="text-primary">Student</span>! 👋</h1>
+                            <p class="text-slate-500">Here's your progress for today.</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 shadow-sm">
+                                <i class="fa-solid fa-fire text-orange-500 mr-2"></i> 3 Day Streak
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-700">Interview Readiness</h3>
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fa-solid fa-battery-full"></i></div>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 mb-2" id="dash-score">0%</div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="dash-score-bar"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-700">Modules Completed</h3>
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-solid fa-list-check"></i></div>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 mb-2">2<span class="text-base text-slate-400 font-normal">/12</span></div>
+                            <p class="text-xs text-slate-500">Keep pushing!</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-700">Target Role</h3>
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fa-solid fa-crosshairs"></i></div>
+                            </div>
+                            <div class="text-xl font-bold text-slate-900 mb-2" id="dash-role">Not Set</div>
+                            <p class="text-xs text-slate-500">Software Engineering Path</p>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Actions -->
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Next Steps -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                            <h3 class="font-bold text-lg mb-4 heading">Recommended for You</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4 p-4 rounded-lg bg-indigo-50 border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition" onclick="navTo('interview')">
+                                    <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center"><i class="fa-solid fa-robot"></i></div>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-slate-800">Practice HR Introduction</h4>
+                                        <p class="text-xs text-slate-500">AI Mock Interview • 5 mins</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-indigo-400"></i>
+                                </div>
+                                <div class="flex items-center gap-4 p-4 rounded-lg bg-white border border-slate-100 cursor-pointer hover:bg-slate-50 transition" onclick="navTo('training')">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-500 text-white flex items-center justify-center"><i class="fa-solid fa-calculator"></i></div>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-slate-800">Aptitude: Time & Work</h4>
+                                        <p class="text-xs text-slate-500">Training • 15 mins</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Graph Placeholder -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col items-center justify-center text-center">
+                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa-solid fa-chart-line text-slate-400 text-2xl"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-700">Performance Analytics</h3>
+                            <p class="text-sm text-slate-500 mb-4">Take more tests to unlock detailed graphs.</p>
+                            <button onclick="navTo('tests')" class="text-primary text-sm font-bold hover:underline">Go to Test Series</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. TRAINING VIEW -->
+                <div id="view-training" class="view-section hidden space-y-6">
+                    <h2 class="text-2xl font-bold heading text-slate-900">Training Hub</h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <!-- Aptitude -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
+                            <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                                <i class="fa-solid fa-brain text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-bold text-lg mb-2">Aptitude & Logic</h3>
+                                <ul class="text-sm text-slate-600 space-y-2 mb-4">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Quantitative Ability</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Logical Reasoning</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Verbal Ability</li>
+                                </ul>
+                                <button class="w-full py-2 border border-blue-500 text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition">Start Learning</button>
+                            </div>
+                        </div>
+
+                        <!-- Technical -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
+                            <div class="h-32 bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-center">
+                                <i class="fa-solid fa-code text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-bold text-lg mb-2">Technical Skills</h3>
+                                <ul class="text-sm text-slate-600 space-y-2 mb-4">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> DSA Basics</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> DBMS & SQL</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> System Design</li>
+                                </ul>
+                                <button class="w-full py-2 border border-indigo-500 text-primary rounded-lg font-bold hover:bg-indigo-50 transition">Start Learning</button>
+                            </div>
+                        </div>
+
+                        <!-- HR -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
+                            <div class="h-32 bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
+                                <i class="fa-solid fa-users text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-bold text-lg mb-2">HR & Soft Skills</h3>
+                                <ul class="text-sm text-slate-600 space-y-2 mb-4">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Resume Writing</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Body Language</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Email Etiquette</li>
+                                </ul>
+                                <button class="w-full py-2 border border-purple-500 text-purple-600 rounded-lg font-bold hover:bg-purple-50 transition">Start Learning</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. TEST SERIES VIEW -->
+                <div id="view-tests" class="view-section hidden space-y-6">
+                    <h2 class="text-2xl font-bold heading text-slate-900">Test Series</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Level 1 -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-6">
+                            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xl font-bold">1</div>
+                            <div class="flex-1 text-center md:text-left">
+                                <h3 class="font-bold text-lg text-slate-900">Level 1: Aptitude Foundation</h3>
+                                <p class="text-sm text-slate-500">20 Questions • 30 Minutes • Beginner</p>
+                            </div>
+                            <button onclick="startTest(1)" class="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-700 transition">Take Test</button>
+                        </div>
+
+                        <!-- Level 2 -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-6 opacity-75">
+                            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xl font-bold">2</div>
+                            <div class="flex-1 text-center md:text-left">
+                                <div class="flex items-center justify-center md:justify-start gap-2">
+                                    <h3 class="font-bold text-lg text-slate-900">Level 2: Technical Core</h3>
+                                    <i class="fa-solid fa-lock text-slate-400 text-xs"></i>
+                                </div>
+                                <p class="text-sm text-slate-500">Coding & Domain MCQ • Intermediate</p>
+                            </div>
+                            <button class="px-6 py-2 bg-slate-100 text-slate-400 rounded-lg font-medium cursor-not-allowed">Locked</button>
+                        </div>
+
+                        <!-- Level 3 -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 flex flex-col md:flex-row items-center gap-6 opacity-75">
+                            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xl font-bold">3</div>
+                            <div class="flex-1 text-center md:text-left">
+                                <div class="flex items-center justify-center md:justify-start gap-2">
+                                    <h3 class="font-bold text-lg text-slate-900">Level 3: HR Scenarios</h3>
+                                    <i class="fa-solid fa-lock text-slate-400 text-xs"></i>
+                                </div>
+                                <p class="text-sm text-slate-500">Audio/Text Responses • Advanced</p>
+                            </div>
+                            <button class="px-6 py-2 bg-slate-100 text-slate-400 rounded-lg font-medium cursor-not-allowed">Locked</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. AI INTERVIEW VIEW -->
+                <div id="view-interview" class="view-section hidden h-[calc(100vh-8rem)] flex flex-col">
+                    <div class="bg-white border border-slate-200 rounded-t-xl p-4 flex justify-between items-center shadow-sm shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800">CrackNest AI Interviewer</h3>
+                                <p class="text-xs text-green-600 flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Online</p>
+                            </div>
+                        </div>
+                        <select id="interview-mode" class="bg-slate-50 border border-slate-200 text-sm rounded-lg px-3 py-1 outline-none">
+                            <option value="HR">HR Round</option>
+                            <option value="Technical">Technical Round</option>
+                        </select>
+                    </div>
+                    
+                    <div id="chat-history" class="flex-1 bg-slate-50 border-x border-slate-200 overflow-y-auto p-4 space-y-4">
+                        <!-- Messages go here -->
+                        <div class="flex gap-3 max-w-[80%]">
+                            <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xs"><i class="fa-solid fa-robot"></i></div>
+                            <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 shadow-sm">
+                                Hello! I'm your AI interviewer. Choose a mode above and type "Start" to begin our mock interview.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-b-xl p-4 shrink-0">
+                        <form id="chat-form" class="flex gap-2">
+                            <input type="text" id="chat-input" class="flex-1 border border-slate-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 outline-none" placeholder="Type your answer...">
+                            <button type="submit" class="bg-primary hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 7. RESUME BUILDER VIEW -->
+                <div id="view-resume" class="view-section hidden">
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Editor -->
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                <h2 class="text-xl font-bold heading mb-4">Resume Details</h2>
+                                <div class="space-y-4">
+                                    <input type="text" id="res-name" class="w-full p-2 border rounded" placeholder="Full Name" oninput="updateResume()">
+                                    <input type="text" id="res-email" class="w-full p-2 border rounded" placeholder="Email" oninput="updateResume()">
+                                    <input type="text" id="res-phone" class="w-full p-2 border rounded" placeholder="Phone" oninput="updateResume()">
+                                    <textarea id="res-summary" class="w-full p-2 border rounded" rows="3" placeholder="Professional Summary" oninput="updateResume()"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                <h3 class="font-bold mb-3">Experience & Education</h3>
+                                <textarea id="res-exp" class="w-full p-2 border rounded mb-3" rows="4" placeholder="Experience (Use bullets)" oninput="updateResume()"></textarea>
+                                <textarea id="res-edu" class="w-full p-2 border rounded" rows="3" placeholder="Education Details" oninput="updateResume()"></textarea>
+                            </div>
+
+                             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                <h3 class="font-bold mb-3">Skills</h3>
+                                <input type="text" id="res-skills-input" class="w-full p-2 border rounded" placeholder="Skills (comma separated)" oninput="updateResume()">
+                            </div>
+
+                            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <div class="flex items-start gap-3">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-primary mt-1"></i>
+                                    <div>
+                                        <h4 class="font-bold text-primary text-sm">AI Suggestion</h4>
+                                        <p class="text-xs text-indigo-700 mt-1" id="ai-suggestion-text">Fill in your summary and click the wand to get an AI improvement!</p>
+                                        <button onclick="improveSummary()" class="mt-2 text-xs bg-white text-primary px-3 py-1 rounded border border-indigo-200 font-bold hover:bg-indigo-50">Improve Summary</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="window.print()" class="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800">
+                                <i class="fa-solid fa-download mr-2"></i> Download PDF
+                            </button>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="bg-white shadow-2xl p-8 min-h-[800px] text-sm text-slate-800" id="resume-preview">
+                            <div class="border-b-2 border-slate-800 pb-4 mb-6">
+                                <h1 class="text-3xl font-bold uppercase tracking-wide text-slate-900" id="prev-name">Your Name</h1>
+                                <div class="flex gap-4 mt-2 text-slate-600 text-xs">
+                                    <span id="prev-email">email@example.com</span> | <span id="prev-phone">+1234567890</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <h3 class="font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 mb-2 pb-1">Summary</h3>
+                                <p class="text-slate-700 leading-relaxed" id="prev-summary">Professional summary goes here...</p>
+                            </div>
+
+                            <div class="mb-6">
+                                <h3 class="font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 mb-2 pb-1">Experience</h3>
+                                <div class="text-slate-700 whitespace-pre-line leading-relaxed" id="prev-exp">No experience added yet.</div>
+                            </div>
+
+                            <div class="mb-6">
+                                <h3 class="font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 mb-2 pb-1">Education</h3>
+                                <div class="text-slate-700 whitespace-pre-line leading-relaxed" id="prev-edu">No education added yet.</div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h3 class="font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 mb-2 pb-1">Skills</h3>
+                                <div class="flex flex-wrap gap-2" id="prev-skills">
+                                    <!-- Pills -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Setup
+        const firebaseConfig = JSON.parse(localStorage.getItem('firebaseConfig') || '{}');
+        // Fallback if localstorage empty (Development/Preview safety)
+        const activeConfig = Object.keys(firebaseConfig).length > 0 ? firebaseConfig : {
+            apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU",
+            authDomain: "crak-a74d0.firebaseapp.com",
+            projectId: "crak-a74d0",
+            appId: "1:106356918520:web:e9affa0adef64574c1530d"
+        };
+
+        const app = initializeApp(activeConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = "cracknest-v1"; // Logical namespace for artifacts
+
+        // Global State
+        let currentUser = null;
+        let userProfile = null;
+        let baselineScore = 0;
+
+        // --- DOM Elements ---
+        const loadingScreen = document.getElementById('loading-screen');
+        const appContainer = document.getElementById('app-container');
+        const views = {
+            setup: document.getElementById('view-profile-setup'),
+            baseline: document.getElementById('view-baseline-test'),
+            dashboard: document.getElementById('view-dashboard'),
+            training: document.getElementById('view-training'),
+            tests: document.getElementById('view-tests'),
+            interview: document.getElementById('view-interview'),
+            resume: document.getElementById('view-resume')
+        };
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // --- Navigation Logic ---
+        window.navTo = (target) => {
+            // Hide all
+            Object.values(views).forEach(el => el.classList.add('hidden'));
+            navItems.forEach(btn => btn.classList.remove('bg-slate-800', 'text-white'));
+            
+            // Show target
+            if (views[target]) {
+                views[target].classList.remove('hidden');
+                const activeBtn = document.querySelector(`.nav-item[data-target="${target}"]`);
+                if(activeBtn) activeBtn.classList.add('bg-slate-800', 'text-white');
+            }
+        };
+
+        // --- Auth & Init Logic ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('sidebar-avatar').textContent = user.email[0].toUpperCase();
+                document.getElementById('sidebar-name').textContent = user.displayName || user.email.split('@')[0];
+
+                // Check for existing profile
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    const docSnap = await getDoc(docRef);
+
+                    loadingScreen.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+
+                    if (docSnap.exists()) {
+                        userProfile = docSnap.data();
+                        loadDashboardData();
+                        navTo('dashboard');
+                        
+                        // Prefill resume
+                        document.getElementById('res-name').value = userProfile.name || "";
+                        document.getElementById('res-skills-input').value = userProfile.skills || "";
+                        window.updateResume();
+                    } else {
+                        navTo('setup'); // New user flow
+                    }
+                } catch (e) {
+                    console.error("Profile Load Error", e);
+                    loadingScreen.innerHTML = `<p class="text-red-500">Error loading profile. Refresh.</p>`;
+                }
+            } else {
+                // Not logged in -> Redirect to Index
+                window.location.href = "index (3).html";
+            }
+        });
+
+        // --- 1. Profile Setup Logic ---
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('p-name').value,
+                degree: document.getElementById('p-degree').value,
+                role: document.getElementById('p-role').value,
+                exp: document.getElementById('p-exp').value,
+                skills: document.getElementById('p-skills').value,
+                joinedAt: new Date().toISOString()
+            };
+
+            const btn = e.target.querySelector('button');
+            btn.textContent = "Saving...";
+            
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data'), data);
+                userProfile = data;
+                navTo('baseline'); // Proceed to next step
+            } catch (err) {
+                alert("Error saving profile: " + err.message);
+                btn.textContent = "Try Again";
+            }
+        });
+
+        // --- 2. Baseline Test Logic ---
+        const questions = [
+            { q: "What is the time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n^2)", "O(1)"], a: 1 },
+            { q: "Which of these is NOT a database?", options: ["MySQL", "MongoDB", "Python", "PostgreSQL"], a: 2 },
+            { q: "Complete the series: 2, 4, 8, 16, ...", options: ["30", "32", "24", "18"], a: 1 },
+            { q: "HR Question: Tell me about yourself. (Choose best approach)", options: ["Recite resume", "Share hobbies", "Focus on professional journey & skills", "Talk about family"], a: 2 }
+        ];
+        let currentQIndex = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            if (currentQIndex >= questions.length) {
+                finishQuiz();
+                return;
+            }
+            const q = questions[currentQIndex];
+            document.getElementById('q-current').textContent = currentQIndex + 1;
+            document.getElementById('q-total').textContent = questions.length;
+            document.getElementById('q-text').textContent = q.q;
+            document.getElementById('q-options').innerHTML = q.options.map((opt, i) => `
+                <div onclick="selectOption(${i})" class="opt-btn p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition" id="opt-${i}">
+                    ${opt}
+                </div>
+            `).join('');
+            
+            // Progress bar
+            const pct = ((currentQIndex) / questions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${pct}%`;
+        }
+
+        window.selectOption = (idx) => {
+            document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
+            const sel = document.getElementById(`opt-${idx}`);
+            sel.classList.add('bg-indigo-600', 'text-white');
+            sel.dataset.selected = "true";
+        };
+
+        document.getElementById('next-q-btn').addEventListener('click', () => {
+            const selected = document.querySelector('.opt-btn[data-selected="true"]');
+            if (!selected) return alert("Please select an option.");
+            
+            const ansIdx = parseInt(selected.id.split('-')[1]);
+            if (ansIdx === questions[currentQIndex].a) score++;
+            
+            currentQIndex++;
+            loadQuestion();
+        });
+
+        function finishQuiz() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('quiz-footer').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            
+            const finalPct = Math.round((score / questions.length) * 100);
+            baselineScore = finalPct;
+            document.getElementById('res-score').textContent = `${finalPct}%`;
+            document.getElementById('res-level').textContent = finalPct > 70 ? "Advanced" : (finalPct > 40 ? "Interm." : "Beginner");
+            
+            // Save Score
+            setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'baseline'), { score: finalPct, date: new Date().toISOString() });
+        }
+
+        window.finishBaseline = () => {
+            loadDashboardData();
+            navTo('dashboard');
+        }
+
+        // --- 3. Dashboard Logic ---
+        function loadDashboardData() {
+            document.getElementById('dash-name').textContent = userProfile.name.split(' ')[0];
+            document.getElementById('dash-role').textContent = userProfile.role;
+            document.getElementById('dash-score').textContent = `${baselineScore}%`;
+            document.getElementById('dash-score-bar').style.width = `${baselineScore}%`;
+        }
+
+        // --- 4. Resume Logic ---
+        window.updateResume = () => {
+            document.getElementById('prev-name').textContent = document.getElementById('res-name').value || "Your Name";
+            document.getElementById('prev-email').textContent = document.getElementById('res-email').value || "email@example.com";
+            document.getElementById('prev-phone').textContent = document.getElementById('res-phone').value || "Phone";
+            document.getElementById('prev-summary').textContent = document.getElementById('res-summary').value || "Summary goes here...";
+            document.getElementById('prev-exp').textContent = document.getElementById('res-exp').value || "No experience added yet.";
+            document.getElementById('prev-edu').textContent = document.getElementById('res-edu').value || "No education added yet.";
+            
+            const skills = document.getElementById('res-skills-input').value.split(',');
+            document.getElementById('prev-skills').innerHTML = skills.map(s => s.trim() ? `<span class="bg-slate-200 px-2 py-1 rounded text-xs">${s.trim()}</span>` : "").join('');
+        };
+
+        // --- 5. AI Features (Gemini) ---
+        // Using System Prompt config for API
+        const apiKey = ""; 
+
+        async function callGemini(prompt) {
+            if (!apiKey) {
+                // Mock response if no API key in env (safety)
+                console.warn("No API Key. Returning mock.");
+                return "This is a simulated AI response. The actual API key is injected at runtime in the specific environment.";
+            }
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (e) {
+                console.error(e);
+                return "I'm having trouble connecting right now.";
+            }
+        }
+
+        // Resume AI
+        window.improveSummary = async () => {
+            const current = document.getElementById('res-summary').value;
+            if(!current) return alert("Write a draft summary first!");
+            
+            const btn = document.querySelector('#view-resume button'); // Dirty select, but works for this scope
+            const originalText = document.getElementById('ai-suggestion-text').innerText;
+            document.getElementById('ai-suggestion-text').innerText = "AI is thinking...";
+            
+            const prompt = `Rewrite this professional resume summary to be more impactful and ATS friendly: "${current}"`;
+            const improved = await callGemini(prompt);
+            
+            document.getElementById('res-summary').value = improved;
+            document.getElementById('ai-suggestion-text').innerText = "Summary updated! " + originalText;
+            updateResume();
+        }
+
+        // Interview AI
+        const chatForm = document.getElementById('chat-form');
+        const chatHistory = document.getElementById('chat-history');
+        
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            // User UI
+            appendMessage('user', msg);
+            input.value = '';
+
+            // AI Logic
+            const mode = document.getElementById('interview-mode').value;
+            const context = `You are a strict but helpful ${mode} interviewer for a job. The candidate says: "${msg}". Respond with a follow-up question or feedback. Keep it under 50 words.`;
+            
+            // Loading UI
+            const loadingId = appendMessage('ai', '...');
+            
+            const reply = await callGemini(context);
+            
+            // Update Loading with Real Text
+            document.getElementById(loadingId).innerText = reply;
+        });
+
+        function appendMessage(role, text) {
+            const id = 'msg-' + Date.now();
+            const isAI = role === 'ai';
+            const html = `
+                <div class="flex gap-3 max-w-[80%] ${isAI ? '' : 'ml-auto flex-row-reverse'} message-enter">
+                    <div class="w-8 h-8 rounded-full ${isAI ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-600'} flex-shrink-0 flex items-center justify-center text-xs">
+                        <i class="fa-solid ${isAI ? 'fa-robot' : 'fa-user'}"></i>
+                    </div>
+                    <div class="${isAI ? 'bg-white border border-slate-200 rounded-tl-none' : 'bg-primary text-white rounded-tr-none'} p-3 rounded-2xl text-sm shadow-sm" id="${id}">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            chatHistory.insertAdjacentHTML('beforeend', html);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            return id;
+        }
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.href = "index (3).html");
+        });
+
+        // Initialize Baseline Test (Ensure it's ready)
+        loadQuestion();
+
+    </script>
+</body>
+</html>
