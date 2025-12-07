@@ -25,6 +25,7 @@
                         dark: '#0F172A', // Slate 900
                         light: '#F8FAFC', // Slate 50
                         success: '#10B981',
+                        error: '#EF4444',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -54,6 +55,12 @@
         
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Test Styles */
+        .option-label { transition: all 0.2s; }
+        .option-label:hover { background-color: #F8FAFC; }
+        .correct-answer { background-color: #D1FAE5 !important; border-color: #10B981 !important; color: #065F46; }
+        .wrong-answer { background-color: #FEE2E2 !important; border-color: #EF4444 !important; color: #991B1B; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-700 h-screen flex overflow-hidden">
@@ -310,6 +317,17 @@
                             </div>
                         </div>
                         <button onclick="generateTest('Technical', 'Intermediate')" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Generate Test</button>
+                    </div>
+                    <!-- Level 3 Added for completeness -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xl">3</div>
+                            <div>
+                                <h3 class="font-bold text-lg">Level 3: Advanced Scenario</h3>
+                                <p class="text-sm text-slate-500">Complex role-based scenarios.</p>
+                            </div>
+                        </div>
+                        <button onclick="generateTest('Advanced Concepts', 'Advanced')" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Generate Test</button>
                     </div>
                 </div>
             </div>
@@ -570,17 +588,89 @@
             document.getElementById('modal-content').innerHTML = marked.parse(content);
         }
 
+        // Updated Interactive Test Generation
         async function generateTest(topic, level) {
             const profile = JSON.parse(localStorage.getItem('cn_profile'));
             openUniversalModal(`${level} ${topic} Test`);
             document.getElementById('modal-content').innerHTML = '<div class="flex justify-center"><div class="loader w-10 h-10 border-4 border-primary"></div></div>';
             
-            const prompt = `Generate a ${level} level practice test for "${topic}" specifically for a ${profile.role}.
-            Content: 3 Questions.
-            Format: Markdown. Don't provide answers immediately, put answers at the very bottom under a "## Solutions" header.`;
+            const prompt = `Generate 3 multiple choice questions for a ${level} level "${topic}" test for a ${profile.role}. 
+            Return STRICT JSON array: [{"question": "...", "options": ["Op1", "Op2", "Op3", "Op4"], "correctIndex": 0}] 
+            (0 for first option, 1 for second, etc.)`;
             
-            const content = await callGemini(prompt);
-            document.getElementById('modal-content').innerHTML = marked.parse(content);
+            const questions = await callGemini(prompt, true);
+            
+            if (questions) {
+                let html = `<form id="practice-test-form" class="space-y-6">`;
+                
+                questions.forEach((q, index) => {
+                    html += `
+                    <div class="test-question-container" data-correct="${q.correctIndex}">
+                        <p class="font-bold text-lg mb-3">${index + 1}. ${q.question}</p>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, i) => `
+                                <label class="option-label flex items-center p-3 border border-slate-200 rounded-lg cursor-pointer">
+                                    <input type="radio" name="q${index}" value="${i}" class="mr-3" required>
+                                    <span class="opt-text">${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <p class="feedback-msg hidden mt-2 text-sm font-bold"></p>
+                    </div>`;
+                });
+                
+                html += `
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-indigo-700 mt-4">Submit Test</button>
+                    <div id="test-results" class="hidden mt-6 p-4 bg-slate-100 rounded-lg text-center font-bold text-xl"></div>
+                </form>`;
+                
+                document.getElementById('modal-content').innerHTML = html;
+                
+                // Attach handler specifically to this new form
+                document.getElementById('practice-test-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    submitPracticeTest(questions.length);
+                });
+            }
+        }
+
+        function submitPracticeTest(totalQuestions) {
+            let score = 0;
+            const containers = document.querySelectorAll('.test-question-container');
+            
+            containers.forEach(container => {
+                const correctIndex = parseInt(container.getAttribute('data-correct'));
+                const selectedInput = container.querySelector('input[type="radio"]:checked');
+                const feedback = container.querySelector('.feedback-msg');
+                const options = container.querySelectorAll('.option-label');
+                
+                // Reset styles
+                options.forEach(opt => opt.classList.remove('correct-answer', 'wrong-answer'));
+                feedback.classList.add('hidden');
+                feedback.classList.remove('text-green-600', 'text-red-600');
+
+                if (selectedInput) {
+                    const userIndex = parseInt(selectedInput.value);
+                    if (userIndex === correctIndex) {
+                        score++;
+                        options[userIndex].classList.add('correct-answer');
+                        feedback.textContent = "Correct!";
+                        feedback.classList.add('text-green-600');
+                    } else {
+                        options[userIndex].classList.add('wrong-answer');
+                        options[correctIndex].classList.add('correct-answer'); // Show correct one
+                        feedback.textContent = "Incorrect.";
+                        feedback.classList.add('text-red-600');
+                    }
+                    feedback.classList.remove('hidden');
+                }
+            });
+
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = `You scored ${score} / ${totalQuestions}`;
+            resultDiv.classList.remove('hidden');
+            if(score === totalQuestions) resultDiv.classList.add('text-green-600');
+            else resultDiv.classList.add('text-primary');
         }
 
         function openUniversalModal(title) {
@@ -692,6 +782,7 @@
         window.sendChat = sendChat;
         window.clearChat = clearChat;
         window.aiImproveSummary = aiImproveSummary;
+        window.submitPracticeTest = submitPracticeTest;
     </script>
 </body>
 </html>
