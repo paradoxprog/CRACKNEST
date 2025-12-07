@@ -80,7 +80,8 @@
         <!-- SIDEBAR -->
         <aside class="w-64 bg-slate-900 text-white flex-col hidden md:flex transition-all duration-300" id="sidebar">
             <div class="p-6 border-b border-slate-700 flex items-center gap-3">
-                <img src="logo.jpg" alt="Logo" class="w-8 h-8 object-contain">
+                <!-- LOGO -->
+                <img src="logo.jpg" alt="Logo" class="w-8 h-8 object-contain bg-white rounded-full">
                 <span class="text-xl font-bold heading">CrackNest</span>
             </div>
 
@@ -107,10 +108,10 @@
 
             <div class="p-4 border-t border-slate-700">
                 <div class="flex items-center gap-3 mb-4 cursor-default">
-                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold" id="sidebar-avatar">U</div>
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold" id="sidebar-avatar">S</div>
                     <div>
                         <p class="text-sm font-bold text-white truncate w-32" id="sidebar-name">Student</p>
-                        <p class="text-xs text-slate-400" id="sidebar-role">Student</p>
+                        <p class="text-xs text-slate-400" id="sidebar-role">Loading...</p>
                     </div>
                 </div>
                 <button id="logout-btn" class="w-full bg-slate-800 hover:bg-red-600/20 text-slate-300 hover:text-red-400 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2">
@@ -227,6 +228,7 @@
                         </div>
                         <div class="p-8">
                             <div id="quiz-container">
+                                <!-- Dynamic Question Content -->
                                 <div class="mb-6">
                                     <span class="text-xs font-bold text-primary uppercase tracking-wide">Question <span id="q-current">1</span> of <span id="q-total">10</span></span>
                                     <h3 class="text-lg font-medium text-slate-900 mt-2" id="q-text">Question text goes here?</h3>
@@ -391,6 +393,7 @@
                             <div class="p-6">
                                 <h3 class="font-bold text-lg mb-2">Technical Skills</h3>
                                 <ul class="text-sm text-slate-600 space-y-2 mb-4" id="tech-skills-list">
+                                    <!-- Dynamic Content -->
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Domain Concepts</li>
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Core Tools</li>
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Best Practices</li>
@@ -494,6 +497,7 @@
                         </div>
                         <div class="p-8">
                             <div id="ai-test-container">
+                                <!-- Dynamic Question Content -->
                                 <div class="text-center py-10" id="test-loader">
                                     <div class="loader mx-auto mb-4"></div>
                                     <p class="text-slate-600">AI is crafting questions for your profile...</p>
@@ -1037,43 +1041,43 @@
         };
 
         // --- 5. AI Features (Gemini) ---
-        // API Key is now handled securely on the server side (Vercel)
-
-        // --- 5. AI Features (Gemini) ---
-        
-        // PASTE YOUR API KEY HERE
         const apiKey = "AIzaSyAruLEerPpveDtUsXvTO4GlomEGezE5NhU"; 
 
         async function callGemini(prompt) {
+            // Check for Secure Backend Function (Vercel)
             try {
-                // Direct call to Google's API endpoint
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
                 
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.text;
+                }
+            } catch (e) {
+                console.warn("Backend API not available, falling back to direct call (Development Mode)");
+            }
+
+            // Fallback: Direct Call (For Local Testing ONLY)
+            if (!apiKey) {
+                console.warn("No API Key. Returning mock.");
+                return "This is a simulated AI response. Please configure your API key.";
+            }
+            
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: prompt }]
-                        }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
-                }
-
                 const data = await response.json();
-                
-                // Parse the response structure from Google
-                if (data.candidates && data.candidates[0].content) {
-                    return data.candidates[0].content.parts[0].text;
-                } else {
-                    return "No response generated.";
-                }
+                return data.candidates[0].content.parts[0].text;
             } catch (e) {
-                console.error("API Error:", e);
-                return "I'm having trouble connecting right now. Please check your API key and internet connection.";
+                console.error(e);
+                return "I'm having trouble connecting right now.";
             }
         }
 
