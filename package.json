@@ -1,17 +1,11 @@
 {
   "name": "cracknest",
   "version": "1.0.0",
-  "description": "AI-Powered Interview Prep Platform",
-  "private": true,
   "scripts": {
     "start": "npx serve ."
   },
+  "dependencies": {},
   "engines": {
     "node": ">=18.x"
-  },
-  "keywords": [
-    "interview",
-    "ai",
-    "prep"
-  ]
+  }
 }
