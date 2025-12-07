@@ -384,17 +384,17 @@
                             </div>
                         </div>
 
-                        <!-- Technical -->
+                        <!-- Technical (Dynamic List) -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
                             <div class="h-32 bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-center">
                                 <i class="fa-solid fa-code text-4xl text-white/90 group-hover:scale-110 transition duration-300"></i>
                             </div>
                             <div class="p-6">
                                 <h3 class="font-bold text-lg mb-2">Technical Skills</h3>
-                                <ul class="text-sm text-slate-600 space-y-2 mb-4">
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> DSA Basics</li>
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> DBMS & SQL</li>
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> System Design</li>
+                                <ul class="text-sm text-slate-600 space-y-2 mb-4" id="tech-skills-list">
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Domain Concepts</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Core Tools</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Best Practices</li>
                                 </ul>
                                 <button onclick="startAITraining('Technical')" class="w-full py-2 border border-indigo-500 text-primary rounded-lg font-bold hover:bg-indigo-50 transition">Start Learning</button>
                             </div>
@@ -982,6 +982,27 @@
             } else {
                 emptyMsg.classList.remove('hidden');
                 graphContainer.classList.add('hidden');
+            }
+
+            // --- Dynamic Technical Skills List Update ---
+            const techList = document.getElementById('tech-skills-list');
+            if (techList) {
+                const field = userProfile.field || 'IT';
+                let skills = ["Core Concepts", "Advanced Techniques", "Industry Standards"];
+
+                switch(field) {
+                    case 'IT': skills = ["DSA & Algorithms", "System Design", "Database Mgmt"]; break;
+                    case 'Marketing': skills = ["SEO & SEM", "Content Strategy", "Market Analytics"]; break;
+                    case 'Finance': skills = ["Financial Modeling", "Risk Management", "Investment Analysis"]; break;
+                    case 'HR': skills = ["Talent Acquisition", "Labor Laws", "Employee Relations"]; break;
+                    case 'Engineering': skills = ["Core Principles", "CAD/Simulations", "Project Management"]; break;
+                    case 'Accounting': skills = ["Taxation", "Auditing Standards", "Financial Reporting"]; break;
+                    case 'Data': skills = ["SQL & Python", "Machine Learning", "Data Visualization"]; break;
+                }
+
+                techList.innerHTML = skills.map(s => 
+                    `<li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> ${s}</li>`
+                ).join('');
             }
         }
 
