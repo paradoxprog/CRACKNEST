@@ -673,6 +673,7 @@
         let currentUser = null;
         let userProfile = null;
         let baselineScore = 0;
+        let baselineQuestions = []; // Changed from const questions to let baselineQuestions
         let activeTestQuestions = [];
         let activeTrainingModule = "";
 
@@ -760,7 +761,7 @@
                         console.log("Profile found, but no baseline. Enforcing test.");
                         userProfile = profileSnap.data();
                         toggleNavigation(false); 
-                        navTo('baseline');
+                        startBaselineAssessment(); // Changed from navTo('baseline') to startBaselineAssessment()
                     } else {
                         console.log("User ready. Loading dashboard.");
                         userProfile = profileSnap.data();
@@ -821,7 +822,7 @@
                      alert("Profile Updated Successfully!");
                      navTo('dashboard');
                 } else {
-                     navTo('baseline'); 
+                     startBaselineAssessment(); // Changed from navTo('baseline') to startBaselineAssessment()
                 }
             } catch (err) {
                 alert("Error saving profile: " + err.message);
@@ -831,23 +832,82 @@
         });
 
         // --- 2. Baseline Test Logic ---
-        const questions = [
-            { q: "What is the time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n^2)", "O(1)"], a: 1 },
-            { q: "Which of these is NOT a database?", options: ["MySQL", "MongoDB", "Python", "PostgreSQL"], a: 2 },
-            { q: "Complete the series: 2, 4, 8, 16, ...", options: ["30", "32", "24", "18"], a: 1 },
-            { q: "HR Question: Tell me about yourself. (Choose best approach)", options: ["Recite resume", "Share hobbies", "Focus on professional journey & skills", "Talk about family"], a: 2 }
-        ];
         let currentQIndex = 0;
         let score = 0;
 
+        // New function to handle AI Generation for Baseline Test
+        async function startBaselineAssessment() {
+            navTo('baseline');
+            
+            // Show loading state
+            document.getElementById('quiz-container').innerHTML = `
+                <div class="text-center py-12">
+                    <div class="loader mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-slate-700">Generating Your Assessment</h3>
+                    <p class="text-slate-500">AI is crafting questions based on your profile (${userProfile.role})...</p>
+                </div>
+            `;
+            document.getElementById('quiz-footer').classList.add('hidden');
+
+            const prompt = `Generate 5 multiple choice questions for a baseline skill assessment for a ${userProfile.role} in ${userProfile.field}. 
+            Experience level: ${userProfile.exp}.
+            Include: 2 Technical (Role specific), 1 Aptitude, 1 Verbal, 1 Situational.
+            Format strictly as a JSON array of objects with keys: "q" (question text), "options" (array of 4 strings), "a" (index of correct answer 0-3).
+            Return ONLY the JSON.`;
+
+            try {
+                const text = await callGemini(prompt);
+                const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                baselineQuestions = JSON.parse(cleaned);
+                
+                // Restore UI Structure
+                document.getElementById('quiz-container').innerHTML = `
+                    <div class="mb-6">
+                        <span class="text-xs font-bold text-primary uppercase tracking-wide">Question <span id="q-current">1</span> of <span id="q-total">10</span></span>
+                        <h3 class="text-lg font-medium text-slate-900 mt-2" id="q-text"></h3>
+                    </div>
+                    <div class="space-y-3" id="q-options"></div>
+                `;
+                document.getElementById('quiz-footer').classList.remove('hidden');
+                
+                currentQIndex = 0;
+                score = 0;
+                loadQuestion();
+
+            } catch (e) {
+                console.error("Baseline Generation Error", e);
+                // Fallback to static if AI fails
+                baselineQuestions = [
+                    { q: "Time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n^2)", "O(1)"], a: 1 },
+                    { q: "Which is a NoSQL DB?", options: ["MySQL", "MongoDB", "PostgreSQL", "Oracle"], a: 1 },
+                    { q: "Identify the noun: 'The cat runs.'", options: ["The", "Cat", "Runs", "Fast"], a: 1 },
+                    { q: "Next in series: 2, 4, 8...", options: ["10", "12", "16", "20"], a: 2 },
+                    { q: "Conflict resolution step 1?", options: ["Ignore", "Listen", "Argue", "Escalate"], a: 1 }
+                ];
+                // Restore UI Structure for fallback
+                document.getElementById('quiz-container').innerHTML = `
+                    <div class="mb-6">
+                        <span class="text-xs font-bold text-primary uppercase tracking-wide">Question <span id="q-current">1</span> of <span id="q-total">10</span></span>
+                        <h3 class="text-lg font-medium text-slate-900 mt-2" id="q-text"></h3>
+                    </div>
+                    <div class="space-y-3" id="q-options"></div>
+                `;
+                document.getElementById('quiz-footer').classList.remove('hidden');
+                
+                currentQIndex = 0;
+                score = 0;
+                loadQuestion();
+            }
+        }
+
         function loadQuestion() {
-            if (currentQIndex >= questions.length) {
+            if (currentQIndex >= baselineQuestions.length) {
                 finishQuiz();
                 return;
             }
-            const q = questions[currentQIndex];
+            const q = baselineQuestions[currentQIndex];
             document.getElementById('q-current').textContent = currentQIndex + 1;
-            document.getElementById('q-total').textContent = questions.length;
+            document.getElementById('q-total').textContent = baselineQuestions.length;
             document.getElementById('q-text').textContent = q.q;
             document.getElementById('q-options').innerHTML = q.options.map((opt, i) => `
                 <div onclick="selectOption(${i})" class="opt-btn p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition" id="opt-${i}">
@@ -855,7 +915,7 @@
                 </div>
             `).join('');
             
-            const pct = ((currentQIndex) / questions.length) * 100;
+            const pct = ((currentQIndex) / baselineQuestions.length) * 100;
             document.getElementById('quiz-progress').style.width = `${pct}%`;
         }
 
@@ -871,7 +931,7 @@
             if (!selected) return alert("Please select an option.");
             
             const ansIdx = parseInt(selected.id.split('-')[1]);
-            if (ansIdx === questions[currentQIndex].a) score++;
+            if (ansIdx === baselineQuestions[currentQIndex].a) score++;
             currentQIndex++;
             loadQuestion();
         });
@@ -880,7 +940,7 @@
             document.getElementById('quiz-container').classList.add('hidden');
             document.getElementById('quiz-footer').classList.add('hidden');
             document.getElementById('quiz-results').classList.remove('hidden');
-            const finalPct = Math.round((score / questions.length) * 100);
+            const finalPct = Math.round((score / baselineQuestions.length) * 100);
             baselineScore = finalPct;
             document.getElementById('res-score').textContent = `${finalPct}%`;
             document.getElementById('res-level').textContent = finalPct > 70 ? "Advanced" : (finalPct > 40 ? "Interm." : "Beginner");
@@ -1117,8 +1177,7 @@
         });
 
         // Initialize Baseline Test (Ensure it's ready)
-        loadQuestion();
-
+        // loadQuestion(); // Removed initial call as it is now handled by startBaselineAssessment
     </script>
 </body>
 </html>
