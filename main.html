@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrackNest | Student Dashboard</title>
+    <title>CrackNest | AI Student Dashboard</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,8 +38,10 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .markdown-prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
         .markdown-prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .markdown-prose h3 { font-weight: bold; font-size: 1.25rem; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown-prose h3 { font-weight: bold; font-size: 1.1rem; margin-top: 1rem; margin-bottom: 0.5rem; color: #1e293b; }
         .markdown-prose strong { color: #4F46E5; }
+        .markdown-prose p { margin-bottom: 0.8rem; }
+        
         .loader {
             border: 3px solid #f3f3f3;
             border-radius: 50%;
@@ -50,17 +52,41 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Progress Bar Animation */
-        .progress-bar { transition: width 1s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-700 h-screen flex overflow-hidden">
+
+    <!-- AUTH OVERLAY -->
+    <div id="auth-overlay" class="hidden fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center text-white">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700">
+            <div class="w-16 h-16 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
+                <i class="fa-solid fa-lock text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 font-heading">Access Restricted</h2>
+            <p class="text-slate-400 mb-8">Please log in to access your dashboard.</p>
+            <a href="index.html" class="block w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-indigo-600 transition mb-4">Go to Login Page</a>
+        </div>
+    </div>
+
+    <!-- UNIVERSAL MODAL (For Training/Tests) -->
+    <div id="universal-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-900">Learning Module</h3>
+                <button onclick="closeUniversalModal()" class="text-slate-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-content" class="p-8 overflow-y-auto markdown-prose">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
 
     <!-- SIDEBAR -->
     <aside id="sidebar" class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col transition-all duration-300">
         <div class="h-20 flex items-center px-6 border-b border-slate-800">
             <div class="flex items-center gap-3">
-                <!-- Replace with your logo if available -->
                 <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white">CN</div>
                 <span class="font-heading font-bold text-xl">CrackNest</span>
             </div>
@@ -71,7 +97,7 @@
                 <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
             </button>
             <button onclick="switchTab('training')" id="nav-training" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-book-open w-5"></i> Training Hub
+                <i class="fa-solid fa-graduation-cap w-5"></i> Training Hub
             </button>
             <button onclick="switchTab('test-series')" id="nav-test-series" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-list-check w-5"></i> Test Series
@@ -89,7 +115,7 @@
                 <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold" id="user-initials">U</div>
                 <div class="overflow-hidden">
                     <p id="display-name" class="text-sm font-bold text-white truncate">Student</p>
-                    <p class="text-xs text-slate-400 truncate" id="user-role-display">Aspiring Engineer</p>
+                    <p class="text-xs text-slate-400 truncate" id="user-role-display">Role pending...</p>
                 </div>
             </div>
             <button id="logout-btn" class="flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-300 transition w-full px-2">
@@ -100,8 +126,6 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-        
-        <!-- Mobile Header -->
         <header class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0">
             <span class="font-heading font-bold text-lg text-slate-800">CrackNest</span>
             <button onclick="document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('sidebar').classList.toggle('absolute'); document.getElementById('sidebar').classList.toggle('z-50'); document.getElementById('sidebar').classList.toggle('h-full');" class="text-slate-600"><i class="fa-solid fa-bars text-xl"></i></button>
@@ -109,142 +133,89 @@
 
         <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative" id="main-container">
 
-            <!-- 1. PROFILE SETUP VIEW (First Time User) -->
-            <div id="view-profile-setup" class="hidden absolute inset-0 bg-white z-40 p-8 overflow-y-auto">
+            <!-- 1. PROFILE SETUP VIEW -->
+            <div id="view-profile-setup" class="hidden absolute inset-0 bg-white z-40 p-8 overflow-y-auto fade-in">
                 <div class="max-w-2xl mx-auto py-10">
                     <div class="text-center mb-10">
-                        <div class="w-16 h-16 bg-indigo-100 text-primary rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
-                            <i class="fa-solid fa-user-pen"></i>
-                        </div>
-                        <h1 class="text-3xl font-bold text-slate-900">Let's Build Your Profile</h1>
-                        <p class="text-slate-600 mt-2">Help us customize your learning path.</p>
+                        <div class="w-16 h-16 bg-indigo-100 text-primary rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-user-pen"></i></div>
+                        <h1 class="text-3xl font-bold text-slate-900">Setup Your Profile</h1>
+                        <p class="text-slate-600 mt-2">CrackNest uses AI to personalize your learning path.</p>
                     </div>
 
                     <form id="profile-form" class="space-y-6">
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                                <input type="text" id="p-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="text" id="p-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Degree / Stream</label>
-                                <input type="text" id="p-degree" placeholder="e.g. B.Tech CS" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="text" id="p-degree" placeholder="e.g. B.Tech CS" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                             </div>
                         </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Target Career Field</label>
-                            <select id="p-field" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="IT">IT / Software Development</option>
-                                <option value="Marketing">Marketing & Sales</option>
-                                <option value="Finance">Finance & Accounting</option>
-                                <option value="HR">Human Resources</option>
-                                <option value="Core Engineering">Core Engineering</option>
-                            </select>
-                        </div>
-
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Target Role</label>
-                            <input type="text" id="p-role" placeholder="e.g. Full Stack Developer" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <input type="text" id="p-role" placeholder="e.g. Full Stack Developer, Data Analyst" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                         </div>
-
-                        <div class="grid md:grid-cols-2 gap-6">
-                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Passing Year</label>
-                                <input type="number" id="p-year" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
-                                <select id="p-exp" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                    <option value="Fresher">Fresher (Student)</option>
-                                    <option value="0-2 Years">0-2 Years</option>
-                                    <option value="2+ Years">2+ Years</option>
-                                </select>
-                            </div>
+                         <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Target Field</label>
+                            <select id="p-field" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                <option>Software Development</option>
+                                <option>Data Science</option>
+                                <option>Marketing</option>
+                                <option>Finance</option>
+                                <option>Human Resources</option>
+                            </select>
                         </div>
-
-                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold text-lg hover:bg-indigo-700 transition shadow-lg mt-8">
-                            Save & Continue <i class="fa-solid fa-arrow-right ml-2"></i>
-                        </button>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
+                            <select id="p-exp" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                <option value="Fresher">Fresher (Student)</option>
+                                <option value="1-2 Years">1-2 Years</option>
+                                <option value="3+ Years">3+ Years</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold text-lg hover:bg-indigo-700 transition shadow-lg mt-8">Save & Continue <i class="fa-solid fa-arrow-right ml-2"></i></button>
                     </form>
                 </div>
             </div>
 
             <!-- 2. BASELINE SKILL TEST VIEW -->
-            <div id="view-baseline" class="hidden absolute inset-0 bg-slate-50 z-40 p-8 overflow-y-auto">
+            <div id="view-baseline" class="hidden absolute inset-0 bg-slate-50 z-40 p-8 overflow-y-auto fade-in">
                 <div class="max-w-3xl mx-auto py-10">
-                    <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
-                        <div class="text-center mb-8">
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-200 relative min-h-[400px]">
+                        <div id="test-intro" class="text-center">
                             <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Step 2 of 2</span>
                             <h2 class="text-2xl font-bold text-slate-900 mt-4">Baseline Skill Assessment</h2>
-                            <p class="text-slate-500">A quick test to analyze your current standing and build your roadmap.</p>
-                        </div>
-
-                        <!-- Mock Test Container -->
-                        <div id="test-container" class="space-y-6">
-                            <!-- Questions will be injected here dynamically or hardcoded for demo -->
-                            <div class="question-card">
-                                <p class="font-bold text-lg mb-4">1. Technical (Logic): What is the time complexity of a binary search algorithm?</p>
-                                <div class="space-y-2">
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q1" value="a" class="mr-3"> O(n)
-                                    </label>
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q1" value="b" class="mr-3"> O(log n)
-                                    </label>
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q1" value="c" class="mr-3"> O(n^2)
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-card">
-                                <p class="font-bold text-lg mb-4">2. Aptitude: If a shirt costs $20 after a 20% discount, what was the original price?</p>
-                                <div class="space-y-2">
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q2" value="a" class="mr-3"> $22
-                                    </label>
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q2" value="b" class="mr-3"> $24
-                                    </label>
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q2" value="c" class="mr-3"> $25
-                                    </label>
-                                </div>
-                            </div>
-
-                             <div class="question-card">
-                                <p class="font-bold text-lg mb-4">3. Verbal: Choose the synonym for "Benevolent".</p>
-                                <div class="space-y-2">
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q3" value="a" class="mr-3"> Cruel
-                                    </label>
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q3" value="b" class="mr-3"> Kind
-                                    </label>
-                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
-                                        <input type="radio" name="q3" value="c" class="mr-3"> Wealthy
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 flex justify-end">
-                            <button onclick="submitBaselineTest()" id="submit-test-btn" class="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
-                                Submit Assessment
+                            <p class="text-slate-500 mb-8">We will generate 3 unique questions based on your profile to gauge your level.</p>
+                            <button onclick="startBaselineTest()" class="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate AI Test
                             </button>
+                        </div>
+
+                        <div id="test-loading" class="hidden flex-col items-center justify-center py-12">
+                            <div class="loader w-12 h-12 border-4 mb-4"></div>
+                            <p class="text-slate-500 animate-pulse">Designing your custom test...</p>
+                        </div>
+
+                        <div id="test-questions" class="hidden space-y-8">
+                            <form id="baseline-form">
+                                <div id="questions-container" class="space-y-6"></div>
+                                <div class="mt-8 flex justify-end">
+                                    <button type="submit" class="bg-green-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-green-700 transition">Submit Answers</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. MAIN DASHBOARD VIEW -->
-            <div id="view-dashboard" class="content-view space-y-8">
-                <!-- Welcome Header -->
+            <!-- 3. DASHBOARD -->
+            <div id="view-dashboard" class="content-view space-y-8 fade-in">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 class="text-3xl font-bold text-slate-900">Welcome Back, <span id="dash-name" class="text-primary">Student</span>!</h1>
-                        <p class="text-slate-500">Here is your personalized interview preparation roadmap.</p>
+                        <p class="text-slate-500">Your personalized AI roadmap.</p>
                     </div>
                     <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
                         <i class="fa-solid fa-trophy text-yellow-500"></i>
@@ -252,97 +223,74 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <h3 class="text-sm font-semibold text-slate-400 uppercase mb-2">My Strengths</h3>
-                        <div class="flex flex-wrap gap-2" id="dash-strengths">
-                            <!-- Injected via JS -->
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Pending Analysis</span>
-                        </div>
+                        <div class="flex flex-wrap gap-2" id="dash-strengths"><span class="text-xs text-slate-400">Loading...</span></div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <h3 class="text-sm font-semibold text-slate-400 uppercase mb-2">Areas to Improve</h3>
-                         <div class="flex flex-wrap gap-2" id="dash-weaknesses">
-                             <!-- Injected via JS -->
-                             <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Pending Analysis</span>
-                        </div>
+                         <div class="flex flex-wrap gap-2" id="dash-weaknesses"><span class="text-xs text-slate-400">Loading...</span></div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase mb-2">Today's Goal</h3>
-                        <p class="text-slate-800 font-bold text-lg" id="dash-goal">Complete Aptitude Module 1</p>
-                        <button onclick="switchTab('training')" class="text-primary text-sm font-medium mt-2 hover:underline">Start Learning &rarr;</button>
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase mb-2">AI Suggested Goal</h3>
+                        <p class="text-slate-800 font-bold text-lg" id="dash-goal">Analyze your profile to set a goal...</p>
+                        <button onclick="switchTab('training')" class="text-primary text-sm font-medium mt-2 hover:underline">Go to Training &rarr;</button>
                     </div>
                 </div>
 
-                <!-- Performance Chart (Simulated) -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold text-lg mb-4">Performance Overview</h3>
-                    <div class="h-64">
-                         <canvas id="performanceChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Recommended Actions -->
                 <div class="grid md:grid-cols-2 gap-6">
                     <div onclick="switchTab('mock')" class="group bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-xl shadow-lg text-white cursor-pointer transition transform hover:scale-[1.02]">
                         <div class="flex justify-between items-start">
                             <div>
-                                <h3 class="font-bold text-xl mb-1">Take an AI Mock Interview</h3>
-                                <p class="text-indigo-100 text-sm opacity-90">Practice HR or Technical rounds with real-time feedback.</p>
+                                <h3 class="font-bold text-xl mb-1">AI Mock Interview</h3>
+                                <p class="text-indigo-100 text-sm opacity-90">Practice HR or Technical rounds.</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg"><i class="fa-solid fa-robot text-2xl"></i></div>
                         </div>
-                        <div class="mt-4 font-bold text-sm bg-white/20 inline-block px-3 py-1 rounded">Start Now &rarr;</div>
                     </div>
-
                     <div onclick="switchTab('resume')" class="group bg-gradient-to-br from-orange-400 to-pink-500 p-6 rounded-xl shadow-lg text-white cursor-pointer transition transform hover:scale-[1.02]">
                         <div class="flex justify-between items-start">
                             <div>
-                                <h3 class="font-bold text-xl mb-1">Build Your Resume</h3>
-                                <p class="text-orange-100 text-sm opacity-90">Use AI to fix your summary and highlight achievements.</p>
+                                <h3 class="font-bold text-xl mb-1">Resume Builder</h3>
+                                <p class="text-orange-100 text-sm opacity-90">AI-powered optimization.</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg"><i class="fa-solid fa-wand-magic-sparkles text-2xl"></i></div>
                         </div>
-                        <div class="mt-4 font-bold text-sm bg-white/20 inline-block px-3 py-1 rounded">Edit Resume &rarr;</div>
                     </div>
                 </div>
             </div>
 
             <!-- 4. TRAINING HUB -->
-            <div id="view-training" class="content-view hidden space-y-6">
+            <div id="view-training" class="content-view hidden space-y-6 fade-in">
                 <h2 class="text-2xl font-bold text-slate-900">Training Dashboard</h2>
-                
-                <!-- Tabs -->
-                <div class="flex border-b border-slate-200 mb-6">
-                    <button class="px-6 py-3 border-b-2 border-primary text-primary font-bold">Aptitude</button>
-                    <button class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800">Technical</button>
-                    <button class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800">HR & Comm</button>
-                </div>
-
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Cards will be populated dynamically or hardcoded -->
+                    <!-- Dynamic Generation Buttons -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4"><i class="fa-solid fa-calculator"></i></div>
                         <h3 class="font-bold text-lg mb-2">Quantitative Aptitude</h3>
-                        <p class="text-sm text-slate-500 mb-4">Learn basics of percentages, ratios, and algebra.</p>
-                        <button class="w-full py-2 border border-slate-200 rounded text-slate-600 hover:bg-slate-50 text-sm font-medium">Start Module</button>
+                        <p class="text-sm text-slate-500 mb-4">Numbers, percentages, ratios.</p>
+                        <button onclick="generateTraining('Quantitative Aptitude')" class="w-full py-2 border border-primary text-primary hover:bg-primary hover:text-white rounded text-sm font-medium transition">Start AI Lesson</button>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-4"><i class="fa-solid fa-brain"></i></div>
                         <h3 class="font-bold text-lg mb-2">Logical Reasoning</h3>
-                        <p class="text-sm text-slate-500 mb-4">Master puzzles, blood relations, and sequences.</p>
-                        <button class="w-full py-2 border border-slate-200 rounded text-slate-600 hover:bg-slate-50 text-sm font-medium">Start Module</button>
+                        <p class="text-sm text-slate-500 mb-4">Puzzles, sequences, patterns.</p>
+                        <button onclick="generateTraining('Logical Reasoning')" class="w-full py-2 border border-primary text-primary hover:bg-primary hover:text-white rounded text-sm font-medium transition">Start AI Lesson</button>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-4"><i class="fa-solid fa-code"></i></div>
+                        <h3 class="font-bold text-lg mb-2">Technical Core</h3>
+                        <p class="text-sm text-slate-500 mb-4">Role-specific technical concepts.</p>
+                        <button onclick="generateTraining('Technical Interview Concepts')" class="w-full py-2 border border-primary text-primary hover:bg-primary hover:text-white rounded text-sm font-medium transition">Start AI Lesson</button>
                     </div>
                 </div>
             </div>
 
             <!-- 5. TEST SERIES -->
-            <div id="view-test-series" class="content-view hidden space-y-6">
+            <div id="view-test-series" class="content-view hidden space-y-6 fade-in">
                 <h2 class="text-2xl font-bold text-slate-900 mb-6">Test Series</h2>
-                
                 <div class="space-y-4">
-                    <!-- Level 1 -->
                     <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-xl">1</div>
@@ -351,37 +299,23 @@
                                 <p class="text-sm text-slate-500">General analytics and reasoning.</p>
                             </div>
                         </div>
-                        <button class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Take Test</button>
+                        <button onclick="generateTest('Aptitude', 'Beginner')" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Generate Test</button>
                     </div>
-
-                    <!-- Level 2 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between opacity-75">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xl"><i class="fa-solid fa-lock"></i></div>
+                            <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xl">2</div>
                             <div>
                                 <h3 class="font-bold text-lg">Level 2: Technical Domain</h3>
                                 <p class="text-sm text-slate-500">Role-specific coding and theory.</p>
                             </div>
                         </div>
-                        <button disabled class="bg-slate-100 text-slate-400 px-6 py-2 rounded-lg text-sm font-medium cursor-not-allowed">Locked</button>
-                    </div>
-
-                    <!-- Level 3 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between opacity-75">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xl"><i class="fa-solid fa-lock"></i></div>
-                            <div>
-                                <h3 class="font-bold text-lg">Level 3: HR & Scenarios</h3>
-                                <p class="text-sm text-slate-500">Video and audio response test.</p>
-                            </div>
-                        </div>
-                        <button disabled class="bg-slate-100 text-slate-400 px-6 py-2 rounded-lg text-sm font-medium cursor-not-allowed">Locked</button>
+                        <button onclick="generateTest('Technical', 'Intermediate')" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Generate Test</button>
                     </div>
                 </div>
             </div>
 
             <!-- 6. AI MOCK INTERVIEW -->
-            <div id="view-mock" class="content-view hidden h-[calc(100vh-100px)] flex flex-col">
+            <div id="view-mock" class="content-view hidden h-[calc(100vh-100px)] flex flex-col fade-in">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">AI Mock Interview</h2>
@@ -395,28 +329,24 @@
                         <button onclick="clearChat()" class="text-sm text-red-500 hover:text-red-700 px-3 py-2 bg-red-50 rounded-lg">Reset</button>
                     </div>
                 </div>
-
                 <div id="chat-window" class="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm p-6 overflow-y-auto space-y-4 mb-4">
                     <div class="flex gap-3">
                         <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div>
                         <div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl text-slate-700 text-sm max-w-[80%]">
-                            Hello! I am your AI interviewer. Select a mode (HR or Technical) and type "Start" to begin.
+                            Hello! I am your AI interviewer. Select a mode and type "Start" to begin.
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm flex gap-2">
-                    <button class="p-3 text-slate-400 hover:text-primary"><i class="fa-solid fa-microphone"></i></button>
                     <input type="text" id="chat-input" placeholder="Type your answer here..." class="flex-1 px-4 py-3 focus:outline-none text-slate-700">
                     <button onclick="sendChat()" class="bg-primary text-white px-6 rounded-lg hover:bg-indigo-700 transition"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
 
             <!-- 7. RESUME BUILDER -->
-            <div id="view-resume" class="content-view hidden space-y-6">
+            <div id="view-resume" class="content-view hidden space-y-6 fade-in">
                  <div class="max-w-4xl mx-auto">
                     <h2 class="text-2xl font-bold text-slate-900 mb-6">Smart Resume Builder</h2>
-                    
                     <div class="grid md:grid-cols-2 gap-6 mb-6">
                         <div class="space-y-4">
                             <div class="bg-white p-4 rounded-xl border border-slate-200">
@@ -424,25 +354,23 @@
                                 <input type="text" id="res-name" placeholder="Full Name" class="w-full p-2 border border-slate-200 rounded mb-2 text-sm">
                                 <input type="text" id="res-email" placeholder="Email" class="w-full p-2 border border-slate-200 rounded text-sm">
                             </div>
-                            
                             <div class="bg-white p-4 rounded-xl border border-slate-200">
                                 <h3 class="font-bold text-sm text-slate-700 mb-2">Summary</h3>
-                                <textarea id="res-summary" rows="4" placeholder="Professional Summary..." class="w-full p-2 border border-slate-200 rounded text-sm"></textarea>
-                                <button onclick="aiImproveSummary()" class="mt-2 text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded font-bold hover:bg-purple-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Improve</button>
+                                <textarea id="res-summary" rows="6" placeholder="Paste your current summary or skills here..." class="w-full p-2 border border-slate-200 rounded text-sm"></textarea>
+                                <button onclick="aiImproveSummary()" class="mt-2 text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded font-bold hover:bg-purple-200"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Rewrite Professional Summary</button>
                             </div>
                         </div>
-
                         <div class="space-y-4">
                              <div class="bg-white p-4 rounded-xl border border-slate-200 h-full">
                                 <h3 class="font-bold text-sm text-slate-700 mb-2">Live Preview</h3>
-                                <div id="resume-preview" class="border border-slate-100 p-4 rounded bg-slate-50 h-64 overflow-y-auto text-xs font-serif leading-relaxed">
-                                    <div class="text-center border-b pb-2 mb-2">
-                                        <h1 class="font-bold text-lg" id="prev-name">Your Name</h1>
-                                        <p class="text-slate-500" id="prev-email">email@example.com</p>
+                                <div id="resume-preview" class="border border-slate-100 p-6 rounded bg-slate-50 h-[400px] overflow-y-auto text-sm font-serif leading-relaxed text-slate-800">
+                                    <div class="text-center border-b border-slate-300 pb-4 mb-4">
+                                        <h1 class="font-bold text-xl uppercase tracking-wider" id="prev-name">Your Name</h1>
+                                        <p class="text-slate-500 text-xs" id="prev-email">email@example.com</p>
                                     </div>
-                                    <p id="prev-summary">Your summary will appear here...</p>
+                                    <h4 class="font-bold text-xs uppercase tracking-wider border-b border-slate-300 mb-2">Professional Summary</h4>
+                                    <p id="prev-summary">Your AI-optimized summary will appear here...</p>
                                 </div>
-                                <button class="w-full mt-4 bg-slate-900 text-white py-2 rounded text-sm hover:bg-slate-800"><i class="fa-solid fa-download mr-2"></i> Export PDF</button>
                             </div>
                         </div>
                     </div>
@@ -452,7 +380,7 @@
         </div>
     </main>
 
-    <!-- FIREBASE INIT & LOGIC -->
+    <!-- FIREBASE & GEMINI LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -463,47 +391,68 @@
         
         onAuthStateChanged(auth, (user) => {
             if (user) { 
+                document.getElementById('auth-overlay').classList.add('hidden');
                 document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0]; 
                 document.getElementById('dash-name').textContent = user.displayName || "Student";
-                
-                // Init flow check after auth
                 checkUserFlow();
             } else { 
-                window.location.href = "index.html"; 
+                document.getElementById('auth-overlay').classList.remove('hidden');
             }
         });
         
         document.getElementById('logout-btn').addEventListener('click', () => { 
-            // Clear local progress on logout for demo purposes? Or keep it.
-            // localStorage.removeItem('cn_profile');
-            // localStorage.removeItem('cn_baseline');
-            signOut(auth).then(() => { window.location.href = "index.html"; }); 
+            signOut(auth).then(() => { document.getElementById('auth-overlay').classList.remove('hidden'); }); 
         });
     </script>
 
-    <!-- APPLICATION LOGIC -->
     <script>
-        // --- 1. STATE MANAGEMENT & FLOW ---
+        const apiKey = ""; // System injects key at runtime
+
+        // --- GEMINI API CALLER ---
+        async function callGemini(prompt, isJson = false) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+                
+                const data = await response.json();
+                let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                
+                if (isJson) {
+                    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    return JSON.parse(text);
+                }
+                return text;
+            } catch (error) {
+                console.error("AI Error:", error);
+                alert("Connection error. Please check your internet.");
+                return null;
+            }
+        }
+
+        // --- 1. STATE MANAGEMENT ---
         function checkUserFlow() {
             const profile = localStorage.getItem('cn_profile');
             const baseline = localStorage.getItem('cn_baseline');
 
-            // Hide everything first
             document.querySelectorAll('.content-view').forEach(el => el.classList.add('hidden'));
             document.getElementById('view-profile-setup').classList.add('hidden');
             document.getElementById('view-baseline').classList.add('hidden');
-            document.getElementById('sidebar').classList.add('hidden'); // Hide sidebar initially during setup
+            document.getElementById('sidebar').classList.add('hidden'); 
 
             if (!profile) {
-                // Step 1: Profile Setup
                 document.getElementById('view-profile-setup').classList.remove('hidden');
             } else if (!baseline) {
-                // Step 2: Baseline Test
                 document.getElementById('view-baseline').classList.remove('hidden');
             } else {
-                // Step 3: Main Dashboard
-                document.getElementById('sidebar').classList.remove('hidden'); // Show sidebar
-                switchTab('dashboard'); // Load dashboard
+                document.getElementById('sidebar').classList.remove('hidden');
+                switchTab('dashboard');
                 loadDashboardStats();
             }
         }
@@ -513,115 +462,170 @@
             e.preventDefault();
             const data = {
                 name: document.getElementById('p-name').value,
-                degree: document.getElementById('p-degree').value,
-                field: document.getElementById('p-field').value,
                 role: document.getElementById('p-role').value,
-                year: document.getElementById('p-year').value,
+                field: document.getElementById('p-field').value,
                 exp: document.getElementById('p-exp').value
             };
             localStorage.setItem('cn_profile', JSON.stringify(data));
-            checkUserFlow(); // Move to next step
+            checkUserFlow();
         });
 
-        // --- 3. BASELINE TEST HANDLER ---
-        function submitBaselineTest() {
-            // Simple logic for demo: Count answers
-            // In real app, validate answers
-            const btn = document.getElementById('submit-test-btn');
-            btn.innerHTML = '<div class="loader w-5 h-5 border-2 border-white"></div> Analyzing...';
+        // --- 3. DYNAMIC BASELINE TEST ---
+        async function startBaselineTest() {
+            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            const btn = document.querySelector('button[onclick="startBaselineTest()"]');
             
-            setTimeout(() => {
-                const results = {
-                    score: 65, // Mock score
-                    strengths: ['Verbal Ability', 'Basic Logic'],
-                    weaknesses: ['Algorithms', 'Data Structures']
-                };
-                localStorage.setItem('cn_baseline', JSON.stringify(results));
-                checkUserFlow(); // Move to dashboard
-            }, 1500);
+            document.getElementById('test-intro').classList.add('hidden');
+            document.getElementById('test-loading').classList.remove('hidden');
+            document.getElementById('test-loading').classList.add('flex');
+
+            const prompt = `Generate 3 multiple choice interview questions for a ${profile.exp} ${profile.role} in ${profile.field}. 
+            1 question on Technical skills, 1 on Aptitude, 1 on Verbal.
+            Return STRICT JSON array: [{ "question": "...", "options": ["A", "B", "C"], "correct": "A (or B/C)", "type": "Technical" }]`;
+
+            const questions = await callGemini(prompt, true);
+            
+            if(questions) {
+                const container = document.getElementById('questions-container');
+                container.innerHTML = '';
+                questions.forEach((q, index) => {
+                    container.innerHTML += `
+                        <div class="question-card bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <p class="font-bold text-lg mb-4"><span class="text-primary text-sm uppercase mr-2">${q.type}</span> ${q.question}</p>
+                            <input type="hidden" name="q${index}_text" value="${q.question}">
+                            <input type="hidden" name="q${index}_correct" value="${q.correct}">
+                            <div class="space-y-2">
+                                ${q.options.map(opt => `
+                                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white bg-white/50">
+                                        <input type="radio" name="q${index}" value="${opt}" class="mr-3" required> ${opt}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>`;
+                });
+                document.getElementById('test-loading').classList.add('hidden');
+                document.getElementById('test-questions').classList.remove('hidden');
+            }
         }
 
-        // --- 4. DASHBOARD LOADER ---
-        function loadDashboardStats() {
+        document.getElementById('baseline-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            let userAnswers = [];
+            
+            // Collect answers for analysis
+            for(let i=0; i<3; i++) {
+                userAnswers.push({
+                    question: formData.get(`q${i}_text`),
+                    user_answer: formData.get(`q${i}`),
+                    correct_answer: formData.get(`q${i}_correct`)
+                });
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<div class="loader w-5 h-5 border-2 border-white"></div> AI Analyzing...';
+            
+            // Ask AI to score and analyze
+            const prompt = `Analyze these test results for a student.
+            Data: ${JSON.stringify(userAnswers)}
+            Return STRICT JSON: { "score": 0-100 (integer), "strengths": ["string", "string"], "weaknesses": ["string", "string"], "goal": "One sentence daily goal" }`;
+            
+            const analysis = await callGemini(prompt, true);
+            
+            if(analysis) {
+                localStorage.setItem('cn_baseline', JSON.stringify(analysis));
+                checkUserFlow();
+            }
+        });
+
+        // --- 4. DASHBOARD STATS ---
+        async function loadDashboardStats() {
             const profile = JSON.parse(localStorage.getItem('cn_profile'));
             const baseline = JSON.parse(localStorage.getItem('cn_baseline'));
 
             if(profile) document.getElementById('user-role-display').textContent = profile.role;
             if(baseline) {
                 document.getElementById('dash-score').textContent = baseline.score;
-                
-                // Populate Strengths
-                const sContainer = document.getElementById('dash-strengths');
-                sContainer.innerHTML = baseline.strengths.map(s => `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">${s}</span>`).join('');
+                document.getElementById('dash-strengths').innerHTML = baseline.strengths.map(s => `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">${s}</span>`).join('');
+                document.getElementById('dash-weaknesses').innerHTML = baseline.weaknesses.map(w => `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">${w}</span>`).join('');
+                document.getElementById('dash-goal').textContent = baseline.goal;
+            }
+        }
 
-                // Populate Weaknesses
-                const wContainer = document.getElementById('dash-weaknesses');
-                wContainer.innerHTML = baseline.weaknesses.map(w => `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">${w}</span>`).join('');
+        // --- 5. TRAINING & TESTS ---
+        async function generateTraining(topic) {
+            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            openUniversalModal(`AI Lesson: ${topic}`);
+            document.getElementById('modal-content').innerHTML = '<div class="flex justify-center"><div class="loader w-10 h-10 border-4 border-primary"></div></div>';
             
-                // Init Chart
-                const ctx = document.getElementById('performanceChart');
-                if(ctx) {
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: ['Baseline', 'Week 1', 'Week 2', 'Week 3'],
-                            datasets: [{
-                                label: 'Readiness Score',
-                                data: [baseline.score, baseline.score + 5, baseline.score + 12, null],
-                                borderColor: '#4F46E5',
-                                tension: 0.4
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
-                }
-            }
-        }
-
-        // --- 5. NAVIGATION ---
-        function switchTab(tabId) {
-            // Update Sidebar UI
-            document.querySelectorAll('.nav-item').forEach(btn => { 
-                btn.classList.remove('bg-primary', 'text-white'); 
-                btn.classList.add('text-slate-400'); 
-            });
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            if(activeBtn) { 
-                activeBtn.classList.add('bg-primary', 'text-white'); 
-                activeBtn.classList.remove('text-slate-400'); 
-            }
-
-            // Show Content
-            document.querySelectorAll('.content-view').forEach(view => view.classList.add('hidden'));
-            const view = document.getElementById(`view-${tabId}`);
-            if(view) view.classList.remove('hidden');
+            const prompt = `Act as a tutor. Teach the concept of "${topic}" to a ${profile.role}.
+            Structure: 
+            1. What is it? (Brief)
+            2. Key Concepts (Bullet points)
+            3. Real-world Example (Relevant to ${profile.role})
+            4. One Practice Question with detailed solution.
+            Format: Markdown.`;
             
-            // Mobile Sidebar handling
-            if(window.innerWidth < 768) {
-                 document.getElementById('sidebar').classList.add('hidden');
-            }
+            const content = await callGemini(prompt);
+            document.getElementById('modal-content').innerHTML = marked.parse(content);
         }
 
-        // --- 6. GEMINI API HANDLER ---
-        async function callGemini(prompt) {
-            try {
-                const response = await fetch('/api/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt })
-                });
-                const data = await response.json();
-                if (data.error) { alert("AI Error: " + data.error); return null; }
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                console.error("Network Error:", error);
-                return "Simulated AI Response: " + prompt; // Fallback for UI testing
-            }
+        async function generateTest(topic, level) {
+            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            openUniversalModal(`${level} ${topic} Test`);
+            document.getElementById('modal-content').innerHTML = '<div class="flex justify-center"><div class="loader w-10 h-10 border-4 border-primary"></div></div>';
+            
+            const prompt = `Generate a ${level} level practice test for "${topic}" specifically for a ${profile.role}.
+            Content: 3 Questions.
+            Format: Markdown. Don't provide answers immediately, put answers at the very bottom under a "## Solutions" header.`;
+            
+            const content = await callGemini(prompt);
+            document.getElementById('modal-content').innerHTML = marked.parse(content);
         }
 
-        // --- 7. MOCK INTERVIEW CHAT ---
+        function openUniversalModal(title) {
+            document.getElementById('universal-modal').classList.remove('hidden');
+            document.getElementById('modal-title').textContent = title;
+        }
+        function closeUniversalModal() { document.getElementById('universal-modal').classList.add('hidden'); }
+
+        // --- 6. MOCK INTERVIEW ---
         let chatHistory = [];
-        
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value;
+            const mode = document.getElementById('mock-mode').value;
+            const profile = JSON.parse(localStorage.getItem('cn_profile'));
+            
+            if(!msg) return;
+            appendMessage('User', msg); 
+            input.value = '';
+            
+            // Loading bubble
+            const windowDiv = document.getElementById('chat-window');
+            const loaderDiv = document.createElement('div');
+            loaderDiv.className = "flex gap-3 mb-2";
+            loaderDiv.id = "chat-loader";
+            loaderDiv.innerHTML = `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center"><i class="fa-solid fa-robot text-xs"></i></div><div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl"><div class="loader w-4 h-4 border-2"></div></div>`;
+            windowDiv.appendChild(loaderDiv);
+            windowDiv.scrollTop = windowDiv.scrollHeight;
+
+            chatHistory.push(`User: ${msg}`);
+            
+            const prompt = `Act as a professional interviewer. 
+            Context: Interviewing a ${profile.exp} ${profile.role}.
+            Mode: ${mode} Round.
+            History: ${chatHistory.slice(-6).join("\n")}
+            Task: Respond to the candidate's last answer. Be encouraging but critical if they are wrong. Keep response concise (under 50 words). Then ask the next relevant question.`;
+            
+            const result = await callGemini(prompt);
+            document.getElementById('chat-loader').remove();
+            
+            if(result) { 
+                appendMessage('AI', result); 
+                chatHistory.push(`AI: ${result}`); 
+            }
+        }
         function appendMessage(sender, text) {
             const window = document.getElementById('chat-window');
             const isAI = sender === 'AI';
@@ -635,75 +639,56 @@
             window.appendChild(div); 
             window.scrollTop = window.scrollHeight;
         }
-
-        async function sendChat() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value;
-            const mode = document.getElementById('mock-mode').value;
-            if(!msg) return;
-            
-            appendMessage('User', msg); 
-            input.value = '';
-            
-            // UI Loading State
-            const loaderDiv = document.createElement('div');
-            loaderDiv.className = "flex gap-3 mb-2";
-            loaderDiv.id = "chat-loader";
-            loaderDiv.innerHTML = `<div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center"><i class="fa-solid fa-robot text-xs"></i></div><div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl"><div class="loader w-4 h-4 border-2"></div></div>`;
-            document.getElementById('chat-window').appendChild(loaderDiv);
-
-            chatHistory.push(`User: ${msg}`);
-            const recentHistory = chatHistory.slice(-6).join("\n"); 
-            
-            // Build Context Prompt
-            const context = mode === 'HR' 
-                ? "You are a strict HR Manager conducting an interview. Ask behavioral questions."
-                : "You are a Senior Tech Lead. Ask technical coding questions.";
-                
-            const prompt = `${context}\nHistory:\n${recentHistory}\nAI:`;
-            
-            const result = await callGemini(prompt);
-            document.getElementById('chat-loader').remove();
-            
-            if(result) { 
-                appendMessage('AI', result); 
-                chatHistory.push(`AI: ${result}`); 
-            }
-        }
-        
         function clearChat() {
             document.getElementById('chat-window').innerHTML = `<div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div><div class="bg-slate-100 p-3 rounded-r-xl rounded-bl-xl text-slate-700 text-sm max-w-[80%]">Session Reset. Ready to start?</div></div>`;
             chatHistory = [];
         }
-        document.getElementById('chat-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChat(); });
 
-        // --- 8. RESUME AI ---
+        // --- 7. RESUME AI ---
         async function aiImproveSummary() {
             const summary = document.getElementById('res-summary').value;
+            const profile = JSON.parse(localStorage.getItem('cn_profile'));
             if(!summary) { alert("Write a draft summary first!"); return; }
             
             const btn = document.querySelector('button[onclick="aiImproveSummary()"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Improving...';
             
-            const prompt = `Rewrite this resume professional summary to be more impactful and ATS friendly: "${summary}"`;
+            const prompt = `Rewrite this resume professional summary for a ${profile.role}. Make it ATS friendly, impactful, and use action verbs. Original: "${summary}"`;
             const result = await callGemini(prompt);
             
-            if(result) document.getElementById('res-summary').value = result;
+            if(result) {
+                document.getElementById('res-summary').value = result;
+                document.getElementById('prev-summary').innerText = result;
+            }
             btn.innerHTML = originalText;
-            
-            // Update Preview
-            document.getElementById('prev-summary').innerText = document.getElementById('res-summary').value;
         }
 
-        // Simple live preview listeners
+        // Event listeners for resume preview
         document.getElementById('res-name').addEventListener('input', (e) => document.getElementById('prev-name').innerText = e.target.value || "Your Name");
         document.getElementById('res-email').addEventListener('input', (e) => document.getElementById('prev-email').innerText = e.target.value || "email@example.com");
         document.getElementById('res-summary').addEventListener('input', (e) => document.getElementById('prev-summary').innerText = e.target.value || "Summary...");
+        document.getElementById('chat-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChat(); });
 
-        // Make functions global for inline onclicks
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-item').forEach(btn => { 
+                btn.classList.remove('bg-primary', 'text-white'); 
+                btn.classList.add('text-slate-400'); 
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) { activeBtn.classList.add('bg-primary', 'text-white'); activeBtn.classList.remove('text-slate-400'); }
+            document.querySelectorAll('.content-view').forEach(view => view.classList.add('hidden'));
+            const view = document.getElementById(`view-${tabId}`);
+            if(view) view.classList.remove('hidden');
+            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('hidden'); }
+        }
+
+        // Global exposing
         window.switchTab = switchTab;
-        window.submitBaselineTest = submitBaselineTest;
+        window.startBaselineTest = startBaselineTest;
+        window.generateTraining = generateTraining;
+        window.generateTest = generateTest;
+        window.closeUniversalModal = closeUniversalModal;
         window.sendChat = sendChat;
         window.clearChat = clearChat;
         window.aiImproveSummary = aiImproveSummary;
