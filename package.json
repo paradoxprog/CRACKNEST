@@ -1,7 +1,6 @@
 {
   "name": "cracknest-app",
   "version": "1.0.0",
-  "description": "CrackNest Interview Prep Platform",
   "type": "module",
   "scripts": {
     "start": "echo 'App is running'"
