@@ -366,7 +366,7 @@
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Logical Reasoning</li>
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Verbal Ability</li>
                                 </ul>
-                                <button class="w-full py-2 border border-blue-500 text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition">Start Learning</button>
+                                <button onclick="alert('Starting Aptitude Module...')" class="w-full py-2 border border-blue-500 text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition">Start Learning</button>
                             </div>
                         </div>
 
@@ -382,7 +382,7 @@
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> DBMS & SQL</li>
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> System Design</li>
                                 </ul>
-                                <button class="w-full py-2 border border-indigo-500 text-primary rounded-lg font-bold hover:bg-indigo-50 transition">Start Learning</button>
+                                <button onclick="alert('Starting Technical Module...')" class="w-full py-2 border border-indigo-500 text-primary rounded-lg font-bold hover:bg-indigo-50 transition">Start Learning</button>
                             </div>
                         </div>
 
@@ -398,7 +398,7 @@
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Body Language</li>
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i> Email Etiquette</li>
                                 </ul>
-                                <button class="w-full py-2 border border-purple-500 text-purple-600 rounded-lg font-bold hover:bg-purple-50 transition">Start Learning</button>
+                                <button onclick="alert('Starting HR Module...')" class="w-full py-2 border border-purple-500 text-purple-600 rounded-lg font-bold hover:bg-purple-50 transition">Start Learning</button>
                             </div>
                         </div>
                     </div>
@@ -429,7 +429,7 @@
                                 </div>
                                 <p class="text-sm text-slate-500">Coding & Domain MCQ • Intermediate</p>
                             </div>
-                            <button class="px-6 py-2 bg-slate-100 text-slate-400 rounded-lg font-medium cursor-not-allowed">Locked</button>
+                            <button onclick="startTest(2)" class="px-6 py-2 bg-slate-100 text-slate-400 rounded-lg font-medium cursor-not-allowed">Locked</button>
                         </div>
 
                         <!-- Level 3 -->
@@ -442,7 +442,7 @@
                                 </div>
                                 <p class="text-sm text-slate-500">Audio/Text Responses • Advanced</p>
                             </div>
-                            <button class="px-6 py-2 bg-slate-100 text-slate-400 rounded-lg font-medium cursor-not-allowed">Locked</button>
+                            <button onclick="startTest(3)" class="px-6 py-2 bg-slate-100 text-slate-400 rounded-lg font-medium cursor-not-allowed">Locked</button>
                         </div>
                     </div>
                 </div>
@@ -843,8 +843,14 @@
 
         // --- 3. Dashboard Logic ---
         function loadDashboardData() {
-            document.getElementById('dash-name').textContent = userProfile.name.split(' ')[0];
-            document.getElementById('dash-role').textContent = userProfile.role;
+            if (!userProfile) return; // Guard
+            
+            const nameEl = document.getElementById('dash-name');
+            const roleEl = document.getElementById('dash-role');
+            
+            if (nameEl) nameEl.textContent = userProfile.name ? userProfile.name.split(' ')[0] : 'Student';
+            if (roleEl) roleEl.textContent = userProfile.role || 'Not Set';
+            
             document.getElementById('dash-score').textContent = `${baselineScore}%`;
             document.getElementById('dash-score-bar').style.width = `${baselineScore}%`;
         }
@@ -950,6 +956,15 @@
             chatHistory.scrollTop = chatHistory.scrollHeight;
             return id;
         }
+
+        // --- NEW: Test Simulation ---
+        window.startTest = (level) => {
+            if(level === 1) {
+                alert("Starting Level 1: Aptitude Foundation...\n(Simulation: You scored 8/10!)");
+            } else {
+                alert(`Starting Level ${level} Test...\n(Locked in simulation mode)`);
+            }
+        };
 
         // Logout
         document.getElementById('logout-btn').addEventListener('click', () => {
