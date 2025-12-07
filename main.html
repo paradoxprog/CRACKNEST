@@ -1040,32 +1040,36 @@
         // API Key is now handled securely on the server side (Vercel)
 
         async function callGemini(prompt) {
-            try {
-                // We now fetch from our OWN local API route
-                const response = await fetch('/api/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt }) // Send the prompt to the server
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                console.log("Vercel API Response:", data);
-                
-                // Return the text exactly as the old function did
-                if (data.candidates && data.candidates[0].content) {
-                    return data.candidates[0].content.parts[0].text;
-                } else {
-                    return "No response generated.";
-                }
-            } catch (e) {
-                console.error("API Error:", e);
-                return "I'm having trouble connecting right now. Please try again.";
+        try {
+            const response = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+    
+            // 1. Handle Rate Limit Specifically
+            if (response.status === 429) {
+                console.warn("Rate Limit Hit");
+                return "I'm thinking too hard! Please wait 30 seconds and try again.";
             }
+    
+            // 2. Handle Other Errors
+            if (!response.ok) {
+                throw new Error(`Server Error: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                return "I couldn't generate a response. Please try again.";
+            }
+        } catch (e) {
+            console.error("API Error:", e);
+            return "Connection issue. Please check your internet or try again later.";
         }
+    }
 
         window.improveSummary = async () => {
             const current = document.getElementById('res-summary').value;
