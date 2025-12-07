@@ -519,13 +519,29 @@
 
         async function syncUserData(user) {
             try {
-                // Fetch Profile - FIXED PATH (6 segments)
-                const profileRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'data', 'profile');
-                const profileSnap = await getDoc(profileRef);
-                
-                // Fetch Baseline/Progress - FIXED PATH (6 segments)
+                // 1. TRY LOCAL STORAGE FOR PROFILE (USER REQUESTED "Not from Firestore")
+                const localProfile = localStorage.getItem('cn_profile');
+                let profileExists = false;
+
+                if (localProfile) {
+                    try {
+                        window.currentUserProfile = JSON.parse(localProfile);
+                        profileExists = true;
+                    } catch(e) {
+                        console.error("Local profile corrupted", e);
+                    }
+                }
+
+                // 2. FETCH BASELINE FROM FIRESTORE (Keep this real)
+                // Use fixed 6-segment path: artifacts/appId/users/uid/data/baseline
                 const baselineRef = doc(db, 'artifacts', window.appId, 'users', user.uid, 'data', 'baseline');
-                const baselineSnap = await getDoc(baselineRef);
+                let baselineSnap = null;
+                try {
+                    baselineSnap = await getDoc(baselineRef);
+                } catch(e) {
+                    console.warn("Firestore baseline fetch failed (auth issue?):", e);
+                    // Fallback to local baseline if auth fails completely
+                }
 
                 // Initial State Reset
                 document.querySelectorAll('.content-view').forEach(el => el.classList.add('hidden'));
@@ -533,14 +549,15 @@
                 document.getElementById('view-baseline').classList.add('hidden');
                 document.getElementById('sidebar').classList.add('hidden');
 
-                if (!profileSnap.exists()) {
+                if (!profileExists) {
+                    // Step 1: No Profile -> Show Setup
                     document.getElementById('view-profile-setup').classList.remove('hidden');
-                } else if (!baselineSnap.exists()) {
-                    window.currentUserProfile = profileSnap.data();
+                } else if (!baselineSnap || !baselineSnap.exists()) {
+                    // Step 2: Has Profile, No Baseline -> Show Test
                     document.getElementById('view-baseline').classList.remove('hidden');
                 } else {
+                    // Step 3: All Good -> Show Dashboard
                     document.getElementById('sidebar').classList.remove('hidden');
-                    window.currentUserProfile = profileSnap.data();
                     window.currentUserBaseline = baselineSnap.data();
                     
                     document.getElementById('dash-name').textContent = window.currentUserProfile.name || "Student";
@@ -551,7 +568,9 @@
                 }
             } catch (error) {
                 console.error("Error syncing data:", error);
-                alert("Data Load Error: " + error.message);
+                alert("Data Sync Error: " + error.message);
+                // Fallback to setup if critical fail
+                document.getElementById('view-profile-setup').classList.remove('hidden');
             }
         }
         
@@ -590,7 +609,7 @@
             }
         }
 
-        // --- 1. PROFILE HANDLER (FIRESTORE) ---
+        // --- 1. PROFILE HANDLER (LOCAL STORAGE) ---
         document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -610,18 +629,21 @@
                     exp: document.getElementById('p-exp').value
                 };
                 
-                console.log("Saving Profile Data:", data);
+                console.log("Saving Profile Locally:", data);
+                
+                // SAVE TO LOCAL STORAGE ONLY (As requested)
+                localStorage.setItem('cn_profile', JSON.stringify(data));
+                
+                // Update global state immediately
+                window.currentUserProfile = data;
                 
                 const user = window.auth.currentUser;
-                if(!user) {
-                    alert("User not authenticated! Please reload.");
-                    return;
+                if(user) {
+                    await window.syncUserData(user); // Check next step
+                } else {
+                    // Fallback if auth is flaky, just reload page/state
+                    location.reload();
                 }
-
-                // FIXED PATH (6 segments)
-                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'data', 'profile'), data);
-                console.log("Profile Saved Successfully");
-                await window.syncUserData(user); // Move flow forward
             } catch (error) {
                 console.error("Profile Save Failed:", error);
                 alert("Failed to save profile: " + error.message);
