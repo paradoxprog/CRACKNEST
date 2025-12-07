@@ -452,10 +452,11 @@
     <!-- FIREBASE & GEMINI LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        const firebaseConfig = { apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU", authDomain: "crak-a74d0.firebaseapp.com", projectId: "crak-a74d0", storageBucket: "crak-a74d0.firebasestorage.app", messagingSenderId: "106356918520", appId: "1:106356918520:web:e9affa0adef64574c1530d", measurementId: "G-YFG4XZWP68" };
+        // Use environment provided config if available
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyAGK_7tNXEyBCUjV9wqBDlbXmbpNxaH2mU", authDomain: "crak-a74d0.firebaseapp.com", projectId: "crak-a74d0", storageBucket: "crak-a74d0.firebasestorage.app", messagingSenderId: "106356918520", appId: "1:106356918520:web:e9affa0adef64574c1530d", measurementId: "G-YFG4XZWP68" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -478,8 +479,20 @@
                 try {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } catch (e) {
-                    console.error("Token auth failed", e);
+                    console.warn("Custom token auth failed, trying anonymous fallback", e);
+                    try {
+                        // Fallback to anonymous auth if custom token fails (e.g. mismatch/expired)
+                        await signInAnonymously(auth);
+                    } catch (anonError) {
+                        console.error("Anonymous fallback failed", anonError);
+                    }
                 }
+            } else {
+                // If no custom token is present, we rely on existing session or anonymous fallback
+                // Check if user is already signed in via persistence handled by onAuthStateChanged
+                // If strictly necessary to force a sign-in:
+                // await signInAnonymously(auth); 
+                // But we leave it to onAuthStateChanged to detect existing users first.
             }
         };
         initAuth();
@@ -487,7 +500,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) { 
                 document.getElementById('auth-overlay').classList.add('hidden');
-                document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0]; 
+                document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0] || "User"; 
                 
                 // Show loading state
                 document.getElementById('loading-overlay').classList.remove('hidden');
@@ -582,23 +595,36 @@
             e.preventDefault();
             const btn = e.target.querySelector('button');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             
-            const data = {
-                name: document.getElementById('p-name').value,
-                degree: document.getElementById('p-degree').value,
-                year: document.getElementById('p-year').value,
-                langs: document.getElementById('p-langs').value,
-                certs: document.getElementById('p-certs').value,
-                field: document.getElementById('p-field').value,
-                role: document.getElementById('p-role').value,
-                exp: document.getElementById('p-exp').value
-            };
-            
-            const user = window.auth.currentUser;
-            if(user) {
+            try {
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+                
+                const data = {
+                    name: document.getElementById('p-name').value,
+                    degree: document.getElementById('p-degree').value,
+                    year: document.getElementById('p-year').value,
+                    langs: document.getElementById('p-langs').value,
+                    certs: document.getElementById('p-certs').value,
+                    field: document.getElementById('p-field').value,
+                    role: document.getElementById('p-role').value,
+                    exp: document.getElementById('p-exp').value
+                };
+                
+                console.log("Saving Profile Data:", data);
+                
+                const user = window.auth.currentUser;
+                if(!user) {
+                    alert("User not authenticated! Please reload.");
+                    return;
+                }
+
                 await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'users', user.uid, 'profile'), data);
+                console.log("Profile Saved Successfully");
                 await window.syncUserData(user); // Move flow forward
+            } catch (error) {
+                console.error("Profile Save Failed:", error);
+                alert("Failed to save profile: " + error.message);
+                btn.innerHTML = originalText;
             }
         });
 
