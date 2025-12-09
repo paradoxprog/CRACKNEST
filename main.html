@@ -78,6 +78,11 @@
             display: block;
             animation: fadeIn 0.4s ease-in-out;
         }
+        
+        /* Utility class for JS usage */
+        .animate-fadeIn {
+            animation: fadeIn 0.4s ease-in-out;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -105,8 +110,10 @@
             border-bottom-left-radius: 0.25rem;
         }
         /* Markdown styles inside chat */
-        .chat-ai ul { list-style-type: disc; margin-left: 1.5rem; }
-        .chat-ai strong { font-weight: 700; }
+        .chat-ai ul, .prose ul { list-style-type: disc; margin-left: 1.5rem; }
+        .chat-ai ol, .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
+        .chat-ai strong, .prose strong { font-weight: 700; }
+        .chat-ai p, .prose p { margin-bottom: 0.5rem; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 h-screen overflow-hidden flex flex-col">
@@ -123,7 +130,7 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-slate-200 flex-col hidden md:flex z-20 shadow-sm">
             <div class="h-20 flex items-center px-6 border-b border-slate-100 cursor-pointer" onclick="window.location.reload()">
-                <!-- Logo Text as per request (since image not available, this matches index.html) -->
+                <!-- Logo Text -->
                 <span class="font-heading font-bold text-2xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
             </div>
 
@@ -489,17 +496,11 @@
     <!-- MAIN LOGIC (LocalStorage only) -->
     <script>
         // State Variables
-        // Mock User for Local Mode
-        let currentUser = {
-            uid: 'local-user-123',
-            displayName: 'Guest Student',
-            email: 'guest@cracknest.com'
-        };
         let userProfile = null;
         
         // --- GEMINI API HELPERS ---
-        const GEMINI_API_KEY = ""; // Runtime key
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
+        const apiKey = ""; // Runtime key
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
         async function callGemini(prompt) {
             try {
@@ -511,9 +512,13 @@
                     })
                 });
                 const data = await response.json();
+                if (data.error) {
+                    console.error("Gemini API Error:", data.error);
+                    return null;
+                }
                 return data.candidates[0].content.parts[0].text;
             } catch (error) {
-                console.error("Gemini Error:", error);
+                console.error("Gemini Network Error:", error);
                 return null;
             }
         }
@@ -524,12 +529,19 @@
             const storedProfile = localStorage.getItem('cracknest_profile');
             
             if (storedProfile) {
-                userProfile = JSON.parse(storedProfile);
-                
-                // Update Sidebar
-                updateSidebarUserInfo();
-                
-                handleNavigationState();
+                try {
+                    userProfile = JSON.parse(storedProfile);
+                    // Update Sidebar
+                    updateSidebarUserInfo();
+                    handleNavigationState();
+                } catch (e) {
+                    // Corrupt data fallback
+                    console.error("Profile data corrupted, resetting.");
+                    localStorage.removeItem('cracknest_profile');
+                    userProfile = null;
+                    switchView('view-profile-setup');
+                    document.getElementById('app-container').classList.remove('hidden');
+                }
             } else {
                 // New user -> Profile Setup
                 userProfile = null;
@@ -543,7 +555,8 @@
             if (userProfile) {
                 document.getElementById('sidebar-user-name').textContent = userProfile.name;
                 document.getElementById('dash-username').textContent = userProfile.name;
-                document.getElementById('sidebar-user-avatar').textContent = userProfile.name[0].toUpperCase();
+                const initial = userProfile.name ? userProfile.name[0].toUpperCase() : 'U';
+                document.getElementById('sidebar-user-avatar').textContent = initial;
             }
         }
 
@@ -667,9 +680,6 @@
                         btn.classList.remove('bg-green-600', 'hover:bg-green-700');
                         btn.disabled = false;
                     }, 2000);
-                    
-                    // If target role changed, maybe we should clear roadmap cache?
-                    // For now, let's keep it simple.
                 } else {
                     // New setup -> Continue flow
                     handleNavigationState(); 
@@ -719,6 +729,9 @@
                         loading.classList.add('hidden');
                         container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. Please refresh.</div>';
                     }
+                } else {
+                    loading.classList.add('hidden');
+                    container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to connect to AI. Check API Key.</div>';
                 }
             }
         }
@@ -763,7 +776,14 @@
                 // Show Results UI
                 document.getElementById('test-container').classList.add('hidden');
                 document.getElementById('test-results').classList.remove('hidden');
-                document.getElementById('test-analysis-text').innerHTML = marked.parse(analysis || "Great job! Your roadmap is ready.");
+                
+                const displayText = analysis || "Great job! Your roadmap is ready.";
+                // Safe Markdown Parsing
+                if (typeof marked !== 'undefined') {
+                    document.getElementById('test-analysis-text').innerHTML = marked.parse(displayText);
+                } else {
+                    document.getElementById('test-analysis-text').textContent = displayText;
+                }
                 
                 // Pre-fetch roadmap
                 loadDashboardData(true);
@@ -841,7 +861,14 @@
             
             // Remove "Connecting..." and show real msg
             historyDiv.innerHTML = ''; 
-            addMessage("AI", reply);
+            if (reply) {
+                addMessage("AI", reply);
+            } else {
+                addMessage("AI", "Sorry, I couldn't connect to the server. Please try again.");
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                startBtn.textContent = "Start Session";
+            }
         });
 
         chatForm.addEventListener('submit', async (e) => {
@@ -860,7 +887,12 @@
             Evaluate it briefly (one sentence feedback) and then ask the next follow-up question. Be encouraging but professional.`;
             
             const reply = await callGemini(prompt);
-            addMessage("AI", reply);
+            
+            if (reply) {
+                addMessage("AI", reply);
+            } else {
+                addMessage("AI", "I'm having trouble responding right now.");
+            }
             
             chatInput.disabled = false;
             sendBtn.disabled = false;
@@ -870,15 +902,20 @@
         function addMessage(sender, text) {
             const isUser = sender === "You";
             const bubble = document.createElement('div');
-            bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai' animate-fadeIn`;
+            // FIX: Corrected Template Literal Syntax and Added animate-fadeIn CSS
+            bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'} animate-fadeIn`;
             
             // Icon
             const icon = isUser ? '<i class="fa-solid fa-user absolute bottom-0 -right-8 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs"></i>' : 
                                 '<i class="fa-solid fa-robot absolute bottom-0 -left-8 w-6 h-6 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-xs"></i>';
             
-            const content = isUser ? text : marked.parse(text);
+            // Safe Markdown Parsing
+            let content = text;
+            if (!isUser && typeof marked !== 'undefined') {
+                content = marked.parse(text);
+            }
             
-            bubble.innerHTML = content;
+            bubble.innerHTML = content + icon;
             historyDiv.appendChild(bubble);
             historyDiv.scrollTop = historyDiv.scrollHeight;
         }
@@ -887,16 +924,20 @@
         document.getElementById('logout-btn').addEventListener('click', () => {
             if(confirm("This will clear your local progress and reset the app. Continue?")) {
                 localStorage.removeItem('cracknest_profile');
-                // Optional: clear other keys if you want a full wipe
-                // localStorage.clear(); 
-                window.location.href = "index.html";
+                localStorage.removeItem('cracknest_questions_' + (userProfile ? userProfile.targetRole : ''));
+                localStorage.removeItem('cracknest_roadmap_' + (userProfile ? userProfile.targetRole : ''));
+                
+                // FIX: Reload current page instead of redirecting to index.html (which might not exist in preview)
+                window.location.reload();
             }
         });
 
         // --- MOBILE MENU ---
         document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
             document.getElementById('mobile-menu').classList.remove('hidden');
-            document.getElementById('mobile-menu').classList.remove('opacity-0');
+            setTimeout(() => {
+                 document.getElementById('mobile-menu').classList.remove('opacity-0');
+            }, 10);
         });
         document.getElementById('close-mobile-menu').addEventListener('click', () => {
             document.getElementById('mobile-menu').classList.add('hidden');
