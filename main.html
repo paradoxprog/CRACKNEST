@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrackNest | Dashboard</title>
+    <title>CrackNest | AI Career Dashboard</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,130 +24,95 @@
                         secondary: '#F59E0B', // Amber 500
                         dark: '#0F172A', // Slate 900
                         light: '#F8FAFC', // Slate 50
-                        success: '#10B981', // Emerald 500
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         heading: ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
                     }
                 }
             }
         }
     </script>
     
-    <!-- Marked for Markdown Parsing (for AI responses) -->
+    <!-- Marked.js for Markdown Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* Loader Animation */
         .loader {
-            border: 3px solid #f3f3f3;
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #4F46E5;
             border-radius: 50%;
-            border-top: 3px solid #4F46E5;
-            width: 24px;
-            height: 24px;
-            -webkit-animation: spin 1s linear infinite; /* Safari */
-            animation: spin 1s linear infinite;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
         }
-
-        @keyframes spin {
+        @keyframes rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        /* Hide sections by default */
-        .section-view {
+        /* View Transitions */
+        .view-section {
             display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
         }
-        .section-view.active {
+        .view-section.active {
             display: block;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-        
-        /* Utility class for JS usage */
-        .animate-fadeIn {
-            animation: fadeIn 0.4s ease-in-out;
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-bubble {
-            max-width: 80%;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            border-radius: 1rem;
-            position: relative;
-            line-height: 1.5;
-        }
-        .chat-user {
-            background-color: #4F46E5;
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 0.25rem;
-        }
-        .chat-ai {
-            background-color: #F1F5F9;
-            color: #1E293B;
-            margin-right: auto;
-            border-bottom-left-radius: 0.25rem;
-        }
-        /* Markdown styles inside chat */
-        .chat-ai ul, .prose ul { list-style-type: disc; margin-left: 1.5rem; }
-        .chat-ai ol, .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
-        .chat-ai strong, .prose strong { font-weight: 700; }
-        .chat-ai p, .prose p { margin-bottom: 0.5rem; }
+        /* Markdown Styles */
+        .prose p { margin-bottom: 0.75em; }
+        .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.75em; }
+        .prose strong { color: #334155; font-weight: 700; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 h-screen overflow-hidden flex flex-col">
 
-    <!-- Loading Screen -->
-    <div id="full-page-loader" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
-        <div class="loader w-12 h-12 border-4 border-t-primary mb-4"></div>
+    <!-- Global Loader -->
+    <div id="global-loader" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
+        <span class="loader mb-4 border-slate-200 border-b-primary"></span>
         <p class="text-slate-500 font-medium animate-pulse">Initializing CrackNest...</p>
     </div>
 
-    <!-- Main App Container (Hidden until Auth) -->
-    <div id="app-container" class="flex h-full hidden">
+    <!-- Main App Layout -->
+    <div id="app-layout" class="flex h-full opacity-0 transition-opacity duration-500">
         
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-slate-200 flex-col hidden md:flex z-20 shadow-sm">
-            <div class="h-20 flex items-center px-6 border-b border-slate-100 cursor-pointer" onclick="window.location.reload()">
-                <!-- Logo Text -->
-                <span class="font-heading font-bold text-2xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
+        <!-- Sidebar (Desktop) -->
+        <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col z-20 shadow-sm">
+            <div class="h-16 flex items-center px-6 border-b border-slate-100">
+                <span class="font-heading font-bold text-2xl text-slate-800 tracking-tight">Crack<span class="text-primary">Nest</span></span>
             </div>
 
-            <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1" id="sidebar-nav">
-                <!-- Nav items injected by JS -->
+            <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1" id="sidebar-menu">
+                <!-- Menu items injected by JS -->
             </nav>
 
             <div class="p-4 border-t border-slate-100">
-                <div class="flex items-center gap-3 p-2 rounded-lg bg-slate-50 mb-3 cursor-pointer hover:bg-slate-100 transition" onclick="switchView('view-profile-setup')">
-                    <div id="sidebar-user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-md">U</div>
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 mb-3 cursor-pointer hover:bg-slate-100 transition" onclick="App.router.navigate('profile')">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-md ring-2 ring-indigo-50">U</div>
                     <div class="overflow-hidden">
-                        <p id="sidebar-user-name" class="text-sm font-bold text-slate-700 truncate">User</p>
-                        <p class="text-xs text-slate-500 truncate">View Profile</p>
+                        <p id="user-name-display" class="text-sm font-bold text-slate-700 truncate">Guest User</p>
+                        <p class="text-xs text-slate-500 truncate">Edit Profile</p>
                     </div>
                 </div>
-                <button id="logout-btn" class="w-full flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 py-2 rounded-lg transition text-sm font-medium">
-                    <i class="fa-solid fa-right-from-bracket"></i> Reset / Sign Out
+                <button onclick="App.auth.logout()" class="w-full flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 py-2.5 rounded-lg transition text-sm font-medium">
+                    <i class="fa-solid fa-power-off"></i> Sign Out
                 </button>
             </div>
         </aside>
@@ -155,796 +120,648 @@
         <!-- Mobile Header -->
         <div class="md:hidden fixed top-0 w-full bg-white z-20 border-b border-slate-200 h-16 flex items-center justify-between px-4 shadow-sm">
             <span class="font-heading font-bold text-xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
-            <button id="mobile-menu-toggle" class="text-slate-600 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-bars text-xl"></i></button>
+            <button onclick="App.ui.toggleMobileMenu()" class="text-slate-600 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-bars text-xl"></i></button>
         </div>
 
         <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden transition-opacity">
-            <div class="bg-white w-4/5 h-full shadow-2xl p-4 flex flex-col transform transition-transform">
+        <div id="mobile-menu" class="fixed inset-0 bg-slate-900/50 z-30 hidden transition-opacity">
+            <div class="bg-white w-4/5 h-full shadow-2xl p-4 flex flex-col transform transition-transform animate-slide-in">
                 <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
                     <span class="font-heading font-bold text-xl text-primary">Menu</span>
-                    <button id="close-mobile-menu" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button onclick="App.ui.toggleMobileMenu()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
-                <nav id="mobile-nav-items" class="space-y-2"></nav>
+                <nav id="mobile-menu-items" class="space-y-2"></nav>
             </div>
         </div>
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col h-full overflow-hidden relative pt-16 md:pt-0">
-            
-            <!-- Views Container -->
-            <div id="views-container" class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 relative scroll-smooth">
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative pt-16 md:pt-0 bg-slate-50/50">
+            <div id="content-container" class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
 
-                <!-- VIEW 1: PROFILE SETUP / EDIT -->
-                <div id="view-profile-setup" class="section-view max-w-2xl mx-auto mt-8 pb-12">
+                <!-- VIEW: PROFILE SETUP -->
+                <section id="view-profile" class="view-section max-w-2xl mx-auto py-6">
                     <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
                         <div class="text-center mb-8">
-                            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-2xl animate-bounce">
-                                <i class="fa-solid fa-user-gear"></i>
+                            <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-2xl">
+                                <i class="fa-solid fa-user-astronaut"></i>
                             </div>
-                            <h2 id="profile-heading" class="text-2xl font-bold text-slate-800 font-heading">Let's Set Up Your Profile</h2>
-                            <p id="profile-subheading" class="text-slate-500">Tell us about yourself so we can personalize your roadmap.</p>
+                            <h2 class="text-2xl font-bold text-slate-800 font-heading">Profile Setup</h2>
+                            <p class="text-slate-500">Customize your learning path.</p>
                         </div>
-
-                        <form id="profile-form" class="space-y-6">
-                            <div class="grid md:grid-cols-2 gap-6">
+                        <form id="profile-form" onsubmit="App.controllers.profile.save(event)" class="space-y-5">
+                            <div class="grid md:grid-cols-2 gap-5">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                                    <input type="text" id="p-name" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                    <input type="text" name="name" required class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
-                                    <input type="tel" id="p-phone" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                                    <input type="tel" name="phone" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                                 </div>
                             </div>
-
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Current Degree / Stream</label>
-                                <input type="text" id="p-degree" placeholder="e.g. B.Tech Computer Science" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
-                            </div>
-
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Year of Passing</label>
-                                    <select id="p-year" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                        <option>2023</option>
-                                        <option>2024</option>
-                                        <option selected>2025</option>
-                                        <option>2026</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
-                                    <select id="p-experience" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                        <option value="fresher">Fresher (Student)</option>
-                                        <option value="0-2">0-2 Years</option>
-                                        <option value="2+">2+ Years</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Career Target (Role)</label>
-                                <select id="p-target" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                    <option value="Software Developer">Software Developer (SDE)</option>
-                                    <option value="Data Analyst">Data Analyst</option>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Target Role</label>
+                                <select name="targetRole" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                                    <option value="Software Developer">Software Developer</option>
+                                    <option value="Data Scientist">Data Scientist</option>
                                     <option value="Product Manager">Product Manager</option>
                                     <option value="UI/UX Designer">UI/UX Designer</option>
                                     <option value="Digital Marketer">Digital Marketer</option>
-                                    <option value="HR Manager">HR Manager</option>
                                 </select>
                             </div>
-
-                            <button type="submit" id="profile-submit-btn" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-primary/30 flex justify-center items-center gap-2 transform hover:scale-[1.02]">
-                                Save & Continue <i class="fa-solid fa-arrow-right"></i>
+                            <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-primary/25">
+                                Save Profile
                             </button>
                         </form>
                     </div>
-                </div>
+                </section>
 
-                <!-- VIEW 2: BASELINE SKILL TEST -->
-                <div id="view-skill-test" class="section-view max-w-3xl mx-auto mt-4 pb-12">
+                <!-- VIEW: SKILL ASSESSMENT -->
+                <section id="view-assessment" class="view-section max-w-3xl mx-auto py-6">
                     <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-100 pb-4 gap-4">
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
                             <div>
-                                <h2 class="text-2xl font-bold text-slate-800 font-heading">Baseline Skill Assessment</h2>
-                                <p class="text-sm text-slate-500">Customized for: <span id="test-target-role" class="font-bold text-primary">Software Developer</span></p>
+                                <h2 class="text-2xl font-bold text-slate-800 font-heading">Skill Assessment</h2>
+                                <p class="text-sm text-slate-500">Role: <span class="font-bold text-primary" id="assessment-role">...</span></p>
                             </div>
-                            <div class="bg-indigo-50 text-primary px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2">
-                                <i class="fa-solid fa-brain"></i> AI Generated
-                            </div>
+                            <span class="bg-indigo-50 text-primary px-3 py-1 rounded-full text-xs font-bold border border-indigo-100"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated</span>
+                        </div>
+                        
+                        <!-- Loading State -->
+                        <div id="assessment-loader" class="hidden text-center py-12">
+                            <div class="loader w-10 h-10 border-slate-200 border-b-primary mb-4"></div>
+                            <p class="text-slate-500 animate-pulse">Designing questions for you...</p>
                         </div>
 
-                        <div id="test-loading" class="hidden text-center py-16">
-                            <div class="loader mx-auto mb-6 border-t-secondary w-12 h-12"></div>
-                            <h3 class="text-lg font-bold text-slate-700 mb-2">Generating Questions...</h3>
-                            <p class="text-slate-500 animate-pulse max-w-md mx-auto">Our AI is analyzing your profile to create relevant questions for your role.</p>
-                        </div>
+                        <!-- Questions Container -->
+                        <div id="assessment-questions" class="space-y-6"></div>
 
-                        <div id="test-container" class="space-y-6">
-                            <!-- Questions injected here -->
-                        </div>
-
-                        <div id="test-results" class="hidden text-center py-8">
-                            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 text-4xl shadow-sm">
-                                <i class="fa-solid fa-check"></i>
+                        <!-- Results Container -->
+                        <div id="assessment-results" class="hidden text-center py-8">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 text-3xl">
+                                <i class="fa-solid fa-trophy"></i>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-3 font-heading">All Done!</h3>
-                            <p class="text-slate-600 mb-8 text-lg">We've analyzed your performance and built your custom roadmap.</p>
-                            
-                            <div class="bg-white p-6 rounded-xl text-left mb-8 border border-slate-200 shadow-sm relative overflow-hidden">
-                                <div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
-                                <h4 class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-robot"></i> AI Analysis Report</h4>
-                                <div id="test-analysis-text" class="prose prose-slate text-slate-700"></div>
-                            </div>
-
-                            <button id="go-to-dashboard-btn" class="bg-primary text-white font-bold py-4 px-10 rounded-xl hover:bg-indigo-700 transition shadow-xl shadow-primary/30 transform hover:scale-105">
-                                Go to Dashboard <i class="fa-solid fa-arrow-right ml-2"></i>
-                            </button>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-2">Assessment Complete!</h3>
+                            <div id="assessment-feedback" class="text-left bg-slate-50 p-6 rounded-xl border border-slate-200 prose prose-slate max-w-none text-sm"></div>
+                            <button onclick="App.router.navigate('dashboard')" class="mt-6 bg-primary text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-700 transition">Go to Dashboard</button>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- VIEW 3: DASHBOARD (HOME) -->
-                <div id="view-dashboard" class="section-view pb-12">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <!-- VIEW: DASHBOARD -->
+                <section id="view-dashboard" class="view-section space-y-8">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-2">
                         <div>
-                            <h1 class="text-2xl md:text-3xl font-bold text-slate-800 font-heading">Welcome Back, <span id="dash-username" class="text-primary">User</span>! 👋</h1>
-                            <p class="text-slate-500">Your daily learning hub is ready.</p>
+                            <h1 class="text-2xl md:text-3xl font-bold text-slate-800 font-heading">Dashboard</h1>
+                            <p class="text-slate-500">Welcome back, <span class="font-bold text-primary" id="dash-user-name">User</span>!</p>
                         </div>
-                        <div class="flex gap-3">
-                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
-                                <i class="fa-solid fa-fire text-orange-500"></i>
-                                <span class="font-bold text-slate-700">1 Day Streak</span>
-                            </div>
-                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
-                                <i class="fa-solid fa-star text-yellow-500"></i>
-                                <span class="font-bold text-slate-700">Level 1</span>
+                        <div class="flex gap-2 mt-4 md:mt-0">
+                             <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 text-sm font-bold text-slate-600">
+                                <i class="fa-solid fa-fire text-orange-500 mr-1"></i> Streak: 1
                             </div>
                         </div>
                     </div>
 
-                    <!-- Stats Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-blue-100 p-3 rounded-lg text-blue-600"><i class="fa-solid fa-chart-pie text-xl"></i></div>
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Readiness</span>
+                    <!-- Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-bullseye"></i></div>
+                                <span class="text-xs font-bold text-slate-400 uppercase">Target</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-1">45%</h3>
-                            <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
-                                <div class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
-                            </div>
+                            <p class="text-xl font-bold text-slate-800" id="dash-target-role">Software Developer</p>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-purple-100 p-3 rounded-lg text-purple-600"><i class="fa-solid fa-bullseye text-xl"></i></div>
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Target</span>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="p-2 bg-purple-50 text-purple-600 rounded-lg"><i class="fa-solid fa-chart-line"></i></div>
+                                <span class="text-xs font-bold text-slate-400 uppercase">Progress</span>
                             </div>
-                            <h3 id="dash-target-role" class="text-xl font-bold text-slate-800 mb-1">Developer</h3>
-                            <p class="text-sm text-slate-500">Next Goal: Basics</p>
+                            <p class="text-xl font-bold text-slate-800">Level 1 <span class="text-sm font-normal text-slate-400">/ Beginner</span></p>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600"><i class="fa-solid fa-check-circle text-xl"></i></div>
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Modules</span>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                             <div class="flex items-center gap-3 mb-2">
+                                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-check"></i></div>
+                                <span class="text-xs font-bold text-slate-400 uppercase">Completed</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-1">1/5</h3>
-                            <p class="text-sm text-slate-500">Last: Baseline Assessment</p>
+                            <p class="text-xl font-bold text-slate-800">1 <span class="text-sm font-normal text-slate-400">Module</span></p>
                         </div>
                     </div>
 
                     <div class="grid lg:grid-cols-3 gap-8">
-                        <!-- Custom Roadmap -->
+                        <!-- AI Roadmap -->
                         <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                             <div class="flex justify-between items-center mb-6">
-                                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map text-secondary"></i> Personalized Roadmap</h3>
-                                <button class="text-primary text-sm font-medium hover:underline">View Full Plan</button>
+                                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-map-location-dot text-primary"></i> Learning Roadmap
+                                </h3>
+                                <button onclick="App.controllers.dashboard.generateRoadmap(true)" class="text-xs text-primary font-bold hover:underline">
+                                    <i class="fa-solid fa-rotate"></i> Refresh Plan
+                                </button>
                             </div>
                             <div id="roadmap-container" class="space-y-4">
-                                <!-- Roadmap Items Injected -->
+                                <!-- Loading Placeholder -->
                                 <div class="animate-pulse space-y-3">
-                                    <div class="h-20 bg-slate-50 border border-slate-100 rounded-lg"></div>
-                                    <div class="h-20 bg-slate-50 border border-slate-100 rounded-lg"></div>
-                                    <div class="h-20 bg-slate-50 border border-slate-100 rounded-lg"></div>
+                                    <div class="h-24 bg-slate-50 rounded-xl border border-slate-100"></div>
+                                    <div class="h-24 bg-slate-50 rounded-xl border border-slate-100"></div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Quick Actions -->
                         <div class="space-y-6">
-                            <div class="bg-gradient-to-br from-primary to-indigo-700 rounded-xl p-6 text-white shadow-xl relative overflow-hidden group">
-                                <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition duration-500"></div>
-                                <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-robot mr-2"></i> AI Mock Interview</h3>
-                                <p class="text-indigo-100 text-sm mb-6">Practice with our AI HR to boost your confidence before the real deal.</p>
-                                <button onclick="switchView('view-mock-interview')" class="w-full bg-white text-primary font-bold py-3 rounded-lg hover:bg-indigo-50 transition shadow-lg">Start Session</button>
+                            <!-- Mock Interview Card -->
+                            <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl p-6 text-white shadow-lg relative overflow-hidden group cursor-pointer" onclick="App.router.navigate('interview')">
+                                <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition duration-700"></div>
+                                <div class="relative z-10">
+                                    <i class="fa-solid fa-robot text-3xl mb-4 text-indigo-200"></i>
+                                    <h3 class="font-bold text-lg mb-1">AI Mock Interview</h3>
+                                    <p class="text-indigo-100 text-sm mb-4">Practice HR & Technical questions.</p>
+                                    <button class="bg-white/20 hover:bg-white/30 text-white text-sm font-bold py-2 px-4 rounded-lg backdrop-blur-sm transition">Start Session</button>
+                                </div>
                             </div>
 
-                            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-                                <h3 class="font-bold text-lg text-slate-800 mb-4">Daily Challenge</h3>
-                                <div class="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-4">
-                                    <span class="text-xs font-bold text-orange-600 uppercase tracking-wide">Aptitude</span>
-                                    <p class="font-medium text-slate-800 mt-1">Time & Work Problem</p>
+                            <!-- Resume Builder Card -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition cursor-pointer" onclick="App.router.navigate('resume')">
+                                <div class="flex items-center gap-4 mb-3">
+                                    <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center text-secondary font-bold text-lg">
+                                        <i class="fa-solid fa-file-pen"></i>
+                                    </div>
+                                    <h3 class="font-bold text-slate-800">Resume Builder</h3>
                                 </div>
-                                <button class="w-full border border-slate-200 text-slate-600 font-medium py-2 rounded-lg hover:bg-slate-50 transition">Solve Now</button>
+                                <p class="text-sm text-slate-500 mb-3">Create an ATS-friendly resume with AI suggestions.</p>
+                                <span class="text-xs font-bold text-primary">Open Builder &rarr;</span>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- VIEW 4: AI MOCK INTERVIEW -->
-                <div id="view-mock-interview" class="section-view h-full flex flex-col pb-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                        <div>
-                            <h2 class="text-2xl font-bold text-slate-800 font-heading">AI Mock Interview</h2>
-                            <p class="text-slate-500">Practice HR and Technical rounds in a safe environment.</p>
-                        </div>
-                        <div class="flex gap-2 w-full sm:w-auto">
-                             <select id="interview-mode" class="flex-1 sm:flex-none border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-primary focus:border-primary">
-                                <option value="HR">HR Round</option>
-                                <option value="Technical">Technical Round</option>
-                            </select>
-                            <button id="start-interview-btn" class="bg-primary text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition shadow-lg shadow-primary/20 whitespace-nowrap">Start Session</button>
-                        </div>
+                <!-- VIEW: MOCK INTERVIEW -->
+                <section id="view-interview" class="view-section h-[calc(100vh-8rem)] flex flex-col">
+                    <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                        <h2 class="text-2xl font-bold text-slate-800 font-heading">AI Interviewer</h2>
+                        <select id="interview-type" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white outline-none focus:border-primary">
+                            <option value="HR">HR Round</option>
+                            <option value="Technical">Technical Round</option>
+                        </select>
                     </div>
-
-                    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden relative">
-                        <div id="chat-history" class="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-4">
-                            <!-- Chat messages go here -->
-                            <div class="flex items-center justify-center h-full text-slate-400 flex-col">
-                                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 text-3xl">
-                                    <i class="fa-solid fa-headset"></i>
-                                </div>
-                                <p class="font-medium">Select a mode and click 'Start Session' to begin.</p>
+                    
+                    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                        <!-- Chat Area -->
+                        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-4">
+                            <div class="h-full flex flex-col items-center justify-center text-center text-slate-400">
+                                <i class="fa-solid fa-headset text-4xl mb-3 opacity-50"></i>
+                                <p>Select a mode and click Start to begin.</p>
+                                <button onclick="App.controllers.interview.start()" class="mt-4 bg-primary text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition">Start Interview</button>
                             </div>
                         </div>
                         
-                        <div class="p-4 bg-white border-t border-slate-200">
-                            <form id="chat-form" class="flex gap-3">
-                                <input type="text" id="chat-input" placeholder="Type your answer here..." disabled class="flex-1 border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:bg-slate-50 disabled:text-slate-400 transition">
-                                <button type="submit" id="send-chat-btn" disabled class="bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
+                        <!-- Input Area -->
+                        <div class="p-4 bg-white border-t border-slate-100">
+                            <form id="chat-form" onsubmit="App.controllers.interview.send(event)" class="flex gap-2">
+                                <input type="text" id="chat-input" disabled placeholder="Type your answer..." class="flex-1 border border-slate-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-primary transition disabled:bg-slate-50">
+                                <button type="submit" id="chat-send-btn" disabled class="bg-primary text-white w-12 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
                                     <i class="fa-solid fa-paper-plane"></i>
                                 </button>
                             </form>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- VIEW 5: RESUME BUILDER -->
-                <div id="view-resume" class="section-view pb-12">
-                    <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6">Smart Resume Builder</h2>
-                    
+                <!-- VIEW: RESUME BUILDER -->
+                <section id="view-resume" class="view-section py-6">
+                    <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6">Resume Builder</h2>
                     <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Editor -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-pen-to-square text-primary"></i> Edit Details</h3>
-                            <form class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Professional Summary</label>
-                                    <textarea rows="4" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-primary focus:border-primary" placeholder="Passionate developer..."></textarea>
-                                    <button type="button" class="text-xs text-primary font-bold mt-2 hover:underline flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Enhance Summary</button>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Skills (Comma separated)</label>
-                                    <input type="text" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-primary focus:border-primary" placeholder="Java, Python, SQL...">
-                                </div>
-                                <div>
-                                     <label class="block text-sm font-medium text-slate-700 mb-1">Experience</label>
-                                     <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 text-sm text-slate-500 italic">
-                                        Imported from Profile
-                                     </div>
-                                </div>
-                                <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-100 text-sm text-yellow-800">
-                                    <i class="fa-solid fa-lightbulb mr-2"></i> <strong>Tip:</strong> Add measurable metrics (e.g., "Improved speed by 20%") to your experience.
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="bg-slate-200 rounded-xl p-8 flex items-center justify-center min-h-[400px] border border-slate-300 relative">
-                            <div class="text-center text-slate-500">
-                                <i class="fa-solid fa-file-pdf text-5xl mb-4 text-slate-400"></i>
-                                <h4 class="font-bold text-slate-600 text-lg">Live Preview</h4>
-                                <p class="text-sm mb-6">Fill in details to see your resume.</p>
-                                <button class="bg-slate-800 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-slate-700 transition shadow-lg">Download PDF</button>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg text-slate-800">Edit Details</h3>
+                                <button onclick="App.controllers.resume.enhanceSummary()" id="btn-enhance-summary" class="text-xs bg-indigo-50 text-primary px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Enhance Summary
+                                </button>
                             </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Professional Summary</label>
+                                    <textarea id="resume-summary" rows="5" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-primary focus:border-primary outline-none" placeholder="Experienced developer with a passion for clean code..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Key Skills</label>
+                                    <input type="text" id="resume-skills" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-primary focus:border-primary outline-none" placeholder="JavaScript, Python, React...">
+                                </div>
+                                <div class="p-4 bg-amber-50 rounded-lg border border-amber-100 text-amber-800 text-sm">
+                                    <i class="fa-solid fa-lightbulb mr-2"></i> <strong>Tip:</strong> Use the AI button to polish your summary.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div class="bg-slate-200 rounded-xl p-8 flex flex-col items-center justify-center min-h-[400px] border border-slate-300 text-center relative overflow-hidden">
+                            <i class="fa-solid fa-file-pdf text-6xl text-slate-400 mb-4"></i>
+                            <h3 class="font-bold text-slate-600 text-lg">PDF Preview</h3>
+                            <p class="text-slate-500 text-sm mb-6 max-w-xs">Fill in your details to generate a preview of your resume.</p>
+                            <button class="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-slate-700 transition">Download PDF</button>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                 <!-- VIEW 6: TRAINING CENTER -->
-                 <div id="view-training" class="section-view pb-12">
-                    <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6">Training Center</h2>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Aptitude -->
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-lg transition cursor-pointer group">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xl group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-calculator"></i>
-                                </div>
-                                <span class="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded">Level 1</span>
-                            </div>
-                            <h3 class="font-bold text-lg text-slate-800 mb-1">Quantitative Aptitude</h3>
-                            <p class="text-slate-500 text-sm mb-4">Master speed math, percentages, and profit & loss.</p>
-                            <div class="w-full bg-slate-100 h-2 rounded-full mb-2">
-                                <div class="bg-blue-500 h-2 rounded-full w-1/3"></div>
-                            </div>
-                            <span class="text-xs text-slate-400 font-bold">33% Complete</span>
+                <!-- VIEW: TRAINING CENTER -->
+                <section id="view-training" class="view-section py-6">
+                     <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6">Training Center</h2>
+                     <div class="bg-white p-12 rounded-xl border border-slate-200 text-center">
+                        <div class="bg-indigo-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-hammer text-3xl text-primary"></i>
                         </div>
-
-                        <!-- Technical -->
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-lg transition cursor-pointer group">
-                             <div class="flex justify-between items-start mb-4">
-                                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-primary text-xl group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-code"></i>
-                                </div>
-                                <span class="bg-indigo-50 text-primary text-xs font-bold px-2 py-1 rounded">Level 2</span>
-                            </div>
-                            <h3 class="font-bold text-lg text-slate-800 mb-1">Technical Domain (SDE)</h3>
-                            <p class="text-slate-500 text-sm mb-4">Data Structures, Algorithms, and DBMS basics.</p>
-                            <div class="w-full bg-slate-100 h-2 rounded-full mb-2">
-                                <div class="bg-primary h-2 rounded-full w-1/12"></div>
-                            </div>
-                            <span class="text-xs text-slate-400 font-bold">8% Complete</span>
-                        </div>
-                    </div>
-                </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Under Construction</h3>
+                        <p class="text-slate-500">This module is coming soon with interactive coding challenges.</p>
+                     </div>
+                </section>
 
             </div>
         </main>
     </div>
 
-    <!-- MAIN LOGIC (LocalStorage only) -->
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
     <script>
-        // State Variables
-        let userProfile = null;
-        
-        // --- GEMINI API HELPERS ---
-        const apiKey = "AIzaSyC5Q4m5_1sw1g-W2ekO6t6PU7gAUhNy5Hk"; // Runtime key
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            apiKey: "", // Runtime injected key
+            model: "gemini-2.5-flash-preview-09-2025"
+        };
 
-        async function callGemini(prompt) {
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
+        // --- STATE MANAGEMENT ---
+        const Store = {
+            get: (key) => JSON.parse(localStorage.getItem(`cracknest_${key}`) || 'null'),
+            set: (key, val) => localStorage.setItem(`cracknest_${key}`, JSON.stringify(val)),
+            remove: (key) => localStorage.removeItem(`cracknest_${key}`),
+            clear: () => {
+                Object.keys(localStorage).forEach(k => {
+                    if(k.startsWith('cracknest_')) localStorage.removeItem(k);
                 });
-                const data = await response.json();
-                if (data.error) {
-                    console.error("Gemini API Error:", data.error);
+            }
+        };
+
+        // --- AI SERVICE (Gemini) ---
+        const AI = {
+            getUrl: () => `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model}:generateContent?key=${CONFIG.apiKey}`,
+            
+            async generate(prompt) {
+                try {
+                    const response = await fetch(this.getUrl(), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) throw new Error(data.error.message);
+                    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error("No response from AI");
+                    
+                    return data.candidates[0].content.parts[0].text;
+                } catch (error) {
+                    console.error("AI Error:", error);
                     return null;
                 }
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                console.error("Gemini Network Error:", error);
-                return null;
-            }
-        }
+            },
 
-        // --- INITIALIZATION ---
-        function initApp() {
-            // Check Local Storage for Profile
-            const storedProfile = localStorage.getItem('cracknest_profile');
-            
-            if (storedProfile) {
+            async generateJSON(prompt) {
+                const text = await this.generate(`${prompt} \n\nIMPORTANT: Respond ONLY with a valid JSON array. Do not use markdown code blocks.`);
+                if (!text) return null;
                 try {
-                    userProfile = JSON.parse(storedProfile);
-                    // Update Sidebar
-                    updateSidebarUserInfo();
-                    handleNavigationState();
+                    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    return JSON.parse(cleanText);
                 } catch (e) {
-                    // Corrupt data fallback
-                    console.error("Profile data corrupted, resetting.");
-                    localStorage.removeItem('cracknest_profile');
-                    userProfile = null;
-                    switchView('view-profile-setup');
-                    document.getElementById('app-container').classList.remove('hidden');
+                    console.error("JSON Parse Error:", e);
+                    return null;
                 }
-            } else {
-                // New user -> Profile Setup
-                userProfile = null;
-                switchView('view-profile-setup');
-                document.getElementById('full-page-loader').classList.add('hidden');
-                document.getElementById('app-container').classList.remove('hidden');
             }
-        }
+        };
 
-        function updateSidebarUserInfo() {
-            if (userProfile) {
-                document.getElementById('sidebar-user-name').textContent = userProfile.name;
-                document.getElementById('dash-username').textContent = userProfile.name;
-                const initial = userProfile.name ? userProfile.name[0].toUpperCase() : 'U';
-                document.getElementById('sidebar-user-avatar').textContent = initial;
-            }
-        }
-
-        // --- NAVIGATION STATE MACHINE ---
-        function handleNavigationState() {
-            const loader = document.getElementById('full-page-loader');
-            const container = document.getElementById('app-container');
-
-            if (!userProfile) {
-                switchView('view-profile-setup');
-            } else if (!userProfile.baselineTestComplete) {
-                switchView('view-skill-test');
-                document.getElementById('test-target-role').textContent = userProfile.targetRole;
-                loadSkillTest();
-            } else {
-                switchView('view-dashboard');
-                loadDashboardData();
-            }
-
-            loader.classList.add('hidden');
-            container.classList.remove('hidden');
-            renderSidebar();
-        }
-
-        // --- VIEW SWITCHER ---
-        window.switchView = function(viewId) {
-            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            window.scrollTo(0,0);
+        // --- UI UTILITIES ---
+        const UI = {
+            el: (id) => document.getElementById(id),
             
-            // Highlight sidebar item
-            document.querySelectorAll('.nav-item').forEach(el => {
-                if(el.dataset.target === viewId) el.classList.add('bg-indigo-50', 'text-primary');
-                else el.classList.remove('bg-indigo-50', 'text-primary');
-            });
-
-            // Specific logic for Profile View (Check if it's Edit Mode)
-            if (viewId === 'view-profile-setup' && userProfile) {
-                loadProfileForEdit();
-            }
-
-            // Mobile menu close
-            document.getElementById('mobile-menu').classList.add('hidden');
-        }
-
-        // --- SIDEBAR RENDERER ---
-        function renderSidebar() {
-            const nav = document.getElementById('sidebar-nav');
-            const items = [
-                { id: 'view-dashboard', icon: 'fa-table-columns', label: 'Dashboard' },
-                { id: 'view-training', icon: 'fa-book-open', label: 'Training Center' },
-                { id: 'view-mock-interview', icon: 'fa-headset', label: 'AI Mock Interview' },
-                { id: 'view-resume', icon: 'fa-file-lines', label: 'Resume Builder' },
-                { id: 'view-profile-setup', icon: 'fa-user', label: 'My Profile' }, // Added Profile item
-            ];
-
-            const html = items.map(item => `
-                <button onclick="switchView('${item.id}')" data-target="${item.id}" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition mb-1 text-left">
-                    <i class="fa-solid ${item.icon} w-6 text-center"></i> ${item.label}
-                </button>
-            `).join('');
-
-            nav.innerHTML = html;
-            // Also render mobile nav
-            document.getElementById('mobile-nav-items').innerHTML = html;
-        }
-
-        // --- 1. PROFILE SETUP / EDIT LOGIC ---
-        
-        function loadProfileForEdit() {
-            // Change Text to indicate Edit Mode
-            document.getElementById('profile-heading').textContent = "Edit Your Profile";
-            document.getElementById('profile-subheading').textContent = "Update your personal details and career goals.";
-            document.getElementById('profile-submit-btn').innerHTML = 'Update Profile <i class="fa-solid fa-check ml-2"></i>';
-            
-            // Populate Fields
-            document.getElementById('p-name').value = userProfile.name;
-            document.getElementById('p-phone').value = userProfile.phone;
-            document.getElementById('p-degree').value = userProfile.degree;
-            document.getElementById('p-year').value = userProfile.year;
-            document.getElementById('p-experience').value = userProfile.experience;
-            document.getElementById('p-target').value = userProfile.targetRole;
-        }
-
-        document.getElementById('profile-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('profile-submit-btn');
-            const originalText = btn.innerHTML;
-            const isUpdate = !!userProfile; // Check if it's an update or new setup
-
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-            btn.disabled = true;
-
-            const profileData = {
-                name: document.getElementById('p-name').value,
-                phone: document.getElementById('p-phone').value,
-                degree: document.getElementById('p-degree').value,
-                year: document.getElementById('p-year').value,
-                experience: document.getElementById('p-experience').value,
-                targetRole: document.getElementById('p-target').value,
-                // Preserve existing data if updating
-                baselineTestComplete: isUpdate ? userProfile.baselineTestComplete : false,
-                testDate: isUpdate ? userProfile.testDate : null,
-                createdAt: isUpdate ? userProfile.createdAt : new Date().toISOString()
-            };
-
-            try {
-                // Save to LocalStorage
-                localStorage.setItem('cracknest_profile', JSON.stringify(profileData));
-                userProfile = profileData;
-                
-                // Update UI immediately
-                updateSidebarUserInfo();
-
-                if (isUpdate) {
-                    // Stay on page and show success for update
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Updated Successfully';
-                    btn.classList.add('bg-green-600', 'hover:bg-green-700');
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                        btn.disabled = false;
-                    }, 2000);
+            showLoader: (show) => {
+                const loader = UI.el('global-loader');
+                const app = UI.el('app-layout');
+                if (show) {
+                    loader.classList.remove('opacity-0', 'pointer-events-none');
+                    app.classList.add('opacity-0');
                 } else {
-                    // New setup -> Continue flow
-                    handleNavigationState(); 
+                    loader.classList.add('opacity-0', 'pointer-events-none');
+                    app.classList.remove('opacity-0');
+                }
+            },
+
+            toggleMobileMenu: () => {
+                const menu = UI.el('mobile-menu');
+                menu.classList.toggle('hidden');
+            },
+
+            renderMarkdown: (text) => {
+                return typeof marked !== 'undefined' ? marked.parse(text) : text;
+            }
+        };
+
+        // --- CONTROLLERS (Business Logic) ---
+        const App = {
+            state: {
+                user: null
+            },
+
+            init: () => {
+                // Check Auth
+                const user = Store.get('profile');
+                App.state.user = user;
+                
+                // Render Menu
+                App.router.renderMenu();
+
+                // Route
+                if (!user) {
+                    App.router.navigate('profile');
+                } else if (!user.assessmentComplete) {
+                    App.router.navigate('assessment');
+                    App.controllers.assessment.init();
+                } else {
+                    App.router.navigate('dashboard');
+                    App.controllers.dashboard.init();
                 }
 
-            } catch (error) {
-                console.error("Error saving profile:", error);
-                alert("Failed to save profile: " + error.message);
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
+                UI.showLoader(false);
+            },
 
-        // --- 2. SKILL TEST LOGIC ---
-        let currentQuestions = [];
-
-        async function loadSkillTest() {
-            const container = document.getElementById('test-container');
-            const loading = document.getElementById('test-loading');
-            
-            // Check LocalStorage cache first
-            const cachedQuestions = localStorage.getItem('cracknest_questions_' + userProfile.targetRole);
-            
-            if (cachedQuestions) {
-                currentQuestions = JSON.parse(cachedQuestions);
-                renderQuestions();
-            } else {
-                loading.classList.remove('hidden');
-                container.innerHTML = '';
-                
-                const prompt = `Generate 5 multiple choice questions (JSON format) for a ${userProfile.targetRole} interview. 
-                Include 'question', 'options' (array of 4 strings), and 'correctIndex' (0-3). 
-                Output ONLY valid JSON array. No code blocks.`;
-
-                const result = await callGemini(prompt);
-                
-                if (result) {
-                    try {
-                        const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
-                        currentQuestions = JSON.parse(jsonStr);
-                        // Save to LocalStorage
-                        localStorage.setItem('cracknest_questions_' + userProfile.targetRole, JSON.stringify(currentQuestions));
-                        loading.classList.add('hidden');
-                        renderQuestions();
-                    } catch (e) {
-                        console.error("JSON Parse error", e);
-                        loading.classList.add('hidden');
-                        container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. Please refresh.</div>';
+            auth: {
+                logout: () => {
+                    if (confirm("Reset application data?")) {
+                        Store.clear();
+                        window.location.reload();
                     }
-                } else {
-                    loading.classList.add('hidden');
-                    container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to connect to AI. Check API Key.</div>';
+                }
+            },
+
+            router: {
+                routes: [
+                    { id: 'dashboard', icon: 'fa-table-columns', label: 'Dashboard' },
+                    { id: 'assessment', icon: 'fa-clipboard-check', label: 'Skill Check' },
+                    { id: 'interview', icon: 'fa-headset', label: 'AI Interview' },
+                    { id: 'resume', icon: 'fa-file-lines', label: 'Resume Builder' },
+                    { id: 'training', icon: 'fa-graduation-cap', label: 'Training' },
+                ],
+                
+                activeRoute: null,
+
+                renderMenu: () => {
+                    const html = App.router.routes.map(r => `
+                        <button onclick="App.router.navigate('${r.id}')" id="nav-${r.id}" class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition mb-1 text-left">
+                            <i class="fa-solid ${r.icon} w-6 text-center"></i> ${r.label}
+                        </button>
+                    `).join('');
+                    UI.el('sidebar-menu').innerHTML = html;
+                    UI.el('mobile-menu-items').innerHTML = html;
+                },
+
+                navigate: (viewId) => {
+                    // Hide Mobile Menu if open
+                    UI.el('mobile-menu').classList.add('hidden');
+
+                    // View Logic
+                    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+                    UI.el(`view-${viewId}`).classList.add('active');
+                    
+                    // Sidebar Active State
+                    document.querySelectorAll('#sidebar-menu button, #mobile-menu-items button').forEach(b => {
+                        b.classList.remove('bg-indigo-50', 'text-primary');
+                        if(b.id === `nav-${viewId}`) b.classList.add('bg-indigo-50', 'text-primary');
+                    });
+
+                    // Update State Variables if needed
+                    if (App.state.user) {
+                        UI.el('user-name-display').textContent = App.state.user.name;
+                        UI.el('user-avatar').textContent = App.state.user.name[0].toUpperCase();
+                    }
+
+                    // Special Initialization per View
+                    if (viewId === 'dashboard') App.controllers.dashboard.init();
+                    if (viewId === 'profile' && App.state.user) App.controllers.profile.loadForEdit();
+                }
+            },
+
+            controllers: {
+                profile: {
+                    save: (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        const isEdit = !!App.state.user;
+                        
+                        const profile = {
+                            name: formData.get('name'),
+                            phone: formData.get('phone'),
+                            targetRole: formData.get('targetRole'),
+                            assessmentComplete: isEdit ? App.state.user.assessmentComplete : false
+                        };
+
+                        Store.set('profile', profile);
+                        App.state.user = profile;
+                        
+                        // If new user, go to assessment, else stay or go to dashboard
+                        if (!isEdit) {
+                            App.router.navigate('assessment');
+                            App.controllers.assessment.init();
+                        } else {
+                            alert("Profile Updated!");
+                            App.router.navigate('dashboard');
+                        }
+                    },
+                    loadForEdit: () => {
+                        const form = UI.el('profile-form');
+                        if (App.state.user) {
+                            form.name.value = App.state.user.name;
+                            form.phone.value = App.state.user.phone;
+                            form.targetRole.value = App.state.user.targetRole;
+                        }
+                    }
+                },
+
+                assessment: {
+                    questions: [],
+                    init: async () => {
+                        const role = App.state.user.targetRole;
+                        UI.el('assessment-role').textContent = role;
+                        
+                        const cached = Store.get(`questions_${role}`);
+                        if (cached) {
+                            App.controllers.assessment.render(cached);
+                        } else {
+                            UI.el('assessment-questions').innerHTML = '';
+                            UI.el('assessment-loader').classList.remove('hidden');
+                            
+                            const prompt = `Generate 5 multiple choice questions for a ${role} interview. Format: JSON Array with properties: 'q' (question string), 'opts' (array of 4 strings).`;
+                            const questions = await AI.generateJSON(prompt);
+                            
+                            UI.el('assessment-loader').classList.add('hidden');
+                            if (questions) {
+                                Store.set(`questions_${role}`, questions);
+                                App.controllers.assessment.render(questions);
+                            } else {
+                                UI.el('assessment-questions').innerHTML = '<p class="text-red-500 text-center">Failed to load AI questions. Please reload.</p>';
+                            }
+                        }
+                    },
+                    render: (questions) => {
+                        App.controllers.assessment.questions = questions;
+                        const html = questions.map((q, i) => `
+                            <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl">
+                                <p class="font-bold text-slate-800 mb-3"><span class="text-primary">Q${i+1}.</span> ${q.q}</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    ${q.opts.map(opt => `
+                                        <label class="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-300">
+                                            <input type="radio" name="q_${i}" class="text-primary focus:ring-primary">
+                                            <span class="text-sm text-slate-600">${opt}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('');
+                        
+                        UI.el('assessment-questions').innerHTML = html + `
+                            <button onclick="App.controllers.assessment.submit()" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg mt-4">Submit Assessment</button>
+                        `;
+                    },
+                    submit: async () => {
+                        const role = App.state.user.targetRole;
+                        UI.el('assessment-questions').classList.add('hidden');
+                        UI.el('assessment-loader').classList.remove('hidden');
+                        UI.el('assessment-loader').querySelector('p').textContent = "AI is analyzing your results...";
+                        
+                        // Fake scoring + Real AI Feedback
+                        const prompt = `A ${role} student just finished a baseline assessment. Give a short, encouraging markdown summary (3-4 sentences) about the importance of ${role} basics.`;
+                        const feedback = await AI.generate(prompt);
+                        
+                        // Save State
+                        const user = App.state.user;
+                        user.assessmentComplete = true;
+                        Store.set('profile', user);
+
+                        UI.el('assessment-loader').classList.add('hidden');
+                        UI.el('assessment-results').classList.remove('hidden');
+                        UI.el('assessment-feedback').innerHTML = UI.renderMarkdown(feedback || "Great job taking the first step!");
+                    }
+                },
+
+                dashboard: {
+                    init: () => {
+                        const user = App.state.user;
+                        if(!user) return;
+                        UI.el('dash-user-name').textContent = user.name;
+                        UI.el('dash-target-role').textContent = user.targetRole;
+                        App.controllers.dashboard.generateRoadmap();
+                    },
+                    generateRoadmap: async (force = false) => {
+                        const role = App.state.user.targetRole;
+                        const key = `roadmap_${role}`;
+                        let items = Store.get(key);
+                        
+                        if (!items || force) {
+                            UI.el('roadmap-container').innerHTML = '<div class="animate-pulse space-y-3"><div class="h-24 bg-slate-50 rounded-xl border border-slate-100"></div></div>';
+                            const prompt = `Create a 3-step learning roadmap for a ${role}. JSON Array with keys: 'title', 'desc', 'time'.`;
+                            items = await AI.generateJSON(prompt);
+                            if(items) Store.set(key, items);
+                        }
+
+                        if (items) {
+                            const html = items.map((item, i) => `
+                                <div class="flex gap-4 p-5 rounded-xl bg-slate-50 border border-slate-100 items-start hover:bg-white hover:shadow-md transition">
+                                    <div class="bg-white text-primary w-10 h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm border border-slate-100">${i+1}</div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <h4 class="font-bold text-slate-800 text-lg">${item.title}</h4>
+                                            <span class="text-xs font-bold text-secondary bg-orange-50 px-2 py-1 rounded border border-orange-100 whitespace-nowrap ml-2">${item.time}</span>
+                                        </div>
+                                        <p class="text-sm text-slate-600 mt-1 leading-relaxed">${item.desc}</p>
+                                    </div>
+                                </div>
+                            `).join('');
+                            UI.el('roadmap-container').innerHTML = html;
+                        }
+                    }
+                },
+
+                interview: {
+                    history: [],
+                    start: async () => {
+                        const mode = UI.el('interview-type').value;
+                        const role = App.state.user.targetRole;
+                        const chatArea = UI.el('chat-messages');
+                        
+                        chatArea.innerHTML = '';
+                        App.controllers.interview.addMsg("AI", `Connecting to ${mode} interviewer...`);
+                        
+                        // Enable inputs
+                        UI.el('chat-input').disabled = false;
+                        UI.el('chat-send-btn').disabled = false;
+                        
+                        const prompt = `You are a strict ${mode} interviewer for a ${role} role. Introduce yourself briefly and ask the first question.`;
+                        const reply = await AI.generate(prompt);
+                        
+                        chatArea.innerHTML = ''; // clear connecting msg
+                        App.controllers.interview.addMsg("AI", reply);
+                        App.controllers.interview.history = [{role: 'model', parts: [{text: reply}]}];
+                    },
+                    send: async (e) => {
+                        e.preventDefault();
+                        const input = UI.el('chat-input');
+                        const text = input.value.trim();
+                        if(!text) return;
+
+                        App.controllers.interview.addMsg("You", text);
+                        input.value = '';
+                        input.disabled = true;
+
+                        // AI Reply
+                        // Note: For full chat, we would send history. Here strictly 1-turn context for simplicity in single file
+                        const context = App.controllers.interview.history[0]?.parts[0]?.text || "";
+                        const prompt = `Context: I asked "${context}". The candidate replied "${text}". Evaluate the answer briefly then ask the next follow-up question.`;
+                        
+                        const reply = await AI.generate(prompt);
+                        App.controllers.interview.addMsg("AI", reply);
+                        App.controllers.interview.history = [{role: 'model', parts: [{text: reply}]}]; // Reset context to latest
+                        
+                        input.disabled = false;
+                        input.focus();
+                    },
+                    addMsg: (sender, text) => {
+                        const div = document.createElement('div');
+                        const isUser = sender === "You";
+                        div.className = `max-w-[85%] p-4 rounded-2xl mb-4 text-sm leading-relaxed relative ${isUser ? 'bg-primary text-white ml-auto rounded-br-none' : 'bg-slate-100 text-slate-800 mr-auto rounded-bl-none'}`;
+                        div.innerHTML = isUser ? text : UI.renderMarkdown(text);
+                        UI.el('chat-messages').appendChild(div);
+                        UI.el('chat-messages').scrollTop = UI.el('chat-messages').scrollHeight;
+                    }
+                },
+
+                resume: {
+                    enhanceSummary: async () => {
+                        const summaryBox = UI.el('resume-summary');
+                        const current = summaryBox.value;
+                        if (!current) return alert("Please type a rough summary first.");
+                        
+                        const btn = UI.el('btn-enhance-summary');
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Improving...';
+                        
+                        const prompt = `Rewrite this professional summary to be more impactful and ATS-friendly for a ${App.state.user.targetRole}: "${current}"`;
+                        const improved = await AI.generate(prompt);
+                        
+                        if (improved) summaryBox.value = improved;
+                        btn.innerHTML = originalText;
+                    }
                 }
             }
-        }
+        };
 
-        function renderQuestions() {
-            const container = document.getElementById('test-container');
-            container.innerHTML = currentQuestions.map((q, i) => `
-                <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
-                    <p class="font-bold text-slate-800 mb-4 text-lg"><span class="text-primary mr-2">Q${i+1}.</span> ${q.question}</p>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, idx) => `
-                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
-                                <input type="radio" name="q${i}" value="${idx}" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
-                                <span class="text-slate-700 font-medium group-hover:text-primary">${opt}</span>
-                            </label>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('') + `
-                <button onclick="submitTest()" class="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition shadow-lg mt-4 text-lg">
-                    Submit Assessment
-                </button>
-            `;
-            
-            // Expose function globally
-            window.submitTest = async () => {
-                const btn = document.querySelector('#test-container button');
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Results...';
-                btn.disabled = true;
-                
-                // Get Analysis from Gemini based on role
-                const analysisPrompt = `A student aiming for ${userProfile.targetRole} just finished a baseline test. 
-                Generate a brief, encouraging analysis (3 bullet points) on why this role is a good choice and a 1-sentence motivation. Format in Markdown.`;
-                
-                const analysis = await callGemini(analysisPrompt);
-                
-                // Update Local State
-                userProfile.baselineTestComplete = true;
-                userProfile.testDate = new Date().toISOString();
-                localStorage.setItem('cracknest_profile', JSON.stringify(userProfile)); 
-                
-                // Show Results UI
-                document.getElementById('test-container').classList.add('hidden');
-                document.getElementById('test-results').classList.remove('hidden');
-                
-                const displayText = analysis || "Great job! Your roadmap is ready.";
-                // Safe Markdown Parsing
-                if (typeof marked !== 'undefined') {
-                    document.getElementById('test-analysis-text').innerHTML = marked.parse(displayText);
-                } else {
-                    document.getElementById('test-analysis-text').textContent = displayText;
-                }
-                
-                // Pre-fetch roadmap
-                loadDashboardData(true);
-            };
-        }
-        
-        document.getElementById('go-to-dashboard-btn').addEventListener('click', () => {
-             handleNavigationState();
-        });
-
-        // --- 3. DASHBOARD LOGIC ---
-        async function loadDashboardData(prefetch = false) {
-            document.getElementById('dash-target-role').textContent = userProfile.targetRole;
-            
-            // Check cache
-            const cachedRoadmap = localStorage.getItem('cracknest_roadmap_' + userProfile.targetRole);
-            
-            if (cachedRoadmap) {
-                if(!prefetch) renderRoadmap(JSON.parse(cachedRoadmap));
-            } else {
-                const prompt = `Create a 3-step learning roadmap (JSON) for a ${userProfile.targetRole}. 
-                Format: Array of objects with 'title', 'description', 'duration'. Output ONLY JSON array. No code blocks.`;
-                
-                const result = await callGemini(prompt);
-                if (result) {
-                    try {
-                        const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
-                        const roadmap = JSON.parse(jsonStr);
-                        localStorage.setItem('cracknest_roadmap_' + userProfile.targetRole, JSON.stringify(roadmap));
-                        if(!prefetch) renderRoadmap(roadmap);
-                    } catch(e) { console.error(e); }
-                }
-            }
-        }
-
-        function renderRoadmap(items) {
-            const container = document.getElementById('roadmap-container');
-            container.innerHTML = items.map((item, i) => `
-                <div class="flex gap-4 p-5 rounded-xl bg-slate-50 border border-slate-100 items-start hover:bg-white hover:shadow-md transition">
-                    <div class="bg-indigo-100 text-primary w-10 h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-lg">${i+1}</div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-slate-800 text-lg">${item.title}</h4>
-                            <span class="text-xs font-semibold text-secondary bg-orange-50 px-2 py-1 rounded border border-orange-100 whitespace-nowrap ml-2"><i class="fa-regular fa-clock"></i> ${item.duration}</span>
-                        </div>
-                        <p class="text-sm text-slate-600 mt-1 leading-relaxed">${item.description}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // --- 4. AI MOCK INTERVIEW LOGIC ---
-        const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
-        const sendBtn = document.getElementById('send-chat-btn');
-        const historyDiv = document.getElementById('chat-history');
-        const startBtn = document.getElementById('start-interview-btn');
-        
-        startBtn.addEventListener('click', async () => {
-            const mode = document.getElementById('interview-mode').value;
-            historyDiv.innerHTML = '';
-            
-            chatInput.disabled = false;
-            sendBtn.disabled = false;
-            startBtn.disabled = true;
-            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            startBtn.textContent = "Interview in Progress...";
-
-            addMessage("AI", `Starting ${mode} Interview... connecting...`);
-            
-            const prompt = `You are a professional and polite ${mode} interviewer for a ${userProfile.targetRole} role. 
-            Start the interview by introducing yourself briefly and asking the first relevant question.`;
-            
-            const reply = await callGemini(prompt);
-            
-            // Remove "Connecting..." and show real msg
-            historyDiv.innerHTML = ''; 
-            if (reply) {
-                addMessage("AI", reply);
-            } else {
-                addMessage("AI", "Sorry, I couldn't connect to the server. Please try again.");
-                startBtn.disabled = false;
-                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                startBtn.textContent = "Start Session";
-            }
-        });
-
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            addMessage("You", text);
-            chatInput.value = '';
-            chatInput.disabled = true;
-            sendBtn.disabled = true;
-
-            // Simple context: Last response + Current Answer
-            // In production, you'd send full history.
-            const prompt = `I am a candidate for ${userProfile.targetRole}. Here is my answer to your previous question: "${text}". 
-            Evaluate it briefly (one sentence feedback) and then ask the next follow-up question. Be encouraging but professional.`;
-            
-            const reply = await callGemini(prompt);
-            
-            if (reply) {
-                addMessage("AI", reply);
-            } else {
-                addMessage("AI", "I'm having trouble responding right now.");
-            }
-            
-            chatInput.disabled = false;
-            sendBtn.disabled = false;
-            chatInput.focus();
-        });
-
-        function addMessage(sender, text) {
-            const isUser = sender === "You";
-            const bubble = document.createElement('div');
-            // FIX: Corrected Template Literal Syntax and Added animate-fadeIn CSS
-            bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'} animate-fadeIn`;
-            
-            // Icon
-            const icon = isUser ? '<i class="fa-solid fa-user absolute bottom-0 -right-8 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs"></i>' : 
-                                '<i class="fa-solid fa-robot absolute bottom-0 -left-8 w-6 h-6 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-xs"></i>';
-            
-            // Safe Markdown Parsing
-            let content = text;
-            if (!isUser && typeof marked !== 'undefined') {
-                content = marked.parse(text);
-            }
-            
-            bubble.innerHTML = content + icon;
-            historyDiv.appendChild(bubble);
-            historyDiv.scrollTop = historyDiv.scrollHeight;
-        }
-
-        // --- LOGOUT / RESET ---
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            if(confirm("This will clear your local progress and reset the app. Continue?")) {
-                localStorage.removeItem('cracknest_profile');
-                localStorage.removeItem('cracknest_questions_' + (userProfile ? userProfile.targetRole : ''));
-                localStorage.removeItem('cracknest_roadmap_' + (userProfile ? userProfile.targetRole : ''));
-                
-                // FIX: Reload current page instead of redirecting to index.html (which might not exist in preview)
-                window.location.reload();
-            }
-        });
-
-        // --- MOBILE MENU ---
-        document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
-            document.getElementById('mobile-menu').classList.remove('hidden');
-            setTimeout(() => {
-                 document.getElementById('mobile-menu').classList.remove('opacity-0');
-            }, 10);
-        });
-        document.getElementById('close-mobile-menu').addEventListener('click', () => {
-            document.getElementById('mobile-menu').classList.add('hidden');
-        });
-
-        // Start App
-        initApp();
+        // --- START ---
+        window.addEventListener('load', App.init);
 
     </script>
 </body>
