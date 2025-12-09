@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrackNest - Crack Every Interview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .slide-up { animation: slideUp 0.5s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 24px;
+            height: 24px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .user-msg {
+            background-color: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .ai-msg {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="app.showLanding()">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg">
+                        <i class="fa-solid fa-feather-pointed text-xl"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">CrackNest</span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                    <a href="#" class="hover:text-blue-600">Features</a>
+                    <a href="#" class="hover:text-blue-600">Success Stories</a>
+                    <a href="#" class="hover:text-blue-600">Pricing</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="nav-login-btn" onclick="app.showAuth()" class="text-slate-600 font-medium hover:text-blue-600">Login</button>
+                    <button id="nav-signup-btn" onclick="app.showAuth(true)" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition shadow-lg shadow-blue-200">Sign Up Free</button>
+                    <!-- User Profile & Logout -->
+                    <div id="nav-user-menu" class="hidden flex items-center gap-4">
+                        <span id="nav-user-email" class="text-sm text-slate-500 hidden md:block"></span>
+                        <button onclick="app.logout()" class="text-red-500 font-medium hover:text-red-700 text-sm">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="app-container" class="pt-16 min-h-screen">
+        
+        <!-- 1. LANDING PAGE VIEW -->
+        <div id="view-landing" class="block">
+            <!-- Hero Section -->
+            <section class="relative pt-20 pb-32 overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                    <div class="inline-block mb-4 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 font-semibold text-sm border border-blue-100 fade-in">
+                        🚀 AI-Powered Career Accelerator
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 fade-in leading-tight">
+                        Crack Every Interview <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">With Confidence.</span>
+                    </h1>
+                    <p class="mt-4 text-xl text-slate-600 max-w-2xl mx-auto mb-10 fade-in">
+                        Your personalized AI coach for Resume Building, Mock Interviews, and Skill Mastery. Get hired faster with CrackNest.
+                    </p>
+                    <div class="flex justify-center gap-4 fade-in">
+                        <button onclick="app.showAuth(true)" class="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 rounded-xl font-bold shadow-xl shadow-blue-200 transition transform hover:-translate-y-1">
+                            Start Preparation
+                        </button>
+                        <button class="bg-white hover:bg-slate-50 text-slate-700 text-lg px-8 py-4 rounded-xl font-bold border border-slate-200 shadow-lg transition">
+                            View Demo
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Background Decoration -->
+                <div class="absolute top-0 left-0 right-0 bottom-0 -z-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-100 via-transparent to-transparent opacity-70"></div>
+            </section>
+
+            <!-- Feature Grid -->
+            <section class="bg-white py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Feature 1 -->
+                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-xl transition duration-300">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-2xl mb-6">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-3">AI Skill Assessment</h3>
+                            <p class="text-slate-600">Baseline tests that adapt to your role to find your strengths and weaknesses instantly.</p>
+                        </div>
+                        <!-- Feature 2 -->
+                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-xl transition duration-300">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-2xl mb-6">
+                                <i class="fa-solid fa-file-contract"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-3">Smart Resume Builder</h3>
+                            <p class="text-slate-600">ATS-friendly templates and AI suggestions to make your achievements shine.</p>
+                        </div>
+                        <!-- Feature 3 -->
+                        <div class="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-xl transition duration-300">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-2xl mb-6">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-3">AI Mock Interviews</h3>
+                            <p class="text-slate-600">Practice with our AI interviewer that speaks, listens, and gives feedback.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 2. AUTH VIEW (LOGIN / SIGNUP) -->
+        <div id="view-auth" class="hidden min-h-[80vh] flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-md p-8 rounded-2xl shadow-2xl slide-up relative">
+                <div class="text-center mb-8">
+                    <h2 id="auth-title" class="text-2xl font-bold text-slate-900">Welcome Back</h2>
+                    <p id="auth-subtitle" class="text-slate-500">Please sign in to continue</p>
+                </div>
+
+                <!-- Error Message Container -->
+                <div id="auth-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center"></div>
+
+                <form id="auth-form" onsubmit="app.handleAuthSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                        <input type="email" id="auth-email" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="you@example.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                        <input type="password" id="auth-password" required minlength="6" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-lg flex justify-center items-center gap-2">
+                        <span>Sign In</span>
+                    </button>
+                </form>
+
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+                    <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-slate-500">Or continue with</span></div>
+                </div>
+
+                <button onclick="app.handleGoogleLogin()" class="w-full bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
+                    <span>Sign in with Google</span>
+                </button>
+                
+                <div class="text-center mt-6">
+                    <p class="text-sm text-slate-600">
+                        <span id="auth-switch-text">Don't have an account?</span>
+                        <button onclick="app.toggleAuthMode()" class="text-blue-600 font-bold hover:underline ml-1" id="auth-switch-btn">Sign Up</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. PROFILE SETUP VIEW (First time only) -->
+        <div id="view-profile" class="hidden min-h-[80vh] flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-md p-8 rounded-2xl shadow-2xl slide-up">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-2xl">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Complete Your Profile</h2>
+                    <p class="text-slate-500">Help us personalize your experience</p>
+                </div>
+                
+                <form onsubmit="app.handleProfileSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                        <input type="text" id="profile-name" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John Doe">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Target Role</label>
+                        <select id="profile-role" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="Software Developer">Software Developer</option>
+                            <option value="Data Scientist">Data Scientist</option>
+                            <option value="Product Manager">Product Manager</option>
+                            <option value="Digital Marketer">Digital Marketer</option>
+                            <option value="Business Analyst">Business Analyst</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
+                        <select id="profile-exp" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="Fresher">Student / Fresher</option>
+                            <option value="1-3 Years">1-3 Years Experience</option>
+                            <option value="3+ Years">3+ Years Experience</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-lg">
+                        Go to Dashboard <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. DASHBOARD VIEW -->
+        <div id="view-dashboard" class="hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white mb-8 shadow-xl flex justify-between items-center slide-up">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Hello, <span id="dash-name">User</span>! 👋</h2>
+                        <p class="text-blue-100">Your target: <span id="dash-role" class="font-semibold bg-white/20 px-2 py-0.5 rounded">Software Engineer</span></p>
+                        <div class="mt-6 flex gap-3">
+                            <div class="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-sm">
+                                <i class="fa-solid fa-trophy text-yellow-300"></i> Readiness: <span id="readiness-score">15%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block text-8xl opacity-20">
+                        <i class="fa-solid fa-rocket"></i>
+                    </div>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Left Column: Actions -->
+                    <div class="lg:col-span-2 space-y-8">
+                        
+                        <!-- Action Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Skill Test Card -->
+                            <div onclick="app.startSkillTest()" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="bg-orange-100 p-3 rounded-xl text-orange-600 group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-list-check text-xl"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">STEP 1</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-1">Baseline Skill Test</h3>
+                                <p class="text-sm text-slate-500">Take a quick AI-generated quiz to assess your current level.</p>
+                            </div>
+
+                            <!-- Roadmap Card -->
+                            <div onclick="app.generateRoadmap()" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="bg-blue-100 p-3 rounded-xl text-blue-600 group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-map text-xl"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">STEP 2</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-1">Generate Roadmap</h3>
+                                <p class="text-sm text-slate-500">Get a custom study plan based on your skill gaps.</p>
+                            </div>
+
+                            <!-- Resume Card -->
+                            <div onclick="app.openResumeBuilder()" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="bg-purple-100 p-3 rounded-xl text-purple-600 group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-file-invoice text-xl"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">STEP 3</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-1">AI Resume Builder</h3>
+                                <p class="text-sm text-slate-500">Optimize your resume with AI suggestions for your role.</p>
+                            </div>
+
+                            <!-- Mock Interview Card -->
+                            <div onclick="app.startMockInterview()" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="bg-green-100 p-3 rounded-xl text-green-600 group-hover:scale-110 transition">
+                                        <i class="fa-solid fa-microphone text-xl"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">STEP 4</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-1">Mock Interview</h3>
+                                <p class="text-sm text-slate-500">Live chat simulation with an AI recruiter.</p>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Content Area (Results/Roadmap display) -->
+                        <div id="dashboard-content-area" class="hidden bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 id="content-area-title" class="text-xl font-bold text-slate-900">Result</h3>
+                                <button onclick="document.getElementById('dashboard-content-area').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div id="content-area-body" class="prose max-w-none text-slate-600">
+                                <!-- AI Content loads here -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Stats & Profile -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-slate-900 mb-4">Your Progress</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-medium">Aptitude</span>
+                                        <span class="text-blue-600">40%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 40%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-medium">Technical</span>
+                                        <span class="text-green-600">10%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-medium">Communication</span>
+                                        <span class="text-purple-600">65%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2">
+                                        <div class="bg-purple-500 h-2 rounded-full" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-indigo-50 rounded-2xl p-6 border border-indigo-100">
+                            <h3 class="font-bold text-indigo-900 mb-2">Daily Quote</h3>
+                            <p class="text-sm text-indigo-700 italic">"Success is where preparation and opportunity meet."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MODALS -->
+        <!-- Mock Interview Modal -->
+        <div id="view-interview" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-2xl h-[600px] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-slate-800">AI Interviewer</h3>
+                        <p class="text-xs text-slate-500">Topic: <span id="interview-topic">General</span></p>
+                    </div>
+                    <button onclick="app.closeModal('view-interview')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <div id="chat-history" class="flex-1 overflow-y-auto p-6 bg-slate-50 flex flex-col gap-2">
+                    <!-- Messages go here -->
+                </div>
+                <div class="p-4 bg-white border-t border-slate-200">
+                    <form onsubmit="app.sendChatMessage(event)" class="flex gap-2">
+                        <input id="chat-input" type="text" class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Type your answer..." autocomplete="off">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resume Builder Modal -->
+        <div id="view-resume" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Smart Resume Builder</h3>
+                    <button onclick="app.closeModal('view-resume')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
+                    <div class="w-full md:w-1/2 p-6 overflow-y-auto border-r border-slate-200">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Paste your current summary or skills:</label>
+                        <textarea id="resume-input" class="w-full h-64 p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm" placeholder="e.g. I am a fresh graduate with knowledge in Java and Python. I did a project on library management..."></textarea>
+                        <button onclick="app.optimizeResume()" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 font-medium">
+                            ✨ Generate Professional Version
+                        </button>
+                    </div>
+                    <div class="w-full md:w-1/2 p-6 bg-slate-50 overflow-y-auto">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">AI Suggestions:</label>
+                        <div id="resume-output" class="prose text-sm text-slate-600">
+                            <p class="italic text-slate-400">AI output will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // API CONFIG
+        const apiKey = ""; // Injected by environment at runtime
+        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        // FIREBASE SETUP
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const fbApp = initializeApp(firebaseConfig);
+        const auth = getAuth(fbApp);
+        const googleProvider = new GoogleAuthProvider();
+
+        // APP STATE & LOGIC
+        window.app = {
+            user: {
+                uid: null,
+                name: "",
+                role: "",
+                exp: ""
+            },
+            isSignUpMode: false,
+            chatHistory: [],
+
+            // --- INITIALIZATION ---
+            init: async () => {
+                // Initial Auth Check (System Requirement)
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch(e) { console.error("Initial auth failed", e); }
+                }
+
+                // Auth Listener
+                onAuthStateChanged(auth, (firebaseUser) => {
+                    if (firebaseUser) {
+                        app.user.uid = firebaseUser.uid;
+                        document.getElementById('nav-user-email').innerText = firebaseUser.email;
+                        
+                        // Check if we have local profile data for this user
+                        const savedProfile = localStorage.getItem(`profile_${firebaseUser.uid}`);
+                        if (savedProfile) {
+                            const data = JSON.parse(savedProfile);
+                            app.user.name = data.name;
+                            app.user.role = data.role;
+                            app.user.exp = data.exp;
+                            app.showDashboard();
+                        } else {
+                            app.showProfileSetup();
+                        }
+                    } else {
+                        app.user = { uid: null, name: "", role: "", exp: "" };
+                        app.showLanding();
+                    }
+                });
+            },
+
+            // --- NAVIGATION ---
+            showLanding: () => {
+                app.hideAllViews();
+                document.getElementById('view-landing').classList.remove('hidden');
+                document.getElementById('nav-login-btn').classList.remove('hidden');
+                document.getElementById('nav-signup-btn').classList.remove('hidden');
+                document.getElementById('nav-user-menu').classList.add('hidden');
+            },
+
+            showAuth: (isSignUp = false) => {
+                app.hideAllViews();
+                document.getElementById('view-auth').classList.remove('hidden');
+                app.setAuthMode(isSignUp);
+            },
+
+            showProfileSetup: () => {
+                app.hideAllViews();
+                document.getElementById('view-profile').classList.remove('hidden');
+                document.getElementById('nav-user-menu').classList.remove('hidden');
+            },
+
+            showDashboard: () => {
+                app.hideAllViews();
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('nav-login-btn').classList.add('hidden');
+                document.getElementById('nav-signup-btn').classList.add('hidden');
+                document.getElementById('nav-user-menu').classList.remove('hidden');
+                
+                // Update UI
+                document.getElementById('dash-name').innerText = app.user.name || "Friend";
+                document.getElementById('dash-role').innerText = app.user.role || "Job Seeker";
+            },
+
+            hideAllViews: () => {
+                ['view-landing', 'view-auth', 'view-profile', 'view-dashboard'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+            },
+
+            closeModal: (id) => {
+                document.getElementById(id).classList.add('hidden');
+            },
+
+            // --- AUTH LOGIC ---
+            setAuthMode: (isSignUp) => {
+                app.isSignUpMode = isSignUp;
+                const title = document.getElementById('auth-title');
+                const subtitle = document.getElementById('auth-subtitle');
+                const submitBtn = document.getElementById('auth-submit-btn');
+                const switchText = document.getElementById('auth-switch-text');
+                const switchBtn = document.getElementById('auth-switch-btn');
+                const errorDiv = document.getElementById('auth-error');
+
+                errorDiv.classList.add('hidden'); // Clear errors
+
+                if (isSignUp) {
+                    title.innerText = "Create Account";
+                    subtitle.innerText = "Start your career journey today";
+                    submitBtn.innerHTML = `<span>Sign Up Free</span>`;
+                    switchText.innerText = "Already have an account?";
+                    switchBtn.innerText = "Log In";
+                } else {
+                    title.innerText = "Welcome Back";
+                    subtitle.innerText = "Please sign in to continue";
+                    submitBtn.innerHTML = `<span>Sign In</span>`;
+                    switchText.innerText = "Don't have an account?";
+                    switchBtn.innerText = "Sign Up";
+                }
+            },
+
+            toggleAuthMode: () => {
+                app.setAuthMode(!app.isSignUpMode);
+            },
+
+            handleAuthSubmit: async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                const errorDiv = document.getElementById('auth-error');
+                const submitBtn = document.getElementById('auth-submit-btn');
+
+                errorDiv.classList.add('hidden');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+                try {
+                    if (app.isSignUpMode) {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                    } else {
+                        await signInWithEmailAndPassword(auth, email, password);
+                    }
+                    // onAuthStateChanged handles redirection
+                } catch (error) {
+                    errorDiv.innerText = app.cleanAuthError(error.code);
+                    errorDiv.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                }
+            },
+
+            handleGoogleLogin: async () => {
+                const errorDiv = document.getElementById('auth-error');
+                try {
+                    await signInWithPopup(auth, googleProvider);
+                } catch (error) {
+                    console.error(error);
+                    errorDiv.innerText = "Google Sign-In failed. Please try again.";
+                    errorDiv.classList.remove('hidden');
+                }
+            },
+
+            logout: async () => {
+                await signOut(auth);
+                // onAuthStateChanged handles UI update
+            },
+
+            cleanAuthError: (code) => {
+                switch(code) {
+                    case 'auth/invalid-email': return "Invalid email address.";
+                    case 'auth/user-disabled': return "This account has been disabled.";
+                    case 'auth/user-not-found': return "No account found with this email.";
+                    case 'auth/wrong-password': return "Incorrect password.";
+                    case 'auth/email-already-in-use': return "Email is already registered.";
+                    case 'auth/weak-password': return "Password should be at least 6 characters.";
+                    default: return "Authentication failed. Please try again.";
+                }
+            },
+
+            // --- PROFILE LOGIC ---
+            handleProfileSubmit: (e) => {
+                e.preventDefault();
+                app.user.name = document.getElementById('profile-name').value;
+                app.user.role = document.getElementById('profile-role').value;
+                app.user.exp = document.getElementById('profile-exp').value;
+                
+                // Save to local storage linked to UID
+                if (app.user.uid) {
+                    localStorage.setItem(`profile_${app.user.uid}`, JSON.stringify({
+                        name: app.user.name,
+                        role: app.user.role,
+                        exp: app.user.exp
+                    }));
+                }
+                app.showDashboard();
+            },
+
+            // --- AI FEATURES (Unchanged Logic) ---
+
+            generateRoadmap: async () => {
+                const contentArea = document.getElementById('dashboard-content-area');
+                const title = document.getElementById('content-area-title');
+                const body = document.getElementById('content-area-body');
+                
+                contentArea.classList.remove('hidden');
+                title.innerText = "Personalized Roadmap";
+                body.innerHTML = '<div class="flex items-center gap-2"><div class="loader"></div> Generating your plan...</div>';
+
+                const prompt = `Create a concise 4-week learning roadmap for a ${app.user.exp} ${app.user.role}. Format as HTML with bold <strong> tags for weeks and list items. Keep it encouraging.`;
+                
+                try {
+                    const text = await app.callGemini(prompt);
+                    body.innerHTML = text;
+                } catch (err) {
+                    body.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+                }
+            },
+
+            startSkillTest: async () => {
+                const contentArea = document.getElementById('dashboard-content-area');
+                const title = document.getElementById('content-area-title');
+                const body = document.getElementById('content-area-body');
+
+                contentArea.classList.remove('hidden');
+                title.innerText = "Baseline Skill Assessment";
+                body.innerHTML = '<div class="flex items-center gap-2"><div class="loader"></div> Generating questions...</div>';
+
+                const prompt = `Generate 3 multiple choice technical questions for a ${app.user.role}. Format the output as simple HTML without markdown code blocks. Just <div> for questions and <br> for options. Do not include the answer key yet.`;
+
+                try {
+                    const text = await app.callGemini(prompt);
+                    body.innerHTML = text + `<button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded" onclick="alert('In a real app, this would evaluate your answers!')">Submit Answers</button>`;
+                } catch (err) {
+                    body.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+                }
+            },
+
+            startMockInterview: () => {
+                document.getElementById('view-interview').classList.remove('hidden');
+                document.getElementById('interview-topic').innerText = app.user.role;
+                const historyDiv = document.getElementById('chat-history');
+                historyDiv.innerHTML = '';
+                
+                // Initial AI greeting
+                app.addChatMessage('ai', `Hello ${app.user.name}. I am your AI interviewer for the ${app.user.role} position. Shall we begin with a brief introduction?`);
+                app.chatHistory = []; 
+            },
+
+            sendChatMessage: async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chat-input');
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                app.addChatMessage('user', msg);
+                input.value = '';
+
+                // Show loading
+                const historyDiv = document.getElementById('chat-history');
+                const loadingId = 'loading-' + Date.now();
+                historyDiv.innerHTML += `<div id="${loadingId}" class="chat-bubble ai-msg"><div class="loader"></div></div>`;
+                historyDiv.scrollTop = historyDiv.scrollHeight;
+
+                const prompt = `You are a technical interviewer for a ${app.user.role}. The candidate says: "${msg}". Reply professionally, acknowledge the answer, and ask the next relevant technical or behavioral question. Keep it short.`;
+
+                try {
+                    const response = await app.callGemini(prompt);
+                    document.getElementById(loadingId).remove();
+                    app.addChatMessage('ai', response);
+                } catch (err) {
+                    document.getElementById(loadingId).innerHTML = "Error connecting to AI.";
+                }
+            },
+
+            addChatMessage: (sender, text) => {
+                const historyDiv = document.getElementById('chat-history');
+                const bubble = document.createElement('div');
+                bubble.className = `chat-bubble ${sender === 'user' ? 'user-msg' : 'ai-msg'} slide-up`;
+                bubble.innerText = text;
+                historyDiv.appendChild(bubble);
+                historyDiv.scrollTop = historyDiv.scrollHeight;
+            },
+
+            openResumeBuilder: () => {
+                document.getElementById('view-resume').classList.remove('hidden');
+            },
+
+            optimizeResume: async () => {
+                const input = document.getElementById('resume-input').value;
+                const outputDiv = document.getElementById('resume-output');
+                
+                if(!input) return alert("Please enter some text first.");
+
+                outputDiv.innerHTML = '<div class="loader"></div> Processing...';
+
+                const prompt = `Rewrite the following resume summary/skills to be ATS-friendly, professional, and impactful for a ${app.user.role}. Use HTML formatting (bullet points, bold text). Text: "${input}"`;
+
+                try {
+                    const response = await app.callGemini(prompt);
+                    outputDiv.innerHTML = response;
+                } catch (err) {
+                    outputDiv.innerHTML = "Error generating resume.";
+                }
+            },
+
+            callGemini: async (promptText) => {
+                try {
+                    const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }] }]
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error("API Error");
+                    
+                    const data = await response.json();
+                    return data.candidates[0].content.parts[0].text;
+                } catch (error) {
+                    console.error(error);
+                    return "Sorry, I am having trouble thinking right now. Please try again.";
+                }
+            }
+        };
+
+        // Boot
+        app.init();
+    </script>
+</body>
+</html>
