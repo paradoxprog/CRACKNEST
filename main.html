@@ -31,6 +31,7 @@
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
                     }
                 }
             }
@@ -90,6 +91,34 @@
         <p class="text-slate-500 font-medium animate-pulse">Initializing CrackNest...</p>
     </div>
 
+    <!-- API Key Modal -->
+    <div id="modal-api-key" class="fixed inset-0 bg-slate-900/60 z-[200] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md transform scale-95 transition-transform">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-indigo-100 text-primary rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Set API Key</h3>
+                <p class="text-sm text-slate-500 mt-1">Enter your Google Gemini API key to enable AI features.</p>
+            </div>
+            <form onsubmit="App.controllers.settings.saveKey(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="input-api-key" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-primary focus:border-primary text-sm font-mono" placeholder="AIzaSy..." required>
+                    <p class="text-xs text-slate-400 mt-2">Your key is stored locally in your browser.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="UI.toggleApiKeyModal(false)" class="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200">Save Key</button>
+                </div>
+            </form>
+            <div class="mt-4 text-center">
+                 <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-primary hover:underline flex items-center justify-center gap-1">
+                    Get a Gemini API Key <i class="fa-solid fa-external-link-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App Layout -->
     <div id="app-layout" class="flex h-full opacity-0 transition-opacity duration-500">
         
@@ -103,8 +132,13 @@
                 <!-- Menu items injected by JS -->
             </nav>
 
-            <div class="p-4 border-t border-slate-100">
-                <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 mb-3 cursor-pointer hover:bg-slate-100 transition" onclick="App.router.navigate('profile')">
+            <div class="p-4 border-t border-slate-100 space-y-2">
+                <!-- API Settings Button -->
+                <button onclick="UI.toggleApiKeyModal(true)" class="w-full flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-50 py-2 rounded-lg transition text-xs font-medium border border-slate-200">
+                    <i class="fa-solid fa-key"></i> API Settings
+                </button>
+
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 cursor-pointer hover:bg-slate-100 transition" onclick="App.router.navigate('profile')">
                     <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-md ring-2 ring-indigo-50">U</div>
                     <div class="overflow-hidden">
                         <p id="user-name-display" class="text-sm font-bold text-slate-700 truncate">Guest User</p>
@@ -131,6 +165,11 @@
                     <button onclick="App.ui.toggleMobileMenu()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <nav id="mobile-menu-items" class="space-y-2"></nav>
+                <div class="mt-auto border-t border-slate-100 pt-4">
+                     <button onclick="UI.toggleApiKeyModal(true)" class="w-full flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-50 py-3 rounded-lg transition text-sm font-medium border border-slate-200">
+                        <i class="fa-solid fa-key"></i> Set API Key
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -384,7 +423,8 @@
     <script>
         // --- CONFIGURATION ---
         const CONFIG = {
-            apiKey: "", // Runtime injected key
+            // Checks for key in local storage, otherwise defaults to empty
+            apiKey: localStorage.getItem('cracknest_api_key') || "", 
             model: "gemini-2.5-flash-preview-09-2025"
         };
 
@@ -394,9 +434,12 @@
             set: (key, val) => localStorage.setItem(`cracknest_${key}`, JSON.stringify(val)),
             remove: (key) => localStorage.removeItem(`cracknest_${key}`),
             clear: () => {
+                // Clear everything EXCEPT the API key
+                const apiKey = localStorage.getItem('cracknest_api_key');
                 Object.keys(localStorage).forEach(k => {
                     if(k.startsWith('cracknest_')) localStorage.removeItem(k);
                 });
+                if(apiKey) localStorage.setItem('cracknest_api_key', apiKey);
             }
         };
 
@@ -405,6 +448,11 @@
             getUrl: () => `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model}:generateContent?key=${CONFIG.apiKey}`,
             
             async generate(prompt) {
+                if (!CONFIG.apiKey) {
+                    UI.toggleApiKeyModal(true);
+                    return "Please enter your API Key in settings to continue.";
+                }
+
                 try {
                     const response = await fetch(this.getUrl(), {
                         method: 'POST',
@@ -420,13 +468,19 @@
                     return data.candidates[0].content.parts[0].text;
                 } catch (error) {
                     console.error("AI Error:", error);
-                    return null;
+                    return `Error: ${error.message}`;
                 }
             },
 
             async generateJSON(prompt) {
+                if (!CONFIG.apiKey) {
+                    UI.toggleApiKeyModal(true);
+                    return null;
+                }
+
                 const text = await this.generate(`${prompt} \n\nIMPORTANT: Respond ONLY with a valid JSON array. Do not use markdown code blocks.`);
-                if (!text) return null;
+                if (!text || text.startsWith("Error") || text.startsWith("Please")) return null;
+                
                 try {
                     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
                     return JSON.parse(cleanText);
@@ -458,6 +512,16 @@
                 menu.classList.toggle('hidden');
             },
 
+            toggleApiKeyModal: (show) => {
+                const modal = UI.el('modal-api-key');
+                if (show) {
+                    modal.classList.remove('hidden');
+                    if(CONFIG.apiKey) UI.el('input-api-key').value = CONFIG.apiKey;
+                } else {
+                    modal.classList.add('hidden');
+                }
+            },
+
             renderMarkdown: (text) => {
                 return typeof marked !== 'undefined' ? marked.parse(text) : text;
             }
@@ -477,6 +541,12 @@
                 // Render Menu
                 App.router.renderMenu();
 
+                // Check for API Key
+                if (!CONFIG.apiKey) {
+                    // Optional: You could force modal open here
+                    // UI.toggleApiKeyModal(true);
+                }
+
                 // Route
                 if (!user) {
                     App.router.navigate('profile');
@@ -493,7 +563,7 @@
 
             auth: {
                 logout: () => {
-                    if (confirm("Reset application data?")) {
+                    if (confirm("Reset application data? (API Key will be kept)")) {
                         Store.clear();
                         window.location.reload();
                     }
@@ -548,6 +618,21 @@
             },
 
             controllers: {
+                settings: {
+                    saveKey: (e) => {
+                        e.preventDefault();
+                        const key = UI.el('input-api-key').value.trim();
+                        if (key) {
+                            localStorage.setItem('cracknest_api_key', key);
+                            CONFIG.apiKey = key;
+                            UI.toggleApiKeyModal(false);
+                            alert("API Key Saved Successfully!");
+                            // Reload to refresh AI states if needed
+                            if(App.router.activeRoute === 'dashboard') App.controllers.dashboard.generateRoadmap(true);
+                        }
+                    }
+                },
+
                 profile: {
                     save: (e) => {
                         e.preventDefault();
@@ -604,7 +689,7 @@
                                 Store.set(`questions_${role}`, questions);
                                 App.controllers.assessment.render(questions);
                             } else {
-                                UI.el('assessment-questions').innerHTML = '<p class="text-red-500 text-center">Failed to load AI questions. Please reload.</p>';
+                                UI.el('assessment-questions').innerHTML = '<p class="text-slate-500 text-center">Please set your API key to generate questions.</p>';
                             }
                         }
                     },
