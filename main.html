@@ -489,8 +489,13 @@
             container.classList.remove('hidden');
 
             try {
-                // Cleanup JSON if gemini adds markdown backticks
-                const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                // ROBUST JSON EXTRACTION: Extract content between first [ and last ]
+                const startIndex = text.indexOf('[');
+                const endIndex = text.lastIndexOf(']') + 1;
+                
+                if(startIndex === -1 || endIndex === 0) throw new Error("No JSON found");
+                
+                const jsonStr = text.substring(startIndex, endIndex);
                 const questions = JSON.parse(jsonStr);
                 
                 let html = '';
@@ -512,7 +517,8 @@
                 html += '<button onclick="alert(\'Assessment Submitted! Score calculation pending implementation.\')" class="mt-4 bg-primary text-white px-6 py-2 rounded-lg font-bold">Submit Answers</button>';
                 container.innerHTML = html;
             } catch (e) {
-                container.innerHTML = "Error parsing AI response. Please try again.";
+                console.error("JSON Parse Error:", e);
+                container.innerHTML = `<div class="text-red-500 bg-red-50 p-4 rounded-lg">Error parsing AI response. The model might be busy or returned invalid JSON.<br><br><small class="text-xs text-gray-500">${e.message}</small><br><button onclick="startBaselineTest()" class="mt-2 text-red-700 underline font-bold">Try Again</button></div>`;
             }
         }
 
