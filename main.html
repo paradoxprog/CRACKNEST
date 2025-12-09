@@ -453,13 +453,29 @@
                     return "Please enter your API Key in settings to continue.";
                 }
 
-                try {
+                // Retry logic helper
+                const fetchWithRetry = async (retries = 3, delay = 2000) => {
                     const response = await fetch(this.getUrl(), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
+
+                    if (response.status === 429) {
+                        if (retries > 0) {
+                            console.warn(`Rate limit hit. Retrying in ${delay}ms...`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return fetchWithRetry(retries - 1, delay * 2);
+                        } else {
+                            throw new Error("API Quota exceeded. Please wait a minute and try again.");
+                        }
+                    }
                     
+                    return response;
+                };
+
+                try {
+                    const response = await fetchWithRetry();
                     const data = await response.json();
                     
                     if (data.error) throw new Error(data.error.message);
