@@ -80,8 +80,8 @@
         <!-- SIDEBAR -->
         <aside class="w-64 bg-slate-900 text-white flex-col hidden md:flex transition-all duration-300" id="sidebar">
             <div class="p-6 border-b border-slate-700 flex items-center gap-3">
-                <!-- LOGO -->
-                <img src="logo.jpg" alt="Logo" class="w-8 h-8 object-contain bg-white rounded-full">
+                <!-- LOGO PLACEHOLDER -->
+                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-slate-900 font-bold">C</div>
                 <span class="text-xl font-bold heading">CrackNest</span>
             </div>
 
@@ -126,7 +126,7 @@
             <!-- Mobile Header -->
             <header id="mobile-header" class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:hidden shrink-0">
                 <div class="flex items-center gap-2">
-                    <img src="logo.jpg" alt="Logo" class="w-8 h-8 object-contain">
+                    <div class="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-xs">CN</div>
                     <span class="font-bold text-slate-800">CrackNest</span>
                 </div>
                 <button class="text-slate-600" onclick="document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('sidebar').classList.toggle('absolute'); document.getElementById('sidebar').classList.toggle('z-50'); document.getElementById('sidebar').classList.toggle('h-full');">
@@ -1041,43 +1041,37 @@
         };
 
         // --- 5. AI Features (Gemini) ---
+        // IMPORTANT: Replace the empty string below with your actual Gemini API Key from Google AI Studio.
         const apiKey = "AIzaSyBapj8iZYmrF7qT1Z_ANPHKLdHvtra8Uz8"; 
 
         async function callGemini(prompt) {
-            // Check for Secure Backend Function (Vercel)
-            try {
-                const response = await fetch('/api/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    return data.text;
-                }
-            } catch (e) {
-                console.warn("Backend API not available, falling back to direct call (Development Mode)");
+            if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
+                console.error("API Key is missing or invalid.");
+                alert("Please open the code and insert your Gemini API Key.");
+                return "API Key Missing. Please check console.";
             }
 
-            // Fallback: Direct Call (For Local Testing ONLY)
-            if (!apiKey) {
-                console.warn("No API Key. Returning mock.");
-                return "This is a simulated AI response. Please configure your API key.";
-            }
-            
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                // Using stable model 'gemini-1.5-flash' to fix connection issues
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
+                
                 const data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Gemini API Error Details:", data);
+                    return `Error: ${data.error?.message || "Unknown API Error"}`;
+                }
+
                 return data.candidates[0].content.parts[0].text;
             } catch (e) {
-                console.error(e);
-                return "I'm having trouble connecting right now.";
+                console.error("Network/Connection Error:", e);
+                return "I'm having trouble connecting right now. Please check your internet connection.";
             }
         }
 
@@ -1146,6 +1140,7 @@
                 const cleaned = response.replace(/```json/g, '').replace(/```/g, '').trim();
                 activeTestQuestions = JSON.parse(cleaned);
             } catch (e) {
+                console.error("Failed to parse test questions", e);
                 activeTestQuestions = [
                     { q: `Concept in ${userProfile?.field}?`, options: ["A", "B", "C", "D"], a: 0 },
                     { q: "Another Question?", options: ["1", "2", "3", "4"], a: 1 }
