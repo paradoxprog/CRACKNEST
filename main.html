@@ -1057,8 +1057,8 @@
             }
 
             try {
-                // Using stable model 'gemini-1.5-flash' to fix connection issues
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                // Using stable model 'gemini-1.5-flash-001' to fix version/region issues
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
