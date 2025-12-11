@@ -216,6 +216,8 @@
                                     <option value="UI/UX Designer">UI/UX Designer</option>
                                     <option value="Digital Marketer">Digital Marketer</option>
                                     <option value="HR Manager">HR Manager</option>
+                                    <option value="Financial Analyst">Financial Analyst</option>
+                                    <option value="Sales Executive">Sales Executive</option>
                                 </select>
                             </div>
 
@@ -460,6 +462,50 @@
                     </div>
                 </div>
 
+                <div id="view-test-series" class="section-view pb-12">
+                    <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6 flex items-center gap-2"><i class="fa-solid fa-list-ol text-primary"></i> Structured Preparation Path</h2>
+                    <p class="text-slate-500 max-w-2xl mb-8">Follow this three-level testing series customized for your career target to ensure you are fully interview-ready.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-lg border-t-4 border-blue-500 p-6">
+                            <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-shuffle text-blue-500"></i> Level 1: Aptitude Test</h3>
+                            <p class="text-slate-600 mb-4">Focuses on core abilities like Quantitative Aptitude, Logical Reasoning, and Verbal Ability.</p>
+                            <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
+                                <li>**Analytics**: Detailed score breakdown by topic.</li>
+                                <li>**Explanations**: Step-by-step solutions for every question.</li>
+                            </ul>
+                            <button class="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition shadow-md">
+                                Start Aptitude Test <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg border-t-4 border-primary p-6">
+                            <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-microchip text-primary"></i> Level 2: Technical Test</h3>
+                            <p class="text-slate-600 mb-4">Role-based assessment covering domain-specific knowledge and practical skills for a <span class="font-bold text-primary" id="test-series-role">Software Developer</span>.</p>
+                            <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
+                                <li>**MCQs**: Multiple Choice Questions tailored to your target role.</li>
+                                <li>**Coding Tasks**: Hands-on problems (for technical roles) with real-time feedback.</li>
+                            </ul>
+                            <button class="bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition shadow-md">
+                                Start Technical Test <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg border-t-4 border-yellow-500 p-6">
+                            <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-handshake text-yellow-500"></i> Level 3: HR Test</h3>
+                            <p class="text-slate-600 mb-4">Simulates the final interview round, testing soft skills, situational judgment, and communication.</p>
+                            <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
+                                <li>**Scenario-Based Questions**: Behavioral and situational queries.</li>
+                                <li>**Written/Audio Answers**: Practice providing structured responses.</li>
+                            </ul>
+                            <button onclick="switchView('view-mock-interview')" class="bg-yellow-500 text-slate-800 font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition shadow-md">
+                                Practice HR Round <i class="fa-solid fa-microphone-lines ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </main>
     </div>
@@ -561,6 +607,11 @@
             if (viewId === 'view-profile-setup' && userProfile) {
                 loadProfileForEdit();
             }
+            
+            // Specific logic for Test Series View
+            if (viewId === 'view-test-series' && userProfile) {
+                document.getElementById('test-series-role').textContent = userProfile.targetRole;
+            }
 
             // Mobile menu close
             document.getElementById('mobile-menu').classList.add('hidden');
@@ -571,10 +622,11 @@
             const nav = document.getElementById('sidebar-nav');
             const items = [
                 { id: 'view-dashboard', icon: 'fa-table-columns', label: 'Dashboard' },
+                { id: 'view-test-series', icon: 'fa-list-ol', label: 'Test Series' }, // NEW ITEM
                 { id: 'view-training', icon: 'fa-book-open', label: 'Training Center' },
                 { id: 'view-mock-interview', icon: 'fa-headset', label: 'AI Mock Interview' },
                 { id: 'view-resume', icon: 'fa-file-lines', label: 'Resume Builder' },
-                { id: 'view-profile-setup', icon: 'fa-user', label: 'My Profile' }, // Added Profile item
+                { id: 'view-profile-setup', icon: 'fa-user', label: 'My Profile' }, 
             ];
 
             const html = items.map(item => `
