@@ -290,12 +290,12 @@
                             <h1 class="text-2xl md:text-3xl font-bold text-slate-800 font-heading">Welcome Back, <span id="dash-username" class="text-primary">User</span>! 👋</h1>
                             <p class="text-slate-500">Your daily learning hub is ready.</p>
                         </div>
-                        <div class="flex gap-3 hidden">
-                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+                        <div class="flex gap-3">
+                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2 hidden">
                                 <i class="fa-solid fa-fire text-orange-500"></i>
                                 <span class="font-bold text-slate-700">1 Day Streak</span>
                             </div>
-                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2 hidden">
                                 <i class="fa-solid fa-star text-yellow-500"></i>
                                 <span class="font-bold text-slate-700">Level 1</span>
                             </div>
@@ -564,8 +564,13 @@
                     return `[{"question": "What is the capital of France? (DUMMY)", "options": ["Berlin", "Madrid", "Paris", "Rome"], "correctIndex": 2}, {"question": "What is the primary data structure for LIFO access?", "options": ["Queue", "Stack", "Array", "Heap"], "correctIndex": 1}, {"question": "Which accounting principle governs revenue recognition?", "options": ["Matching", "Cost", "Revenue recognition", "Conservatism"], "correctIndex": 2}, {"question": "What is 15% of 200?", "options": ["20", "30", "40", "50"], "correctIndex": 1}, {"question": "Which of these is a programming language?", "options": ["HTML", "CSS", "Python", "XML"], "correctIndex": 2}]`;
                 }
                 if (prompt.includes("Generate a brief, encouraging analysis")) {
-                    // Score 40% based on dummy data above (2/5)
-                    return "### Baseline Assessment Complete\n\n* **Great Start!** You achieved a 40% readiness score based on this initial assessment.\n* Your performance shows good conceptual understanding in [Programming Languages] but needs strengthening in [Data Structures] and [Accounting Principles].\n* **Next Step**: Focus on the foundational modules in your custom roadmap to build a solid base for your goal.";
+                    return "### Dummy Analysis\n* You scored 2/5 (40%). Keep practicing!\n* You need to focus on core concepts in your chosen role.\n* Tip: Review fundamental terminology and definitions.";
+                }
+                // DUMMY ROADMAP RESPONSE
+                if (prompt.includes("Create a 3-step learning roadmap")) {
+                     const roleMatch = prompt.match(/Create a 3-step learning roadmap \(JSON\) for a (.*)\./);
+                     const role = roleMatch ? roleMatch[1] : "Developer";
+                     return `[{"title": "Phase 1: Foundations in ${role} Fundamentals", "description": "Master the core principles and tools essential for the ${role} position. Focus on theoretical knowledge and basic skill acquisition.", "duration": "4 Weeks"}, {"title": "Phase 2: Project Implementation & Technical Deep Dive", "description": "Apply foundational skills to a simulated project. For a ${role}, this means complex problem-solving and tool integration.", "duration": "6 Weeks"}, {"title": "Phase 3: Interview Preparation & Soft Skills", "description": "High-intensity mock interviews, behavioral scenario training, and advanced communication workshops tailored for the ${role} career path.", "duration": "3 Weeks"}]`;
                 }
                 return null;
             }
@@ -956,7 +961,18 @@
                         const roadmap = JSON.parse(jsonStr);
                         localStorage.setItem('cracknest_roadmap_' + userProfile.targetRole, JSON.stringify(roadmap));
                         if(!prefetch) renderRoadmap(roadmap);
-                    } catch(e) { console.error(e); }
+                    } catch(e) { 
+                        console.error("Roadmap JSON Parse Error:", e);
+                        // Fallback to show placeholder on error
+                        if (!prefetch) {
+                             document.getElementById('roadmap-container').innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg">Failed to load personalized roadmap. Please try updating your profile.</div>`;
+                        }
+                    }
+                } else {
+                     // Fallback for API failure
+                    if (!prefetch) {
+                        document.getElementById('roadmap-container').innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg">Failed to load personalized roadmap due to API error. Check key/console.</div>`;
+                    }
                 }
             }
         }
