@@ -290,7 +290,7 @@
                             <h1 class="text-2xl md:text-3xl font-bold text-slate-800 font-heading">Welcome Back, <span id="dash-username" class="text-primary">User</span>! 👋</h1>
                             <p class="text-slate-500">Your daily learning hub is ready.</p>
                         </div>
-                        <div class="flex gap-3">
+                        <div class="flex gap-3 hidden">
                             <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
                                 <i class="fa-solid fa-fire text-orange-500"></i>
                                 <span class="font-bold text-slate-700">1 Day Streak</span>
@@ -308,9 +308,9 @@
                                 <div class="bg-blue-100 p-3 rounded-lg text-blue-600"><i class="fa-solid fa-chart-pie text-xl"></i></div>
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Readiness</span>
                             </div>
-                            <h3 id="dash-readiness-percent" class="text-3xl font-bold text-slate-800 mb-1">45%</h3>
+                            <h3 id="dash-readiness-percent" class="text-3xl font-bold text-slate-800 mb-1">0%</h3>
                             <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
-                                <div id="dash-readiness-bar" class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
+                                <div id="dash-readiness-bar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
                             </div>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
@@ -558,13 +558,14 @@
 
         async function callGemini(prompt) {
             if (!GEMINI_API_KEY) {
-                console.error("Gemini Error: API Key is missing. Please update the GEMINI_API_KEY variable.");
+                console.error("Gemini Error: API Key is missing. Please update the GEMINI_API_KEY variable. Using dummy data.");
                 // Provide dummy content if key is missing to allow UI testing
                 if (prompt.includes("Generate 5 multiple choice questions")) {
                     return `[{"question": "What is the capital of France? (DUMMY)", "options": ["Berlin", "Madrid", "Paris", "Rome"], "correctIndex": 2}, {"question": "What is the primary data structure for LIFO access?", "options": ["Queue", "Stack", "Array", "Heap"], "correctIndex": 1}, {"question": "Which accounting principle governs revenue recognition?", "options": ["Matching", "Cost", "Revenue recognition", "Conservatism"], "correctIndex": 2}, {"question": "What is 15% of 200?", "options": ["20", "30", "40", "50"], "correctIndex": 1}, {"question": "Which of these is a programming language?", "options": ["HTML", "CSS", "Python", "XML"], "correctIndex": 2}]`;
                 }
                 if (prompt.includes("Generate a brief, encouraging analysis")) {
-                    return "### Dummy Analysis\n* You scored 2/5 (40%). Keep practicing!\n* You need to focus on core concepts in your chosen role.\n* Tip: Review fundamental terminology and definitions.";
+                    // Score 40% based on dummy data above (2/5)
+                    return "### Baseline Assessment Complete\n\n* **Great Start!** You achieved a 40% readiness score based on this initial assessment.\n* Your performance shows good conceptual understanding in [Programming Languages] but needs strengthening in [Data Structures] and [Accounting Principles].\n* **Next Step**: Focus on the foundational modules in your custom roadmap to build a solid base for your goal.";
                 }
                 return null;
             }
@@ -596,11 +597,10 @@
             if (storedProfile) {
                 userProfile = JSON.parse(storedProfile);
                 
-                // Add default readiness/module if loading old profile without new metrics
+                // Initialize new metrics if they don't exist
                 if (userProfile.readinessScore === undefined) {
                     userProfile.readinessScore = 0;
                     userProfile.modulesComplete = userProfile.baselineTestComplete ? 1 : 0;
-                    localStorage.setItem('cracknest_profile', JSON.stringify(userProfile));
                 }
 
                 updateSidebarUserInfo();
@@ -629,7 +629,7 @@
             if (!userProfile) {
                 switchView('view-profile-setup');
             } else if (!userProfile.baselineTestComplete) {
-                // *** CRITICAL PATH: Loads Test if profile exists but test is incomplete ***
+                // CRITICAL PATH: Loads Test if profile exists but test is incomplete
                 switchView('view-skill-test');
                 document.getElementById('test-target-role').textContent = userProfile.targetRole;
                 loadSkillTest();
@@ -842,12 +842,22 @@
                 <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
                     <p class="font-bold text-slate-800 mb-4 text-lg"><span class="text-primary mr-2">Q${i+1}.</span> ${q.question}</p>
                     <div class="space-y-3">
-                        ${q.options.map((opt, idx) => `
-                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
-                                <input type="radio" name="q${i}" value="${idx}" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
-                                <span class="text-slate-700 font-medium group-hover:text-primary">${opt}</span>
-                            </label>
-                        `).join('')}
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="0" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[0]}</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="1" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[1]}</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="2" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[2]}</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="3" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[3]}</span>
+                        </label>
                     </div>
                 </div>
             `).join('') + `
@@ -863,7 +873,7 @@
                 const btn = document.querySelector('#test-container button');
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Results...';
                 btn.disabled = true;
-
+                
                 let correctCount = 0;
                 const totalQuestions = currentQuestions.length;
                 let incorrectDetails = [];
@@ -1074,12 +1084,22 @@
                     <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
                         <p class="font-bold text-slate-800 mb-4 text-lg"><span class="text-primary mr-2">Q${i+1}.</span> ${q.question}</p>
                         <div class="space-y-3">
-                            ${q.options.map((opt, idx) => `
-                                <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
-                                    <input type="radio" name="q${i}" value="${idx}" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
-                                    <span class="text-slate-700 font-medium group-hover:text-primary">${opt}</span>
-                                </label>
-                            `).join('')}
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="0" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[0]}</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="1" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[1]}</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="2" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[2]}</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="3" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[3]}</span>
+                            </label>
                         </div>
                     </div>
                 `).join('')}
