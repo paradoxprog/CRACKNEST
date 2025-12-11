@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrackNest | Dashboard</title>
-    <meta name="description" content="Your personalized interview preparation dashboard.">
+    <title>CrackNest | Personalized Dashboard</title>
+    <meta name="description" content="Your AI-powered, personalized interview preparation dashboard.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,11 +33,9 @@
     </script>
 
     <style>
-        /* Custom styles to match the index page aesthetic */
         .card-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         }
-        /* Style for the sidebar to be fixed and full height */
         #sidebar {
             transition: transform 0.3s ease-in-out;
         }
@@ -64,10 +62,10 @@
                     <div id="logged-in-view" class="flex items-center gap-4">
                         <div class="flex items-center gap-3">
                            <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-md">
-                               JM
-                               </div>
+                               U
+                           </div>
                            <div class="hidden lg:block">
-                               <p id="user-name" class="text-sm font-bold text-slate-800 leading-none">Justin M.</p>
+                               <p id="user-name" class="text-sm font-bold text-slate-800 leading-none">User</p>
                                <button id="logout-btn" class="text-xs text-red-500 hover:text-red-700 font-medium">Sign Out</button>
                            </div>
                        </div>
@@ -92,10 +90,10 @@
                     <i class="fa-solid fa-user-gear"></i> Profile Setup
                 </a>
                 <a href="#skill-test" class="flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-clipboard-check"></i> Skill Test
+                    <i class="fa-solid fa-clipboard-check"></i> Baseline Test
                 </a>
                 <a href="#training" class="flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-code-branch"></i> Training Modules
+                    <i class="fa-solid fa-code-branch"></i> AI Roadmap
                 </a>
                 <a href="#test-series" class="flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-100 transition">
                     <i class="fa-solid fa-vials"></i> Test Series
@@ -115,16 +113,16 @@
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
             
             <section id="overview" class="mb-10">
-                <h1 class="font-heading text-3xl font-bold text-slate-900 mb-2">Welcome Back, Justin!</h1>
+                <h1 class="font-heading text-3xl font-bold text-slate-900 mb-2" id="greeting-name">Welcome Back!</h1>
                 <p class="text-slate-500 text-lg">Your personalized roadmap to interview success starts here.</p>
                 <div class="mt-6 p-6 bg-primary/10 rounded-xl border border-primary/20 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-primary">Interview Readiness Score:</p>
-                        <span class="font-heading text-4xl font-bold text-primary">68%</span>
+                        <span class="font-heading text-4xl font-bold text-primary" id="readiness-score">--%</span>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-semibold text-primary">Next Step:</p>
-                        <a href="#skill-test" class="text-primary hover:text-indigo-700 font-bold underline">Take Baseline Skill Test</a>
+                        <p class="text-sm font-semibold text-primary">Target Role:</p>
+                        <span class="text-primary font-bold" id="target-role">N/A</span>
                     </div>
                 </div>
             </section>
@@ -133,40 +131,81 @@
                 <div class="bg-white p-8 rounded-2xl card-shadow border border-slate-100">
                     <h2 class="font-heading text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
                         <i class="fa-solid fa-user-gear text-primary"></i> 3. Profile Setup & Personalization
+                        <button id="edit-profile-btn" class="text-sm text-primary hover:text-indigo-700 font-medium ml-auto"><i class="fa-solid fa-pen"></i> Edit</button>
                     </h2>
                     
-                    <div class="grid lg:grid-cols-3 gap-8">
-                        <div class="p-6 border border-slate-100 rounded-xl">
-                            <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-address-card text-secondary"></i> Personal Info</h3>
-                            <ul class="space-y-2 text-sm">
-                                <li><strong>Name:</strong> Justin M.</li>
-                                <li><strong>Degree / Stream:</strong> B.Tech / CSE</li>
-                                <li><strong>Year of Passing:</strong> 2026</li>
-                                <li><strong>Certifications:</strong> AWS Certified Cloud Practitioner</li>
-                                <li><strong>Languages:</strong> English, Hindi</li>
-                            </ul>
-                            <button class="mt-4 text-primary text-sm hover:underline font-medium">Edit Info</button>
+                    <div id="profile-display-view">
+                        <div class="grid lg:grid-cols-3 gap-8">
+                            <div class="p-6 border border-slate-100 rounded-xl">
+                                <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-address-card text-secondary"></i> Personal Info</h3>
+                                <ul class="space-y-2 text-sm" id="personal-info-list">
+                                    <li><strong>Name:</strong> <span data-field="name">N/A</span></li>
+                                    <li><strong>Degree / Stream:</strong> <span data-field="degree">N/A</span></li>
+                                    <li><strong>Year of Passing:</strong> <span data-field="year">N/A</span></li>
+                                    <li><strong>Certifications:</strong> <span data-field="certifications">N/A</span></li>
+                                    <li><strong>Languages:</strong> <span data-field="languages">N/A</span></li>
+                                </ul>
+                            </div>
+
+                            <div class="p-6 border border-slate-100 rounded-xl">
+                                <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-bullseye text-green-600"></i> Career Target</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li><strong>Field:</strong> <span data-field="field">N/A</span></li>
+                                    <li><strong>Specific Role:</strong> <span data-field="role">N/A</span></li>
+                                </ul>
+                            </div>
+
+                            <div class="p-6 border border-slate-100 rounded-xl">
+                                <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-briefcase text-purple-600"></i> Experience</h3>
+                                <p class="text-sm"><span data-field="experience">N/A</span></p>
+                            </div>
                         </div>
 
-                        <div class="p-6 border border-slate-100 rounded-xl">
-                            <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-bullseye text-green-600"></i> Career Target</h3>
-                            <ul class="space-y-2 text-sm">
-                                <li><strong>Field:</strong> IT/Technology</li>
-                                <li><strong>Specific Role:</strong> Software Developer (Backend)</li>
-                            </ul>
-                            <button class="mt-4 text-primary text-sm hover:underline font-medium">Change Target</button>
-                        </div>
-
-                        <div class="p-6 border border-slate-100 rounded-xl">
-                            <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-briefcase text-purple-600"></i> Experience</h3>
-                            <p class="text-sm">Fresher (0-1 Year Experience)</p>
-                            <button class="mt-4 text-primary text-sm hover:underline font-medium">Update Status</button>
-                        </div>
+                        <p class="mt-6 text-sm italic text-slate-500 border-t border-slate-100 pt-4">
+                            ✅ Your profile is complete. Click 'Edit' to make changes.
+                        </p>
                     </div>
 
-                    <p class="mt-6 text-sm italic text-slate-500 border-t border-slate-100 pt-4">
-                        ✅ Based on your profile, CrackNest has built a custom 30-Day Interview Preparation Plan.
-                    </p>
+                    <form id="profile-edit-form" class="hidden space-y-6">
+                        <h3 class="font-bold text-xl text-slate-800">Personal Info</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="name" required class="w-full border p-2 rounded-lg"></div>
+                            <div><label class="block text-sm font-medium mb-1">Degree / Stream</label><input type="text" id="degree" required class="w-full border p-2 rounded-lg"></div>
+                            <div><label class="block text-sm font-medium mb-1">Year of Passing</label><input type="number" id="year" required class="w-full border p-2 rounded-lg"></div>
+                            <div><label class="block text-sm font-medium mb-1">Languages</label><input type="text" id="languages" class="w-full border p-2 rounded-lg" placeholder="e.g., English, Hindi"></div>
+                            <div class="md:col-span-2"><label class="block text-sm font-medium mb-1">Certifications</label><input type="text" id="certifications" class="w-full border p-2 rounded-lg" placeholder="e.g., AWS, PMP"></div>
+                        </div>
+
+                        <h3 class="font-bold text-xl text-slate-800 pt-4 border-t border-slate-100">Career Target</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Field</label>
+                                <select id="field" required class="w-full border p-2 rounded-lg">
+                                    <option value="">Select Field</option>
+                                    <option value="IT">IT/Technology</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="HR">Human Resources (HR)</option>
+                                    <option value="Finance">Finance/Accounting</option>
+                                    <option value="Engineering">Core Engineering (Mechanical/Civil)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Specific Role</label>
+                                <input type="text" id="role" required class="w-full border p-2 rounded-lg" placeholder="e.g., Software Developer, Business Analyst, Marketing Manager">
+                            </div>
+                        </div>
+
+                        <h3 class="font-bold text-xl text-slate-800 pt-4 border-t border-slate-100">Experience</h3>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Experience Level</label>
+                            <select id="experience" required class="w-full border p-2 rounded-lg">
+                                <option value="Fresher">Fresher (0-1 Year)</option>
+                                <option value="Experienced">Experienced (1+ Years)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition">Save Profile</button>
+                    </form>
                 </div>
             </section>
 
@@ -175,25 +214,26 @@
                     <h2 class="font-heading text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
                         <i class="fa-solid fa-clipboard-check text-secondary"></i> 4. Baseline Skill Test
                     </h2>
-                    <p class="mb-4">A comprehensive smart assessment to define your starting point for the **Software Developer (Backend)** role.</p>
+                    <p class="mb-4">A smart assessment tailored for the **<span id="test-role-desc">your selected role</span>** to define your starting point.</p>
                     
-                    <ul class="space-y-3 p-4 bg-slate-50 rounded-lg border border-slate-100 mb-6">
-                        <li class="flex items-center gap-2 text-sm"><i class="fa-solid fa-microchip text-primary"></i> Technical MCQs (DSA, Backend Concepts)</li>
+                    <ul class="space-y-3 p-4 bg-slate-50 rounded-lg border border-slate-100 mb-6" id="test-components">
+                        <li class="flex items-center gap-2 text-sm"><i class="fa-solid fa-microchip text-primary"></i> Technical/Domain MCQs</li>
                         <li class="flex items-center gap-2 text-sm"><i class="fa-solid fa-calculator text-primary"></i> Aptitude Basics (Quant & Logic)</li>
                         <li class="flex items-center gap-2 text-sm"><i class="fa-solid fa-book-open-reader text-primary"></i> Verbal Reasoning & Comprehension</li>
                         <li class="flex items-center gap-2 text-sm"><i class="fa-solid fa-comment-dots text-primary"></i> Short Communication Task</li>
                     </ul>
 
-                    <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
-                        <h3 class="font-bold text-slate-800 mb-2">Last Assessment Results (12/05/2025)</h3>
+                    <div id="test-results" class="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
+                        <h3 class="font-bold text-slate-800 mb-2">Last Assessment Results</h3>
                         <div class="grid grid-cols-3 gap-4 text-sm font-medium">
-                            <p><strong>Readiness Score:</strong> <span class="text-primary font-bold">68%</span></p>
-                            <p><strong>Strength:</strong> DSA, Logical Reasoning</p>
-                            <p><strong>Weakness:</strong> Database Queries, Verbal Ability</p>
+                            <p><strong>Readiness Score:</strong> <span id="test-readiness-score" class="text-primary font-bold">--%</span></p>
+                            <p><strong>Strength:</strong> <span id="test-strength">N/A</span></p>
+                            <p><strong>Weakness:</strong> <span id="test-weakness">N/A</span></p>
                         </div>
-                        <button class="mt-4 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
-                            Retake Test
+                        <button id="take-test-btn" class="mt-4 bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                            Take New Test
                         </button>
+                        <p id="test-status" class="mt-4 text-red-500 font-medium hidden">Please complete your profile setup first!</p>
                     </div>
                 </div>
             </section>
@@ -201,44 +241,44 @@
             <section id="training" class="mb-16">
                 <div class="bg-white p-8 rounded-2xl card-shadow border border-slate-100">
                     <h2 class="font-heading text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                        <i class="fa-solid fa-route text-primary"></i> 5. Personalized Training Dashboard
+                        <i class="fa-solid fa-route text-primary"></i> 5. Personalized Training Dashboard (AI Roadmap)
+                        <i id="ai-loading-icon" class="fa-solid fa-spinner fa-spin text-primary text-xl ml-auto hidden"></i>
                     </h2>
-                    <p class="text-lg font-semibold mb-4 text-slate-800">Your 30-Day Roadmap Progress: <span class="text-secondary">Day 14/30</span></p>
+                    <p class="text-lg font-semibold mb-4 text-slate-800">
+                        Roadmap for <span id="roadmap-role">N/A</span>: <span class="text-secondary" id="roadmap-progress">Day 0/30</span>
+                    </p>
                     
-                    <div class="grid lg:grid-cols-3 gap-8">
+                    <div id="training-modules" class="grid lg:grid-cols-3 gap-8">
                         <div class="p-6 bg-blue-50 rounded-xl border border-blue-100">
                             <h3 class="font-bold text-xl text-blue-600 mb-4 flex items-center gap-2"><i class="fa-solid fa-book text-blue-600"></i> Aptitude Training</h3>
-                            <ul class="space-y-2 text-sm">
-                                <li class="flex items-center justify-between">Quantitative <span class="font-semibold text-slate-700">75% Complete</span></li>
-                                <li class="flex items-center justify-between">Logical Reasoning <span class="font-semibold text-slate-700">85% Complete</span></li>
-                                <li class="flex items-center justify-between">Verbal Ability <span class="font-semibold text-slate-700">50% Complete</span></li>
-                                <li class="text-xs italic mt-2">Includes timed tests & solution videos.</li>
-                            </ul>
-                            <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Go to Aptitude</button>
+                            <p class="text-sm text-slate-700 mb-4">Core Quants, Logic, and Verbal skills essential for all roles.</p>
+                            <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">View Modules</button>
                         </div>
 
                         <div class="p-6 bg-purple-50 rounded-xl border border-purple-100">
-                            <h3 class="font-bold text-xl text-purple-600 mb-4 flex items-center gap-2"><i class="fa-solid fa-laptop-code text-purple-600"></i> Technical Training</h3>
-                            <p class="text-xs font-semibold text-purple-600 mb-2">Role: Software Developer (Backend)</p>
-                            <ul class="space-y-2 text-sm">
-                                <li class="flex items-center justify-between">Coding + DSA <span class="font-semibold text-slate-700">60% Complete</span></li>
-                                <li class="flex items-center justify-between">Database Questions (SQL/NoSQL) <span class="font-semibold text-slate-700">40% Complete</span></li>
-                                <li class="flex items-center justify-between">Domain Concepts (System Design) <span class="font-semibold text-slate-700">30% Complete</span></li>
+                            <h3 class="font-bold text-xl text-purple-600 mb-4 flex items-center gap-2"><i class="fa-solid fa-laptop-code text-purple-600"></i> <span id="domain-module-title">Domain Training</span></h3>
+                            <p class="text-xs font-semibold text-purple-600 mb-2">Focus: <span id="domain-module-focus">N/A</span></p>
+                            <ul class="space-y-2 text-sm" id="domain-topics">
+                                <li class="text-slate-700">Content will be generated by AI based on your role.</li>
                             </ul>
-                            <button class="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition">Go to Technical</button>
+                            <button class="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition">Start Training</button>
                         </div>
 
                         <div class="p-6 bg-green-50 rounded-xl border border-green-100">
                             <h3 class="font-bold text-xl text-green-600 mb-4 flex items-center gap-2"><i class="fa-solid fa-people-carry-box text-green-600"></i> HR & Communication</h3>
-                            <ul class="space-y-2 text-sm">
-                                <li>Answering 'Tell me about yourself'</li>
-                                <li>Email Writing Basics</li>
-                                <li>Confidence-Building Lessons</li>
-                                <li>Interview Do's & Don'ts</li>
-                            </ul>
+                            <p class="text-sm text-slate-700 mb-4">Confidence-building and scenario-based interview prep.</p>
                             <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">Start HR Prep</button>
                         </div>
                     </div>
+
+                    <div class="mt-8 bg-light p-4 rounded-lg border border-slate-100">
+                        <h3 class="font-bold text-lg text-slate-800 mb-2">AI Roadmap Suggestion</h3>
+                        <p id="ai-roadmap-summary" class="text-sm text-slate-600">
+                           Based on your profile and baseline test, the AI recommends focusing **70%** of your time on **<span id="ai-focus-area">N/A</span>** for the first two weeks.
+                           <button id="regenerate-roadmap" class="text-primary text-xs font-medium ml-2 hover:underline">Regenerate</button>
+                        </p>
+                    </div>
+
                 </div>
             </section>
 
@@ -247,36 +287,26 @@
                     <h2 class="font-heading text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
                         <i class="fa-solid fa-vials text-pink-600"></i> 6. Test Series: Structured Practice
                     </h2>
+                    <p class="mb-4 text-slate-600">Prepare sequentially with tests customized to your <span id="test-series-role">N/A</span> role.</p>
                     
                     <div class="grid md:grid-cols-3 gap-6 text-center">
                         <div class="p-6 border-2 border-slate-100 rounded-xl hover:border-blue-300 transition duration-300">
                             <span class="inline-block w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl mb-3">L1</span>
                             <h3 class="font-bold text-lg text-slate-800 mb-2">Aptitude Test</h3>
-                            <p class="text-sm text-slate-500 mb-4">Focus on Quant & Logic. Detailed analytics + solution explanations.</p>
+                            <p class="text-sm text-slate-500 mb-4">Core skills review. Solution explanations available.</p>
                             <button class="text-blue-600 font-semibold hover:underline">Start Test</button>
                         </div>
-                        
                         <div class="p-6 border-2 border-slate-100 rounded-xl hover:border-purple-300 transition duration-300">
                             <span class="inline-block w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold text-xl mb-3">L2</span>
-                            <h3 class="font-bold text-lg text-slate-800 mb-2">Technical Test</h3>
-                            <p class="text-sm text-slate-500 mb-4">Role-based MCQs/Coding tasks with instant feedback on code correctness.</p>
+                            <h3 class="font-bold text-lg text-slate-800 mb-2" id="technical-test-name">Technical/Domain Test</h3>
+                            <p class="text-sm text-slate-500 mb-4">Role-based MCQs / Case Studies with feedback.</p>
                             <button class="text-purple-600 font-semibold hover:underline">Start Test</button>
                         </div>
-
                         <div class="p-6 border-2 border-slate-100 rounded-xl hover:border-green-300 transition duration-300">
                             <span class="inline-block w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-xl mb-3">L3</span>
                             <h3 class="font-bold text-lg text-slate-800 mb-2">HR Test</h3>
-                            <p class="text-sm text-slate-500 mb-4">Scenario-based questions. Submit written/audio answers for evaluation.</p>
+                            <p class="text-sm text-slate-500 mb-4">Scenario-based questions, audio evaluation.</p>
                             <button class="text-green-600 font-semibold hover:underline">Start Test</button>
-                        </div>
-                    </div>
-
-                    <div class="mt-8">
-                        <h3 class="font-bold text-lg text-slate-800 mb-3">Performance Snapshot</h3>
-                        <div class="bg-slate-50 p-4 rounded-lg text-sm">
-                            <p><strong>Overall Marks:</strong> 75% (Level 1)</p>
-                            <p><strong>Topic-wise:</strong> Strong in DS (85%), Needs work in Aptitude Time Management.</p>
-                            <p class="mt-2 text-primary font-semibold cursor-pointer hover:underline">View Progress Graph & Full Report</p>
                         </div>
                     </div>
                 </div>
@@ -290,26 +320,16 @@
                     
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <p class="text-lg mb-4">Create a high-impact, **ATS-friendly** resume in minutes using your profile data and test strengths.</p>
-                            
-                            <ul class="space-y-3 mb-6">
-                                <li class="flex items-start gap-3 text-sm"><i class="fa-solid fa-check-circle text-primary mt-1"></i> Modern ATS-Friendly Templates</li>
-                                <li class="flex items-start gap-3 text-sm"><i class="fa-solid fa-check-circle text-primary mt-1"></i> Auto-fill based on Profile & Strengths</li>
-                                <li class="flex items-start gap-3 text-sm"><i class="fa-solid fa-check-circle text-primary mt-1"></i> AI Suggestions for Measurable Achievements</li>
-                            </ul>
-
+                            <p class="text-lg mb-4">Create an ATS-friendly resume. Auto-filled with your **<span id="resume-role-highlight">N/A</span>** focus and verified strengths.</p>
                             <button class="bg-secondary text-white px-6 py-3 rounded-lg font-bold hover:bg-amber-600 transition shadow-lg shadow-secondary/30">
                                 Launch Resume Builder
                             </button>
                         </div>
                         <div class="bg-light p-6 rounded-xl border border-slate-200">
-                            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-robot text-purple-500"></i> AI Suggestions for Draft</h3>
-                            <ul class="space-y-2 text-sm text-slate-600">
-                                <li>**Improve Summary:** Make it specific to the 'Software Developer' role.</li>
-                                <li>**Measurable Achievements:** Convert project duties into quantifiable results (e.g., "Reduced latency by 15%").</li>
-                                <li>**Highlight Skills:** Emphasize Python and SQL, your top-performing skills.</li>
+                            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-robot text-purple-500"></i> AI Suggestions</h3>
+                            <ul class="space-y-2 text-sm text-slate-600" id="ai-resume-suggestions">
+                                <li>The AI will provide suggestions based on your profile and test results.</li>
                             </ul>
-                            <p class="mt-4 text-xs italic">Export: PDF Ready</p>
                         </div>
                     </div>
                 </div>
@@ -320,27 +340,27 @@
                     <h2 class="font-heading text-2xl font-bold text-white mb-6 flex items-center gap-3">
                         <i class="fa-solid fa-robot text-purple-400"></i> 8. AI Mock Interview Simulator
                     </h2>
-                    <p class="text-slate-300 mb-6">Practice with our advanced AI interviewer for real-time feedback on your performance.</p>
+                    <p class="text-slate-300 mb-6">Practice with our AI interviewer for your **<span id="mock-role-highlight">N/A</span>** role.</p>
                     
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
                             <h3 class="font-bold text-xl text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-headset text-green-400"></i> HR Round Simulation</h3>
-                            <p class="text-sm text-slate-400 mb-4">AI asks common HR/Behavioral questions. Answer via text or voice.</p>
-                            <p class="text-xs font-semibold text-slate-300">Last Score: **7.2/10** (Clarity & Confidence)</p>
+                            <p class="text-sm text-slate-400 mb-4">AI evaluates clarity, tone, and confidence.</p>
                             <button class="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Start HR Mock</button>
                         </div>
 
                         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                            <h3 class="font-bold text-xl text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-terminal text-blue-400"></i> Technical Round Simulation</h3>
-                            <p class="text-sm text-slate-400 mb-4">Role-based technical questions. AI analyzes answers for correctness and depth.</p>
-                            <p class="text-xs font-semibold text-slate-300">Last Score: **8.5/10** (Technical Correctness)</p>
-                            <button class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Start Technical Mock</button>
+                            <h3 class="font-bold text-xl text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-terminal text-blue-400"></i> <span id="technical-mock-name">Technical Round</span> Simulation</h3>
+                            <p class="text-sm text-slate-400 mb-4">AI assesses technical correctness specific to your role.</p>
+                            <button class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Start Mock</button>
                         </div>
                     </div>
                     
                     <div class="mt-8 bg-slate-700 p-5 rounded-lg border border-slate-600">
                         <h3 class="font-bold text-lg text-white mb-2">AI Feedback Summary</h3>
-                        <p class="text-sm text-slate-300">Improvement Focus: Increase pace slightly and use more technical terms in the Technical Round. Suggested Lesson: "Interview Body Language."</p>
+                        <p id="ai-mock-feedback" class="text-sm text-slate-300">
+                            No mock interviews completed yet. Complete your profile and test to generate a targeted session.
+                        </p>
                     </div>
                 </div>
             </section>
@@ -350,26 +370,21 @@
                     <h2 class="font-heading text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
                         <i class="fa-solid fa-certificate text-secondary"></i> 9. Final Evaluation & Certification
                     </h2>
-                    <p class="text-lg mb-4 text-slate-800">Prove your readiness by completing the final assessment.</p>
+                    <p class="text-lg mb-4 text-slate-800">Prove your readiness and earn a verified certificate.</p>
                     
                     <div class="p-6 bg-secondary/10 rounded-xl border border-secondary/20 flex items-center justify-between">
                         <div>
                             <p class="text-sm font-semibold text-secondary">Status:</p>
-                            <span class="font-heading text-3xl font-bold text-secondary">Ready to Certify!</span>
+                            <span id="cert-status" class="font-heading text-3xl font-bold text-secondary">In Progress</span>
                         </div>
-                        <button class="bg-secondary text-white px-8 py-3 rounded-lg font-bold hover:bg-amber-600 transition shadow-lg shadow-secondary/30">
+                        <button id="start-final-exam-btn" class="bg-secondary text-white px-8 py-3 rounded-lg font-bold hover:bg-amber-600 transition shadow-lg shadow-secondary/30 disabled:opacity-50" disabled>
                             Start Final Exam
                         </button>
                     </div>
 
                     <div class="mt-6 bg-light p-4 rounded-lg">
                         <h3 class="font-bold text-lg text-slate-800 mb-2">Complete Performance Summary</h3>
-                        <ul class="text-sm space-y-1">
-                            <li>**Aptitude:** 90% (Mastered)</li>
-                            <li>**Technical:** 82% (Strong)</li>
-                            <li>**Communication:** 78% (Good)</li>
-                        </ul>
-                        <p class="mt-2 text-sm italic text-slate-500">Your final score will be an aggregate of your performance across all modules and the final exam.</p>
+                        <p id="final-summary" class="text-sm text-slate-600">Complete all training modules and test series to unlock your summary.</p>
                     </div>
                 </div>
             </section>
@@ -383,47 +398,317 @@
     </footer>
     
     <script type="module">
+        // Import Firebase Auth (Mocked, as full initialization is complex)
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Initialize Firebase Auth (Assuming app is initialized elsewhere or configured to be imported)
-        // Since we don't have the full import context, we'll assume auth is available from the index.html setup.
-        // For a standalone page, we would need the full firebaseConfig and initializeApp again.
-        // For this example, we'll use a placeholder for demonstration.
-        // Replace this with your actual Firebase initialization if running live:
-        // const app = initializeApp({ /* config */ });
-        // const auth = getAuth(app);
-        
-        // Placeholder auth object for testing purposes (cannot actually sign out without Firebase SDK)
-        const auth = {
-            signOut: async () => {
-                console.log("Mock Sign Out performed.");
-            }
+        // MOCK AUTH: Since we don't have the full Firebase context, we mock the sign out for redirect.
+        const auth = { signOut: async () => { console.log("Mock Sign Out performed."); } };
+
+        // --- DOM Elements ---
+        const profileEditForm = document.getElementById('profile-edit-form');
+        const profileDisplayView = document.getElementById('profile-display-view');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const takeTestBtn = document.getElementById('take-test-btn');
+        const testStatus = document.getElementById('test-status');
+        const aiLoadingIcon = document.getElementById('ai-loading-icon');
+        const regenerateRoadmapBtn = document.getElementById('regenerate-roadmap');
+
+        // --- Default/Initial Data Structure ---
+        const DEFAULT_PROFILE = {
+            name: 'User Name', degree: 'N/A', year: 'N/A', certifications: 'None', languages: 'N/A',
+            field: 'IT', role: 'Software Developer', experience: 'Fresher'
         };
 
+        const DEFAULT_TEST_RESULTS = {
+            score: '--', strength: 'N/A', weakness: 'N/A'
+        };
 
-        // --- UI Logic ---
-        const logoutBtn = document.getElementById('logout-btn');
+        // --- Utility Functions ---
+        function getProfile() {
+            return JSON.parse(localStorage.getItem('cracknestProfile')) || DEFAULT_PROFILE;
+        }
+
+        function getTestResults() {
+            return JSON.parse(localStorage.getItem('cracknestTestResults')) || DEFAULT_TEST_RESULTS;
+        }
+
+        function saveProfile(profile) {
+            localStorage.setItem('cracknestProfile', JSON.stringify(profile));
+            updateUI(profile, getTestResults());
+        }
+
+        function saveTestResults(results) {
+            localStorage.setItem('cracknestTestResults', JSON.stringify(results));
+            updateUI(getProfile(), results);
+        }
+
+        // --- AI/Gemini Mock Functions ---
+
+        /**
+         * Mocks the generation of AI content based on profile and test results.
+         * In a real app, this would be an API call to Gemini.
+         * @param {object} profile 
+         * @param {object} testResults 
+         */
+        async function generateAIContent(profile, testResults) {
+            aiLoadingIcon.classList.remove('hidden');
+            
+            // Simulate API latency
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const role = profile.role;
+            const field = profile.field;
+            const weakness = testResults.weakness === 'N/A' ? 'Aptitude Basics' : testResults.weakness;
+            const strength = testResults.strength === 'N/A' ? 'HR Communication' : testResults.strength;
+
+            // Mock Domain Training Content
+            let domainTitle, domainFocus, domainTopics;
+
+            if (field === 'IT' || field === 'Engineering') {
+                domainTitle = 'Technical Training';
+                domainFocus = `${role} Core Skills`;
+                if (role.toLowerCase().includes('software')) {
+                    domainTopics = [
+                        `Coding + DSA Mastery (${strength})`, 
+                        'System Design & Architecture Basics', 
+                        `Advanced Database Queries (${weakness})`
+                    ];
+                } else {
+                    domainTopics = [
+                        'CAD Software Proficiency', 
+                        'Material Science & stress Analysis', 
+                        'Project Management Methodologies'
+                    ];
+                }
+            } else if (field === 'Marketing') {
+                domainTitle = 'Domain Training';
+                domainFocus = 'Digital Marketing Strategy';
+                domainTopics = [
+                    'SEO & SEM Best Practices',
+                    'Content Strategy & Copywriting',
+                    'Marketing Analytics & Reporting'
+                ];
+            } else if (field === 'HR') {
+                domainTitle = 'Domain Training';
+                domainFocus = 'HR Policy & Compliance';
+                domainTopics = [
+                    'Recruitment Process & ATS Training',
+                    'Labor Law & Compliance Basics',
+                    'Employee Relations Case Studies'
+                ];
+            } else {
+                 domainTitle = 'Domain Training';
+                 domainFocus = `${field} Principles`;
+                 domainTopics = [`${field} Core Concepts`, `Industry Regulations`, `Financial Modeling Basics`];
+            }
+
+            // Mock Resume Suggestions
+            const resumeSuggestions = [
+                `**Improve Summary:** Tailor it to emphasize your skills for the **${role}** role.`,
+                `**Highlight Strongest Skill:** Ensure **${strength}** is clearly demonstrated with measurable results.`,
+                `**Weakness Mitigation:** Add relevant projects to cover gaps in **${weakness}**.`
+            ];
+            
+            // Mock Roadmap Summary
+            const roadmapSummary = `Based on your profile and test results, the AI recommends focusing **75%** of your time on **${weakness}** (Your primary gap) for the first two weeks, and reinforcing your **${strength}** for confidence.`;
+
+            aiLoadingIcon.classList.add('hidden');
+
+            return { domainTitle, domainFocus, domainTopics, resumeSuggestions, roadmapSummary, weakness };
+        }
+
+
+        // --- UI Update Function ---
+        async function updateUI(profile, testResults) {
+            // 1. Update Profile Display
+            document.getElementById('greeting-name').textContent = `Welcome Back, ${profile.name.split(' ')[0]}!`;
+            document.getElementById('user-name').textContent = profile.name;
+            document.getElementById('user-avatar').textContent = profile.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            
+            const profileDisplay = document.getElementById('personal-info-list').parentNode.parentNode;
+            for (const key in profile) {
+                const elements = profileDisplay.querySelectorAll(`[data-field="${key}"]`);
+                elements.forEach(el => el.textContent = profile[key] || 'N/A');
+                // Fill form fields for editing
+                const input = document.getElementById(key);
+                if (input) input.value = profile[key];
+            }
+
+            // 2. Update Test Results
+            const isTestTaken = testResults.score !== '--';
+            document.getElementById('readiness-score').textContent = `${testResults.score}%`;
+            document.getElementById('test-readiness-score').textContent = `${testResults.score}%`;
+            document.getElementById('test-strength').textContent = testResults.strength;
+            document.getElementById('test-weakness').textContent = testResults.weakness;
+            document.getElementById('test-role-desc').textContent = profile.role;
+            document.getElementById('target-role').textContent = profile.role;
+            document.getElementById('resume-role-highlight').textContent = profile.role;
+            document.getElementById('mock-role-highlight').textContent = profile.role;
+            document.getElementById('test-series-role').textContent = profile.role;
+            document.getElementById('roadmap-role').textContent = profile.role;
+
+
+            if (profile.name === 'User Name') {
+                takeTestBtn.disabled = true;
+                testStatus.classList.remove('hidden');
+            } else {
+                takeTestBtn.disabled = false;
+                testStatus.classList.add('hidden');
+            }
+
+            // 3. AI-Driven Content Updates
+            const aiContent = await generateAIContent(profile, testResults);
+            
+            // Training Module
+            document.getElementById('domain-module-title').textContent = aiContent.domainTitle;
+            document.getElementById('domain-module-focus').textContent = aiContent.domainFocus;
+            document.getElementById('technical-test-name').textContent = `${aiContent.domainTitle} Test`;
+            document.getElementById('technical-mock-name').textContent = `${aiContent.domainTitle} Round`;
+            
+            const domainTopicsList = document.getElementById('domain-topics');
+            domainTopicsList.innerHTML = '';
+            aiContent.domainTopics.forEach(topic => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between text-slate-700';
+                li.innerHTML = `${topic}`; // Mock progress is omitted for simplicity
+                domainTopicsList.appendChild(li);
+            });
+
+            // AI Roadmap Summary
+            document.getElementById('ai-roadmap-summary').innerHTML = `${aiContent.roadmapSummary} <button id="regenerate-roadmap" class="text-primary text-xs font-medium ml-2 hover:underline">Regenerate</button>`;
+            document.getElementById('ai-focus-area').textContent = aiContent.weakness;
+
+            // Resume Suggestions
+            const resumeSuggestionsList = document.getElementById('ai-resume-suggestions');
+            resumeSuggestionsList.innerHTML = '';
+            aiContent.resumeSuggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.className = 'text-slate-600';
+                li.innerHTML = suggestion;
+                resumeSuggestionsList.appendChild(li);
+            });
+
+            // Set up regenerate button listener (needs to be re-bound as innerHTML overwrites)
+            document.getElementById('regenerate-roadmap').addEventListener('click', () => {
+                generateAIContent(profile, testResults).then(content => {
+                    document.getElementById('ai-roadmap-summary').textContent = content.roadmapSummary;
+                });
+            });
+
+
+            // 4. Update Final Evaluation Status (Mock Logic)
+            if (isTestTaken && profile.name !== 'User Name' && getProgress() > 80) {
+                 document.getElementById('cert-status').textContent = 'Ready to Certify!';
+                 document.getElementById('start-final-exam-btn').disabled = false;
+                 document.getElementById('final-summary').innerHTML = 'Congratulations! You are ready. <span class="font-bold text-primary">Final Readiness Score: 88%</span>';
+            } else {
+                document.getElementById('cert-status').textContent = 'In Progress';
+                document.getElementById('start-final-exam-btn').disabled = true;
+                document.getElementById('final-summary').textContent = `Complete ${100 - getProgress()}% more training and mock tests to unlock.`;
+            }
+            
+            // Mock Roadmap Progress
+            document.getElementById('roadmap-progress').textContent = `Day ${Math.floor(getProgress() * 0.3)}/30`;
+        }
+
+        // Mock Progress Function
+        function getProgress() {
+            // Simple mock progress calculation based on test score
+            const results = getTestResults();
+            const score = parseInt(results.score) || 0;
+            return Math.min(100, score + 20); // Ensures it's at least 20%
+        }
+
+        // --- Event Listeners ---
+        
+        // Profile Edit/Save Toggle
+        editProfileBtn.addEventListener('click', () => {
+            const isEditing = profileEditForm.classList.contains('hidden');
+            if (isEditing) {
+                profileDisplayView.classList.add('hidden');
+                profileEditForm.classList.remove('hidden');
+                editProfileBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Cancel';
+            } else {
+                profileEditForm.classList.add('hidden');
+                profileDisplayView.classList.remove('hidden');
+                editProfileBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Edit';
+            }
+        });
+
+        // Profile Form Submission
+        profileEditForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newProfile = {
+                name: document.getElementById('name').value,
+                degree: document.getElementById('degree').value,
+                year: document.getElementById('year').value,
+                certifications: document.getElementById('certifications').value,
+                languages: document.getElementById('languages').value,
+                field: document.getElementById('field').value,
+                role: document.getElementById('role').value,
+                experience: document.getElementById('experience').value
+            };
+            
+            saveProfile(newProfile);
+            profileEditForm.classList.add('hidden');
+            profileDisplayView.classList.remove('hidden');
+            editProfileBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Edit';
+        });
+
+        // Mock Take Test
+        takeTestBtn.addEventListener('click', () => {
+            const currentProfile = getProfile();
+            alert(`Starting Baseline Skill Test for ${currentProfile.role}. This takes 10 minutes.`);
+            
+            // Simulate AI test results generation based on role/field
+            let mockScore;
+            let strength, weakness;
+            
+            if (currentProfile.field === 'IT') {
+                mockScore = Math.floor(Math.random() * (90 - 65 + 1)) + 65; // 65-90
+                strength = mockScore > 75 ? 'DSA & Logical Reasoning' : 'Verbal Ability';
+                weakness = mockScore > 75 ? 'System Design' : 'Coding Basics';
+            } else if (currentProfile.field === 'Marketing') {
+                mockScore = Math.floor(Math.random() * (85 - 55 + 1)) + 55; // 55-85
+                strength = mockScore > 70 ? 'Copywriting & Content' : 'HR Communication';
+                weakness = mockScore > 70 ? 'SEO/SEM Analytics' : 'Aptitude Quants';
+            } else { // HR, Finance, Engineering, etc.
+                mockScore = Math.floor(Math.random() * (80 - 60 + 1)) + 60; // 60-80
+                strength = 'Domain Concepts';
+                weakness = 'Aptitude Basics';
+            }
+            
+            saveTestResults({
+                score: mockScore.toString(),
+                strength: strength,
+                weakness: weakness
+            });
+            
+            alert(`Test Complete! Your readiness score is ${mockScore}%. Roadmap updated.`);
+        });
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            // await signOut(auth); // Actual Firebase Sign Out
+            window.location.href = "index.html"; 
+        });
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialProfile = getProfile();
+            const initialTestResults = getTestResults();
+            updateUI(initialProfile, initialTestResults);
+        });
+        
+        // Mobile Sidebar Toggle
         const mobileSidebarBtn = document.getElementById('mobile-sidebar-btn');
         const sidebar = document.getElementById('sidebar');
 
-        // Logout
-        if(logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                // In a real application, you would sign out from Firebase:
-                // await signOut(auth);
-                
-                // For this mock, we redirect to the landing page
-                alert("You have been signed out.");
-                window.location.href = "index.html"; 
-            });
-        }
-        
-        // Mobile Sidebar Toggle
         if (mobileSidebarBtn && sidebar) {
             mobileSidebarBtn.addEventListener('click', () => {
                 sidebar.classList.toggle('active');
             });
-            // Close sidebar when clicking a link
             document.querySelectorAll('#sidebar a').forEach(link => {
                 link.addEventListener('click', () => {
                     if(window.innerWidth < 768) {
@@ -432,11 +717,6 @@
                 });
             });
         }
-
-        // Set a default user avatar initial
-        const userName = document.getElementById('user-name').textContent.split(' ');
-        const initials = userName[0].charAt(0) + (userName.length > 1 ? userName[1].charAt(0) : '');
-        document.getElementById('user-avatar').textContent = initials;
     </script>
 </body>
 </html>
