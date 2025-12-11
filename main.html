@@ -308,9 +308,9 @@
                                 <div class="bg-blue-100 p-3 rounded-lg text-blue-600"><i class="fa-solid fa-chart-pie text-xl"></i></div>
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Readiness</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-1">45%</h3>
+                            <h3 id="dash-readiness-percent" class="text-3xl font-bold text-slate-800 mb-1">45%</h3>
                             <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
-                                <div class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
+                                <div id="dash-readiness-bar" class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
                             </div>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
@@ -319,15 +319,15 @@
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Target</span>
                             </div>
                             <h3 id="dash-target-role" class="text-xl font-bold text-slate-800 mb-1">Developer</h3>
-                            <p class="text-sm text-slate-500">Next Goal: Basics</p>
+                            <p class="text-sm text-slate-500">Field: <span id="dash-target-field">IT/Tech</span></p>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600"><i class="fa-solid fa-check-circle text-xl"></i></div>
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Modules</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-1">1/5</h3>
-                            <p class="text-sm text-slate-500">Last: Baseline Assessment</p>
+                            <h3 id="dash-modules-complete" class="text-3xl font-bold text-slate-800 mb-1">0/5</h3>
+                            <p id="dash-modules-status" class="text-sm text-slate-500">Status: Incomplete</p>
                         </div>
                     </div>
 
@@ -559,6 +559,13 @@
         async function callGemini(prompt) {
             if (!GEMINI_API_KEY) {
                 console.error("Gemini Error: API Key is missing. Please update the GEMINI_API_KEY variable.");
+                // Provide dummy content if key is missing to allow UI testing
+                if (prompt.includes("Generate 5 multiple choice questions")) {
+                    return `[{"question": "What is the capital of France? (DUMMY)", "options": ["Berlin", "Madrid", "Paris", "Rome"], "correctIndex": 2}, {"question": "What is the primary data structure for LIFO access?", "options": ["Queue", "Stack", "Array", "Heap"], "correctIndex": 1}, {"question": "Which accounting principle governs revenue recognition?", "options": ["Matching", "Cost", "Revenue recognition", "Conservatism"], "correctIndex": 2}, {"question": "What is 15% of 200?", "options": ["20", "30", "40", "50"], "correctIndex": 1}, {"question": "Which of these is a programming language?", "options": ["HTML", "CSS", "Python", "XML"], "correctIndex": 2}]`;
+                }
+                if (prompt.includes("Generate a brief, encouraging analysis")) {
+                    return "### Dummy Analysis\n* You scored 2/5 (40%). Keep practicing!\n* You need to focus on core concepts in your chosen role.\n* Tip: Review fundamental terminology and definitions.";
+                }
                 return null;
             }
             try {
@@ -588,6 +595,14 @@
             
             if (storedProfile) {
                 userProfile = JSON.parse(storedProfile);
+                
+                // Add default readiness/module if loading old profile without new metrics
+                if (userProfile.readinessScore === undefined) {
+                    userProfile.readinessScore = 0;
+                    userProfile.modulesComplete = userProfile.baselineTestComplete ? 1 : 0;
+                    localStorage.setItem('cracknest_profile', JSON.stringify(userProfile));
+                }
+
                 updateSidebarUserInfo();
                 handleNavigationState();
             } else {
@@ -714,6 +729,14 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             btn.disabled = true;
 
+            const targetRoleInput = document.getElementById('p-target').value.trim();
+            if (!targetRoleInput) {
+                 alert("Please enter a Specific Target Role.");
+                 btn.innerHTML = originalText;
+                 btn.disabled = false;
+                 return;
+            }
+
             const profileData = {
                 name: document.getElementById('p-name').value,
                 degree: document.getElementById('p-degree').value,
@@ -721,8 +744,11 @@
                 languages: document.getElementById('p-languages').value,
                 certifications: document.getElementById('p-certifications').value,
                 targetField: document.getElementById('p-field').value,
-                targetRole: document.getElementById('p-target').value, // Get value from text input
+                targetRole: targetRoleInput, // Get value from text input
                 experience: document.getElementById('p-experience').value,
+                // New metrics for the dashboard
+                readinessScore: isUpdate && userProfile.readinessScore !== undefined ? userProfile.readinessScore : 0,
+                modulesComplete: isUpdate && userProfile.modulesComplete !== undefined ? userProfile.modulesComplete : 0,
                 // Ensure baselineTestComplete is false for a NEW profile submission
                 baselineTestComplete: isUpdate ? userProfile.baselineTestComplete : false,
                 testDate: isUpdate ? userProfile.testDate : null,
@@ -773,7 +799,8 @@
             document.getElementById('test-target-role').textContent = userProfile.targetRole;
 
             // Check LocalStorage cache first
-            const cachedQuestions = localStorage.getItem('cracknest_questions_' + userProfile.targetRole);
+            const cacheKey = 'cracknest_questions_' + userProfile.targetRole;
+            const cachedQuestions = localStorage.getItem(cacheKey);
             
             if (cachedQuestions) {
                 currentQuestions = JSON.parse(cachedQuestions);
@@ -792,7 +819,7 @@
                         const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
                         currentQuestions = JSON.parse(jsonStr);
                         // Save to LocalStorage
-                        localStorage.setItem('cracknest_questions_' + userProfile.targetRole, JSON.stringify(currentQuestions));
+                        localStorage.setItem(cacheKey, JSON.stringify(currentQuestions));
                         loading.classList.add('hidden');
                         renderQuestions();
                     } catch (e) {
@@ -836,19 +863,45 @@
                 const btn = document.querySelector('#test-container button');
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Results...';
                 btn.disabled = true;
+
+                let correctCount = 0;
+                const totalQuestions = currentQuestions.length;
+                let incorrectDetails = [];
                 
-                // Get Analysis from Gemini based on role
-                const analysisPrompt = `A student aiming for ${userProfile.targetRole} just finished a baseline test. 
-                Generate a brief, encouraging analysis (3 bullet points) on why this role is a good choice and a 1-sentence motivation. Format in Markdown.`;
+                // 1. Grade the test
+                currentQuestions.forEach((q, i) => {
+                    const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                    const userAnswer = selectedOption ? parseInt(selectedOption.value) : -1;
+                    const isCorrect = userAnswer === q.correctIndex;
+                    
+                    if (isCorrect) {
+                        correctCount++;
+                    } else {
+                        incorrectDetails.push({
+                            question: q.question
+                        });
+                    }
+                });
+
+                const readinessScore = Math.round((correctCount / totalQuestions) * 100);
                 
-                const analysis = await callGemini(prompt); // Reusing prompt here for analysis, but the original logic was slightly better
-                
-                // Update Local State
+                // 2. Update Local State with Score and Completion
                 userProfile.baselineTestComplete = true;
+                userProfile.readinessScore = readinessScore;
+                userProfile.modulesComplete = 1; // Baseline is module 1
                 userProfile.testDate = new Date().toISOString();
                 localStorage.setItem('cracknest_profile', JSON.stringify(userProfile)); 
+
+                // 3. Generate Feedback Prompt
+                const incorrectTopics = incorrectDetails.map(d => d.question).slice(0, 3).join(" | "); // Limit topics for brevity
+                const analysisPrompt = `A student aiming for ${userProfile.targetRole} just scored ${readinessScore}% (${correctCount}/${totalQuestions}) on a baseline test. 
+                They missed questions related to: [${incorrectTopics}]. 
+                Generate a brief, encouraging analysis (3 bullet points) on their performance, mentioning areas of weakness (if any) and a 1-sentence motivation. Format in Markdown.`;
+
+                // 4. Get Analysis
+                const analysis = await callGemini(analysisPrompt);
                 
-                // Show Results UI
+                // 5. Show Results UI
                 document.getElementById('test-container').classList.add('hidden');
                 document.getElementById('test-results').classList.remove('hidden');
                 document.getElementById('test-analysis-text').innerHTML = marked.parse(analysis || "Great job! Your roadmap is ready.");
@@ -862,11 +915,22 @@
              handleNavigationState();
         });
 
-        // --- 3. DASHBOARD LOGIC (Unchanged) ---
+        // --- 3. DASHBOARD LOGIC ---
         async function loadDashboardData(prefetch = false) {
             document.getElementById('dash-target-role').textContent = userProfile.targetRole;
+            document.getElementById('dash-target-field').textContent = userProfile.targetField;
+
+            // Update Readiness Card
+            const readiness = userProfile.readinessScore || 0;
+            document.getElementById('dash-readiness-percent').textContent = `${readiness}%`;
+            document.getElementById('dash-readiness-bar').style.width = `${readiness}%`;
+
+            // Update Modules Card
+            const modules = userProfile.modulesComplete || 0;
+            document.getElementById('dash-modules-complete').textContent = `${modules}/5`;
+            document.getElementById('dash-modules-status').textContent = modules > 0 ? 'Status: Baseline Completed' : 'Status: Incomplete';
             
-            // Check cache
+            // Check cache for Roadmap
             const cachedRoadmap = localStorage.getItem('cracknest_roadmap_' + userProfile.targetRole);
             
             if (cachedRoadmap) {
