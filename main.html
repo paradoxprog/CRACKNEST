@@ -40,6 +40,7 @@
         .chat-scroll::-webkit-scrollbar { width: 6px; }
         .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         
+        /* Loading Animation */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4F46E5;
@@ -95,17 +96,10 @@
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
         
-        <div id="api-key-banner" class="bg-indigo-900 text-white px-6 py-2 text-xs flex justify-between items-center z-50 flex-shrink-0">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-key text-secondary"></i>
-                <span class="font-bold">Gemini API Key Required:</span>
-                <span class="opacity-80">Needed to generate your custom baseline test.</span>
-            </div>
-            <div class="flex gap-2">
-                <input type="password" id="gemini-key-input" placeholder="Paste API Key here" class="text-slate-800 px-2 py-1 rounded text-xs w-48 border-none focus:ring-2 focus:ring-secondary">
-                <button onclick="saveApiKey()" class="bg-secondary text-indigo-900 font-bold px-3 py-1 rounded hover:bg-amber-400 transition">Save Key</button>
-            </div>
-        </div>
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 md:hidden flex-shrink-0">
+            <span class="font-heading font-bold text-xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
+            <button id="mobile-menu-toggle" class="text-slate-600"><i class="fa-solid fa-bars text-xl"></i></button>
+        </header>
 
         <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
             
@@ -163,7 +157,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Specific Role</label>
                                 <input type="text" id="p-role" placeholder="e.g. Java Backend Developer" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition">
-                                <p class="text-xs text-slate-400 mt-1">This specific role will be used to generate your test.</p>
+                                <p class="text-xs text-slate-400 mt-1">This role will be used to generate your custom test.</p>
                             </div>
                         </div>
                     </div>
@@ -212,15 +206,12 @@
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
                     <div class="bg-slate-50 px-8 py-4 border-b border-slate-100 flex justify-between items-center">
                         <span class="font-bold text-slate-700">Question <span id="q-number">1</span>/<span id="q-total">5</span></span>
-                        <div class="flex gap-1" id="q-dots">
-                            </div>
+                        <div class="flex gap-1" id="q-dots"></div>
                     </div>
                     
                     <div class="p-8">
                         <p id="q-text" class="text-lg font-medium text-slate-800 mb-6">Loading question...</p>
-                        
-                        <div id="q-options" class="space-y-3">
-                            </div>
+                        <div id="q-options" class="space-y-3"></div>
                     </div>
                 </div>
             </section>
@@ -243,7 +234,6 @@
                     <div class="flex items-center gap-6">
                         <div class="w-24 h-24 rounded-full border-8 border-primary/20 flex items-center justify-center relative">
                             <span class="text-2xl font-bold text-primary" id="score-display">0%</span>
-                            <div class="absolute inset-0 rounded-full border-8 border-primary border-t-transparent animate-[spin_1s_linear_reverse]" style="clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);"></div>
                         </div>
                         <div>
                             <p class="text-slate-600 mb-1">Target Role: <span id="result-role" class="font-bold">...</span></p>
@@ -255,7 +245,10 @@
 
             <section id="section-interview" class="hidden h-full flex flex-col">
                 <div class="mb-4 flex justify-between items-center">
-                    <h2 class="font-heading text-2xl font-bold text-slate-900">AI Mock Interview</h2>
+                    <div>
+                        <h2 class="font-heading text-2xl font-bold text-slate-900">AI Mock Interview</h2>
+                        <p class="text-sm text-slate-500">Role-specific interview simulation.</p>
+                    </div>
                     <button onclick="startInterview()" class="bg-primary text-white px-4 py-1.5 rounded-lg text-sm font-bold">New Session</button>
                 </div>
                 <div class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
@@ -267,15 +260,9 @@
                 </div>
             </section>
 
-            <section id="section-resume" class="hidden max-w-4xl mx-auto">
-                 <div class="mb-6"><h2 class="font-heading text-2xl font-bold text-slate-900">Resume Builder</h2></div>
-                 <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                     <p>Resume features are available after completing the baseline test.</p>
-                 </div>
-            </section>
-
-            <section id="section-roadmap" class="hidden"><div class="text-center py-20"><h2 class="text-2xl font-bold">Roadmap</h2></div></section>
-            <section id="section-tests" class="hidden"><div class="text-center py-20"><h2 class="text-2xl font-bold">Test Series</h2></div></section>
+            <section id="section-resume" class="hidden"><div class="text-center py-20 font-bold text-xl text-slate-400">Resume Builder (Coming Soon)</div></section>
+            <section id="section-roadmap" class="hidden"><div class="text-center py-20 font-bold text-xl text-slate-400">Personalized Roadmap (Coming Soon)</div></section>
+            <section id="section-tests" class="hidden"><div class="text-center py-20 font-bold text-xl text-slate-400">Test Series (Coming Soon)</div></section>
         </div>
     </main>
 
@@ -295,7 +282,13 @@
     </script>
 
     <script>
-        let currentState = { view: 'profile', userProfile: {}, apiKey: '', chatHistory: [], generatedQuestions: [], score: 0 };
+        // ==========================================
+        // 🔑 IMPORTANT: PASTE YOUR API KEY HERE
+        // ==========================================
+        const GEMINI_API_KEY = "AIzaSyBfO_k3iJ-n8_cQHNPuKkyXsYL5E_1d95g"; 
+        // ==========================================
+
+        let currentState = { view: 'profile', userProfile: {}, chatHistory: [], generatedQuestions: [], score: 0 };
 
         function navTo(sectionId) {
             document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
@@ -306,28 +299,19 @@
             currentState.view = sectionId;
         }
 
-        // --- API KEY HANDLING ---
-        function saveApiKey() {
-            const key = document.getElementById('gemini-key-input').value;
-            if(key) {
-                currentState.apiKey = key;
-                document.getElementById('api-key-banner').classList.add('hidden');
-                alert("API Key Saved!");
-            }
-        }
-
         async function callGemini(prompt) {
-            if (!currentState.apiKey) {
-                alert("Please enter a Gemini API Key in the top banner.");
-                throw new Error("No API Key");
+            if (GEMINI_API_KEY === "PASTE_YOUR_GEMINI_KEY_HERE" || !GEMINI_API_KEY) {
+                alert("Developer Error: API Key is missing in the code.");
+                throw new Error("Missing API Key");
             }
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentState.apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
             const data = await response.json();
+            if(data.error) throw new Error(data.error.message);
             return data.candidates[0].content.parts[0].text;
         }
 
@@ -347,7 +331,7 @@
                 exp: document.querySelector('input[name="exp"]:checked').value
             };
 
-            // Update UI Names
+            // Update UI
             document.getElementById('dash-name').innerText = currentState.userProfile.name;
             document.getElementById('loading-role').innerText = currentState.userProfile.role;
             document.getElementById('test-role-display').innerText = currentState.userProfile.role;
@@ -366,7 +350,7 @@
 
                 const rawData = await callGemini(prompt);
                 
-                // Clean AI response (remove markdown if present)
+                // Clean AI response
                 const cleanJson = rawData.replace(/```json/g, '').replace(/```/g, '').trim();
                 currentState.generatedQuestions = JSON.parse(cleanJson);
 
@@ -377,7 +361,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("Failed to generate test. Ensure API Key is correct.");
+                alert("Failed to generate test. Check console for details.");
                 document.getElementById('section-loading').classList.add('hidden');
                 document.getElementById('section-profile').classList.remove('hidden');
             }
@@ -428,7 +412,7 @@
         function selectOption(selectedIdx, correctIdx) {
             if(selectedIdx === correctIdx) userScore++;
             currentQIndex++;
-            renderQuestion(); // Immediately go to next
+            renderQuestion();
         }
 
         function finishTest() {
@@ -437,7 +421,7 @@
             document.getElementById('score-display').innerText = percentage + '%';
         }
 
-        // --- MOCK INTERVIEW LOGIC (Basic) ---
+        // --- MOCK INTERVIEW LOGIC ---
         function startInterview() {
             document.getElementById('chat-history').innerHTML = ''; 
             currentState.chatHistory = [];
@@ -458,17 +442,23 @@
             const context = currentState.chatHistory.slice(-6).join('\n');
             const prompt = `${context}\n\nAct as a ${currentState.userProfile.role} interviewer. Respond to the user's answer and ask the next relevant technical question. Keep it short.`;
             
-            const reply = await callGemini(prompt);
-            appendChat('ai', reply);
-            currentState.chatHistory.push(`AI: ${reply}`);
+            try {
+                const reply = await callGemini(prompt);
+                appendChat('ai', reply);
+                currentState.chatHistory.push(`AI: ${reply}`);
+            } catch (e) {
+                appendChat('ai', "Error connecting to AI. Please check API Key.");
+            }
         }
 
         function appendChat(sender, text) {
             const div = document.createElement('div');
             div.className = `flex items-start gap-3 ${sender === 'user' ? 'flex-row-reverse' : ''}`;
             const bg = sender === 'ai' ? 'bg-white border border-slate-200' : 'bg-primary text-white';
-            div.innerHTML = `<div class="p-3 rounded-2xl ${bg} max-w-[80%] text-sm">${marked.parse(text)}</div>`;
+            div.innerHTML = `<div class="p-3 rounded-2xl ${bg} max-w-[80%] text-sm shadow-sm">${marked.parse(text)}</div>`;
             document.getElementById('chat-history').appendChild(div);
+            // Scroll to bottom
+            document.getElementById('chat-history').scrollTop = document.getElementById('chat-history').scrollHeight;
         }
     </script>
 </body>
