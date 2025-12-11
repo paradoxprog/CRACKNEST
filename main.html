@@ -464,9 +464,30 @@
 
                 <div id="view-test-series" class="section-view pb-12">
                     <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6 flex items-center gap-2"><i class="fa-solid fa-list-ol text-primary"></i> Structured Preparation Path</h2>
-                    <p class="text-slate-500 max-w-2xl mb-8">Follow this three-level testing series customized for your career target to ensure you are fully interview-ready.</p>
+                    <p class="text-slate-500 max-w-2xl mb-8">Follow this three-level testing series customized for your career target to ensure you are fully interview-ready. Target Role: <span class="font-bold text-primary" id="test-series-role"></span></p>
                     
-                    <div class="space-y-6">
+                    <div id="level-test-area" class="bg-white rounded-xl shadow-xl p-8 border border-slate-100 hidden">
+                        <div id="level-test-loading" class="text-center py-16">
+                            <div class="loader mx-auto mb-6 border-t-secondary w-12 h-12"></div>
+                            <h3 class="text-lg font-bold text-slate-700 mb-2">Generating <span id="loading-level"></span> Questions...</h3>
+                            <p class="text-slate-500 animate-pulse max-w-md mx-auto">Our AI is fetching questions for your role: <span id="loading-role" class="font-medium text-primary"></span></p>
+                        </div>
+                        <div id="level-test-questions" class="space-y-6 hidden">
+                            </div>
+                        <div id="level-test-results" class="hidden text-center py-8">
+                            <h3 class="text-3xl font-bold text-slate-800 mb-4 font-heading" id="results-heading"></h3>
+                            <div class="bg-white p-6 rounded-xl text-left mb-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                                <h4 class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Detailed Feedback</h4>
+                                <div id="results-feedback-text" class="prose prose-slate text-slate-700"></div>
+                            </div>
+                             <button onclick="switchView('view-test-series')" class="bg-slate-500 text-white font-bold py-3 px-8 rounded-xl hover:bg-slate-600 transition shadow-lg mt-4">
+                                Back to Test Levels
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="level-selection-area" class="space-y-6">
                         <div class="bg-white rounded-xl shadow-lg border-t-4 border-blue-500 p-6">
                             <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-shuffle text-blue-500"></i> Level 1: Aptitude Test</h3>
                             <p class="text-slate-600 mb-4">Focuses on core abilities like Quantitative Aptitude, Logical Reasoning, and Verbal Ability.</p>
@@ -474,19 +495,19 @@
                                 <li>**Analytics**: Detailed score breakdown by topic.</li>
                                 <li>**Explanations**: Step-by-step solutions for every question.</li>
                             </ul>
-                            <button class="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition shadow-md">
+                            <button onclick="startLevelTest('Level 1', 'Aptitude')" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition shadow-md">
                                 Start Aptitude Test <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                         </div>
 
                         <div class="bg-white rounded-xl shadow-lg border-t-4 border-primary p-6">
                             <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-microchip text-primary"></i> Level 2: Technical Test</h3>
-                            <p class="text-slate-600 mb-4">Role-based assessment covering domain-specific knowledge and practical skills for a <span class="font-bold text-primary" id="test-series-role">Software Developer</span>.</p>
+                            <p class="text-slate-600 mb-4">Role-based assessment covering domain-specific knowledge and practical skills for a <span class="font-bold text-primary" id="test-series-role-level2">Software Developer</span>.</p>
                             <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
                                 <li>**MCQs**: Multiple Choice Questions tailored to your target role.</li>
                                 <li>**Coding Tasks**: Hands-on problems (for technical roles) with real-time feedback.</li>
                             </ul>
-                            <button class="bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition shadow-md">
+                            <button onclick="startLevelTest('Level 2', 'Technical')" class="bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition shadow-md">
                                 Start Technical Test <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                         </div>
@@ -512,14 +533,9 @@
 
     <script>
         // State Variables
-        // Mock User for Local Mode
-        let currentUser = {
-            uid: 'local-user-123',
-            displayName: 'Guest Student',
-            email: 'guest@cracknest.com'
-        };
         let userProfile = null;
-        
+        let activeTestQuestions = [];
+
         // --- GEMINI API HELPERS ---
         const GEMINI_API_KEY = "AIzaSyC0inV4Bpo3iG-36QKQCM-rKOFfX6Z1k3A"; // Runtime key
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
@@ -543,18 +559,13 @@
 
         // --- INITIALIZATION ---
         function initApp() {
-            // Check Local Storage for Profile
             const storedProfile = localStorage.getItem('cracknest_profile');
             
             if (storedProfile) {
                 userProfile = JSON.parse(storedProfile);
-                
-                // Update Sidebar
                 updateSidebarUserInfo();
-                
                 handleNavigationState();
             } else {
-                // New user -> Profile Setup
                 userProfile = null;
                 switchView('view-profile-setup');
                 document.getElementById('full-page-loader').classList.add('hidden');
@@ -603,17 +614,18 @@
                 else el.classList.remove('bg-indigo-50', 'text-primary');
             });
 
-            // Specific logic for Profile View (Check if it's Edit Mode)
             if (viewId === 'view-profile-setup' && userProfile) {
                 loadProfileForEdit();
             }
             
-            // Specific logic for Test Series View
             if (viewId === 'view-test-series' && userProfile) {
+                // Reset test view to level selection when navigating here
                 document.getElementById('test-series-role').textContent = userProfile.targetRole;
+                document.getElementById('test-series-role-level2').textContent = userProfile.targetRole;
+                document.getElementById('level-selection-area').classList.remove('hidden');
+                document.getElementById('level-test-area').classList.add('hidden');
             }
 
-            // Mobile menu close
             document.getElementById('mobile-menu').classList.add('hidden');
         }
 
@@ -622,7 +634,7 @@
             const nav = document.getElementById('sidebar-nav');
             const items = [
                 { id: 'view-dashboard', icon: 'fa-table-columns', label: 'Dashboard' },
-                { id: 'view-test-series', icon: 'fa-list-ol', label: 'Test Series' }, // NEW ITEM
+                { id: 'view-test-series', icon: 'fa-list-ol', label: 'Test Series' },
                 { id: 'view-training', icon: 'fa-book-open', label: 'Training Center' },
                 { id: 'view-mock-interview', icon: 'fa-headset', label: 'AI Mock Interview' },
                 { id: 'view-resume', icon: 'fa-file-lines', label: 'Resume Builder' },
@@ -636,11 +648,164 @@
             `).join('');
 
             nav.innerHTML = html;
-            // Also render mobile nav
             document.getElementById('mobile-nav-items').innerHTML = html;
         }
+        
+        // [Profile Setup, Dashboard, Mock Interview, and Training Center functions omitted for brevity, they remain unchanged from the previous valid state.]
+        // ... (loadProfileForEdit, profile-form listener, loadSkillTest, renderQuestions, loadDashboardData, renderRoadmap, Mock Interview functions) ...
 
-        // --- 1. PROFILE SETUP / EDIT LOGIC ---
+        // --- DYNAMIC TEST SERIES LOGIC (New Implementation) ---
+
+        window.startLevelTest = async function(level, type) {
+            document.getElementById('level-selection-area').classList.add('hidden');
+            document.getElementById('level-test-area').classList.remove('hidden');
+            document.getElementById('level-test-questions').classList.add('hidden');
+            document.getElementById('level-test-results').classList.add('hidden');
+            document.getElementById('level-test-loading').classList.remove('hidden');
+
+            document.getElementById('loading-level').textContent = `${level} (${type})`;
+            document.getElementById('loading-role').textContent = userProfile.targetRole;
+            
+            const prompt = `Generate 5 multiple choice questions (JSON format) for a ${type} test for a ${userProfile.targetRole} role. 
+            Output array of objects with 'question', 'options' (array of 4 strings), and 'correctIndex' (0-3). 
+            Output ONLY valid JSON array. No code blocks.`;
+
+            const result = await callGemini(prompt);
+            
+            document.getElementById('level-test-loading').classList.add('hidden');
+
+            if (result) {
+                try {
+                    const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
+                    activeTestQuestions = JSON.parse(jsonStr);
+                    renderLevelQuestions(level);
+                } catch (e) {
+                    console.error("JSON Parse error", e);
+                    document.getElementById('level-test-area').innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. AI response error.</div>';
+                }
+            } else {
+                 document.getElementById('level-test-area').innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. Network or API error.</div>';
+            }
+        }
+
+        function renderLevelQuestions(level) {
+            const container = document.getElementById('level-test-questions');
+            container.innerHTML = `
+                <h3 class="text-2xl font-bold text-slate-800 font-heading mb-6">${level} Test: ${userProfile.targetRole}</h3>
+                <form id="level-test-form" class="space-y-6">
+                ${activeTestQuestions.map((q, i) => `
+                    <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
+                        <p class="font-bold text-slate-800 mb-4 text-lg"><span class="text-primary mr-2">Q${i+1}.</span> ${q.question}</p>
+                        <div class="space-y-3">
+                            ${q.options.map((opt, idx) => `
+                                <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                    <input type="radio" name="q${i}" value="${idx}" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
+                                    <span class="text-slate-700 font-medium group-hover:text-primary">${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+                    <button type="submit" id="submit-level-test-btn" class="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition shadow-lg mt-4 text-lg">
+                        Submit Test & Get Feedback
+                    </button>
+                </form>
+            `;
+            container.classList.remove('hidden');
+
+            document.getElementById('level-test-form').addEventListener('submit', submitLevelTest);
+        }
+        
+        async function submitLevelTest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-level-test-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Grading & Analyzing...';
+            btn.disabled = true;
+
+            let correctCount = 0;
+            let incorrectDetails = [];
+            
+            // 1. Grade the test
+            activeTestQuestions.forEach((q, i) => {
+                const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                const userAnswer = selectedOption ? parseInt(selectedOption.value) : -1;
+                const isCorrect = userAnswer === q.correctIndex;
+                
+                if (isCorrect) {
+                    correctCount++;
+                } else {
+                    incorrectDetails.push({
+                        question: q.question,
+                        userAnswerIndex: userAnswer,
+                        correctAnswer: q.options[q.correctIndex]
+                    });
+                }
+            });
+
+            // 2. Prepare Feedback Prompt
+            const totalQuestions = activeTestQuestions.length;
+            const score = correctCount;
+            let feedbackPrompt = `A candidate for a ${userProfile.targetRole} role just scored ${score} out of ${totalQuestions} on a skill test. 
+            The candidate answered these questions incorrectly: ${JSON.stringify(incorrectDetails)}. 
+            
+            Generate a detailed analysis (2-3 paragraphs) in Markdown for the candidate:
+            1. An encouraging opening statement with the final score.
+            2. A brief analysis of the incorrect topics (e.g., if multiple were about 'Time & Work', mention that).
+            3. A short, actionable tip on how to improve in the areas they struggled with, tailored to their role.
+            
+            Output ONLY the Markdown content.`;
+
+            // 3. Call Gemini for detailed feedback
+            const feedback = await callGemini(feedbackPrompt);
+            
+            // 4. Render Results
+            document.getElementById('level-test-questions').classList.add('hidden');
+            document.getElementById('level-test-results').classList.remove('hidden');
+
+            const resultsHeading = document.getElementById('results-heading');
+            resultsHeading.innerHTML = `Your Score: <span class="text-primary">${score}/${totalQuestions}</span>`;
+
+            // Set the border color of the feedback box based on performance
+            const feedbackBox = document.querySelector('#level-test-results .border-t-4');
+            const feedbackBorder = document.querySelector('#level-test-results .w-1');
+            
+            feedbackBox.classList.remove('border-red-500', 'border-green-500');
+            feedbackBorder.classList.remove('bg-red-500', 'bg-green-500');
+
+            if (score / totalQuestions > 0.6) {
+                feedbackBox.classList.add('border-green-500');
+                feedbackBorder.classList.add('bg-green-500');
+            } else {
+                feedbackBox.classList.add('border-red-500');
+                feedbackBorder.classList.add('bg-red-500');
+            }
+
+            document.getElementById('results-feedback-text').innerHTML = marked.parse(feedback || "Could not generate AI feedback. Please review the topics you missed.");
+            
+            btn.disabled = false;
+        }
+
+        // --- LOGOUT / RESET ---
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            if(confirm("This will clear your local progress and reset the app. Continue?")) {
+                localStorage.removeItem('cracknest_profile');
+                localStorage.clear(); 
+                window.location.href = "index.html"; // Should redirect to an index page or reload
+            }
+        });
+
+        // --- MOBILE MENU ---
+        document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.remove('hidden');
+        });
+        document.getElementById('close-mobile-menu').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.add('hidden');
+        });
+
+        // Start App
+        initApp();
+        
+        // --- Remaining unchanged functions ---
         
         function loadProfileForEdit() {
             // Change Text to indicate Edit Mode
@@ -712,7 +877,6 @@
             }
         });
 
-        // --- 2. SKILL TEST LOGIC ---
         let currentQuestions = [];
 
         async function loadSkillTest() {
@@ -802,8 +966,7 @@
         document.getElementById('go-to-dashboard-btn').addEventListener('click', () => {
              handleNavigationState();
         });
-
-        // --- 3. DASHBOARD LOGIC ---
+        
         async function loadDashboardData(prefetch = false) {
             document.getElementById('dash-target-role').textContent = userProfile.targetRole;
             
@@ -843,8 +1006,7 @@
                 </div>
             `).join('');
         }
-
-        // --- 4. AI MOCK INTERVIEW LOGIC ---
+        
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-chat-btn');
@@ -899,11 +1061,7 @@
         function addMessage(sender, text) {
             const isUser = sender === "You";
             const bubble = document.createElement('div');
-            // FIX: Corrected class concatenation
             bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'} animate-fadeIn`;
-            
-            // Icon is not attached to the bubble in the original code, but is part of the concept. 
-            // It's commented out/not rendered in the original, so keeping it out of the final bubble innerHTML.
             
             const content = isUser ? text : marked.parse(text);
             
@@ -912,26 +1070,6 @@
             historyDiv.scrollTop = historyDiv.scrollHeight;
         }
 
-        // --- LOGOUT / RESET ---
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            if(confirm("This will clear your local progress and reset the app. Continue?")) {
-                localStorage.removeItem('cracknest_profile');
-                // Optional: clear other keys if you want a full wipe
-                // localStorage.clear(); 
-                window.location.href = "index.html";
-            }
-        });
-
-        // --- MOBILE MENU ---
-        document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
-            document.getElementById('mobile-menu').classList.remove('hidden');
-        });
-        document.getElementById('close-mobile-menu').addEventListener('click', () => {
-            document.getElementById('mobile-menu').classList.add('hidden');
-        });
-
-        // Start App
-        initApp();
 
     </script>
 </body>
