@@ -552,13 +552,13 @@
         let activeTestQuestions = [];
 
         // --- GEMINI API HELPERS ---
-        // !!! IMPORTANT: REPLACE "" WITH YOUR ACTUAL GEMINI API KEY !!!
+        // !!! IMPORTANT: REPLACE "AIzaSyC0inV4Bpo3iG-36QKQCM-rKOFfX6Z1k3A" WITH YOUR ACTUAL GEMINI API KEY !!!
         const GEMINI_API_KEY = "AIzaSyARWzJY6v0Mc_H1BEFIiIXz150CKWlWVNs"; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
         async function callGemini(prompt) {
-            if (!GEMINI_API_KEY) {
-                console.error("Gemini Error: API Key is missing. Please update the GEMINI_API_KEY variable. Using dummy data.");
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyC0inV4Bpo3iG-36QKQCM-rKOFfX6Z1k3A") {
+                console.error("Gemini Error: API Key is missing or invalid. Using dummy data.");
                 // Provide dummy content if key is missing to allow UI testing
                 if (prompt.includes("Generate 5 multiple choice questions")) {
                     return `[{"question": "What is the capital of France? (DUMMY)", "options": ["Berlin", "Madrid", "Paris", "Rome"], "correctIndex": 2}, {"question": "What is the primary data structure for LIFO access?", "options": ["Queue", "Stack", "Array", "Heap"], "correctIndex": 1}, {"question": "Which accounting principle governs revenue recognition?", "options": ["Matching", "Cost", "Revenue recognition", "Conservatism"], "correctIndex": 2}, {"question": "What is 15% of 200?", "options": ["20", "30", "40", "50"], "correctIndex": 1}, {"question": "Which of these is a programming language?", "options": ["HTML", "CSS", "Python", "XML"], "correctIndex": 2}]`;
@@ -1002,9 +1002,10 @@
             `).join('');
         }
         
-        // --- 5. DAILY CHALLENGE LOGIC (NEW) ---
+        // --- 5. DAILY CHALLENGE LOGIC ---
         function getTodayDateKey() {
             const today = new Date();
+            // This ensures the key changes once per day
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         }
 
@@ -1042,11 +1043,11 @@
                         problemEl.textContent = challenge.problem;
                     } catch (e) {
                         console.error("Daily Challenge JSON Parse Error:", e);
-                        topicEl.textContent = "Error";
+                        topicEl.textContent = "ERROR";
                         problemEl.textContent = "Failed to generate challenge.";
                     }
                 } else {
-                    topicEl.textContent = "Aptitude";
+                    topicEl.textContent = "APTITUDE";
                     problemEl.textContent = "Try a classic: Ratios & Proportions.";
                 }
             }
@@ -1188,7 +1189,7 @@
 
             document.getElementById('level-test-form').addEventListener('submit', submitLevelTest);
         }
-        
+
         async function submitLevelTest(e) {
             e.preventDefault();
             const btn = document.getElementById('submit-level-test-btn');
