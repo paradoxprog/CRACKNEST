@@ -357,8 +357,8 @@
                             <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                                 <h3 class="font-bold text-lg text-slate-800 mb-4">Daily Challenge</h3>
                                 <div class="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-4">
-                                    <span class="text-xs font-bold text-orange-600 uppercase tracking-wide">Aptitude</span>
-                                    <p class="font-medium text-slate-800 mt-1">Time & Work Problem</p>
+                                    <span class="text-xs font-bold text-orange-600 uppercase tracking-wide" id="daily-challenge-topic">APTITUDE</span>
+                                    <p class="font-medium text-slate-800 mt-1" id="daily-challenge-problem">Time & Work Problem</p>
                                 </div>
                                 <button class="w-full border border-slate-200 text-slate-600 font-medium py-2 rounded-lg hover:bg-slate-50 transition">Solve Now</button>
                             </div>
@@ -553,7 +553,7 @@
 
         // --- GEMINI API HELPERS ---
         // !!! IMPORTANT: REPLACE "" WITH YOUR ACTUAL GEMINI API KEY !!!
-        const GEMINI_API_KEY = "AIzaSyC0inV4Bpo3iG-36QKQCM-rKOFfX6Z1k3A"; 
+        const GEMINI_API_KEY = "AIzaSyARWzJY6v0Mc_H1BEFIiIXz150CKWlWVNs"; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
         async function callGemini(prompt) {
@@ -571,6 +571,10 @@
                      const roleMatch = prompt.match(/Create a 3-step learning roadmap \(JSON\) for a (.*)\./);
                      const role = roleMatch ? roleMatch[1] : "Developer";
                      return `[{"title": "Phase 1: Foundations in ${role} Fundamentals", "description": "Master the core principles and tools essential for the ${role} position. Focus on theoretical knowledge and basic skill acquisition.", "duration": "4 Weeks"}, {"title": "Phase 2: Project Implementation & Technical Deep Dive", "description": "Apply foundational skills to a simulated project. For a ${role}, this means complex problem-solving and tool integration.", "duration": "6 Weeks"}, {"title": "Phase 3: Interview Preparation & Soft Skills", "description": "High-intensity mock interviews, behavioral scenario training, and advanced communication workshops tailored for the ${role} career path.", "duration": "3 Weeks"}]`;
+                }
+                // DUMMY DAILY CHALLENGE RESPONSE
+                 if (prompt.includes("Generate a daily aptitude challenge")) {
+                    return `{"topic": "Time & Work Problem", "problem": "If 5 workers can build a wall in 10 days, how long will it take 8 workers to build the same wall, assuming they work at the same rate?"}`;
                 }
                 return null;
             }
@@ -945,6 +949,11 @@
             document.getElementById('dash-modules-complete').textContent = `${modules}/5`;
             document.getElementById('dash-modules-status').textContent = modules > 0 ? 'Status: Baseline Completed' : 'Status: Incomplete';
             
+            // Generate/Load Daily Challenge
+            if (!prefetch) {
+                await loadDailyChallenge();
+            }
+
             // Check cache for Roadmap
             const cachedRoadmap = localStorage.getItem('cracknest_roadmap_' + userProfile.targetRole);
             
@@ -992,6 +1001,57 @@
                 </div>
             `).join('');
         }
+        
+        // --- 5. DAILY CHALLENGE LOGIC (NEW) ---
+        function getTodayDateKey() {
+            const today = new Date();
+            return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
+
+        async function loadDailyChallenge() {
+            const dateKey = getTodayDateKey();
+            const challengeCacheKey = `cracknest_daily_challenge_${dateKey}`;
+            const cachedChallenge = localStorage.getItem(challengeCacheKey);
+            
+            const topicEl = document.getElementById('daily-challenge-topic');
+            const problemEl = document.getElementById('daily-challenge-problem');
+
+            if (cachedChallenge) {
+                const challenge = JSON.parse(cachedChallenge);
+                topicEl.textContent = challenge.topic.toUpperCase();
+                problemEl.textContent = challenge.problem;
+            } else {
+                topicEl.textContent = "Loading...";
+                problemEl.textContent = "Generating a new challenge...";
+
+                const prompt = `Generate a daily aptitude challenge (JSON) relevant to a candidate aiming for a ${userProfile.targetRole} role. 
+                The problem should focus on a universal aptitude skill like Math, Logic, or Reasoning. 
+                Output ONLY JSON object with 'topic' (e.g., 'Time & Work', 'Financial Ratios') and 'problem' (the full question).`;
+
+                const result = await callGemini(prompt);
+                
+                if (result) {
+                    try {
+                        const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
+                        const challenge = JSON.parse(jsonStr);
+
+                        // Cache the result for the rest of the day
+                        localStorage.setItem(challengeCacheKey, JSON.stringify(challenge));
+
+                        topicEl.textContent = challenge.topic.toUpperCase();
+                        problemEl.textContent = challenge.problem;
+                    } catch (e) {
+                        console.error("Daily Challenge JSON Parse Error:", e);
+                        topicEl.textContent = "Error";
+                        problemEl.textContent = "Failed to generate challenge.";
+                    }
+                } else {
+                    topicEl.textContent = "Aptitude";
+                    problemEl.textContent = "Try a classic: Ratios & Proportions.";
+                }
+            }
+        }
+
 
         // --- 4. AI MOCK INTERVIEW LOGIC (Unchanged) ---
         const chatForm = document.getElementById('chat-form');
