@@ -79,6 +79,11 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Specific Fade-In for chat messages */
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+        }
 
         .chat-bubble {
             max-width: 80%;
@@ -141,7 +146,7 @@
             <button id="mobile-menu-toggle" class="text-slate-600 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100"><i class="fa-solid fa-bars text-xl"></i></button>
         </div>
 
-        <div id="mobile-menu" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden transition-opacity duration-300 opacity-0">
+        <div id="mobile-menu" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden transition-opacity">
             <div class="bg-white w-4/5 h-full shadow-2xl p-4 flex flex-col transform transition-transform">
                 <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
                     <span class="font-heading font-bold text-xl text-primary">Menu</span>
@@ -166,56 +171,73 @@
                         </div>
 
                         <form id="profile-form" class="space-y-6">
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                                    <input type="text" id="p-name" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                            
+                            <div class="border-b border-slate-200 pb-4">
+                                <h3 class="font-bold text-lg text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-user text-primary/70"></i> Personal Info</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                                        <input type="text" id="p-name" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Degree / Stream</label>
+                                        <input type="text" id="p-degree" placeholder="e.g. B.Tech Computer Science" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
-                                    <input type="tel" id="p-phone" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+
+                                <div class="grid md:grid-cols-2 gap-6 mt-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Year of Passing</label>
+                                        <select id="p-year" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                                            <option>2023</option>
+                                            <option>2024</option>
+                                            <option selected>2025</option>
+                                            <option>2026</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Languages (e.g. English, Hindi)</label>
+                                        <input type="text" id="p-languages" placeholder="e.g. English, Hindi, German" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Certifications (Comma separated)</label>
+                                    <input type="text" id="p-certifications" placeholder="e.g. AWS Certified Developer, Google Analytics" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Current Degree / Stream</label>
-                                <input type="text" id="p-degree" placeholder="e.g. B.Tech Computer Science" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
-                            </div>
 
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Year of Passing</label>
-                                    <select id="p-year" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                        <option>2023</option>
-                                        <option>2024</option>
-                                        <option selected>2025</option>
-                                        <option>2026</option>
-                                    </select>
+                            <div class="pt-4">
+                                <h3 class="font-bold text-lg text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-bullseye text-primary/70"></i> Career Goal</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Target Field</label>
+                                        <select id="p-field" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                                            <option value="IT/Tech">IT / Technology</option>
+                                            <option value="Marketing">Marketing / Sales</option>
+                                            <option value="HR">Human Resources (HR)</option>
+                                            <option value="Finance">Finance / Accounting</option>
+                                            <option value="Engineering">Core Engineering</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Specific Target Role</label>
+                                        <input type="text" id="p-target" required placeholder="e.g. Software Developer, Financial Analyst" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                    </div>
                                 </div>
-                                <div>
+                                <div class="mt-6">
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Experience Level</label>
                                     <select id="p-experience" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                        <option value="fresher">Fresher (Student)</option>
-                                        <option value="0-2">0-2 Years</option>
-                                        <option value="2+">2+ Years</option>
+                                        <option value="Fresher">Fresher (Student)</option>
+                                        <option value="Experienced">Experienced (1+ Years)</option>
                                     </select>
                                 </div>
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Career Target (Role)</label>
-                                <select id="p-target" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                    <option value="Software Developer">Software Developer (SDE)</option>
-                                    <option value="Data Analyst">Data Analyst</option>
-                                    <option value="Product Manager">Product Manager</option>
-                                    <option value="UI/UX Designer">UI/UX Designer</option>
-                                    <option value="Digital Marketer">Digital Marketer</option>
-                                    <option value="HR Manager">HR Manager</option>
-                                </select>
-                            </div>
-
-                            <button type="submit" id="profile-submit-btn" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-primary/30 flex justify-center items-center gap-2 transform hover:scale-[1.02]">
-                                Save & Continue <i class="fa-solid fa-arrow-right"></i>
+                            
+                            <button type="submit" id="profile-submit-btn" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-primary/30 flex justify-center items-center gap-2 transform hover:scale-[1.02] mt-8">
+                                Save Profile & Start Baseline Test <i class="fa-solid fa-arrow-right"></i>
                             </button>
                         </form>
                     </div>
@@ -233,13 +255,13 @@
                             </div>
                         </div>
 
-                        <div id="test-loading" class="hidden text-center py-16">
+                        <div id="test-loading" class="text-center py-16">
                             <div class="loader mx-auto mb-6 border-t-secondary w-12 h-12"></div>
                             <h3 class="text-lg font-bold text-slate-700 mb-2">Generating Questions...</h3>
                             <p class="text-slate-500 animate-pulse max-w-md mx-auto">Our AI is analyzing your profile to create relevant questions for your role.</p>
                         </div>
 
-                        <div id="test-container" class="space-y-6">
+                        <div id="test-container" class="space-y-6 hidden">
                             </div>
 
                         <div id="test-results" class="hidden text-center py-8">
@@ -269,11 +291,11 @@
                             <p class="text-slate-500">Your daily learning hub is ready.</p>
                         </div>
                         <div class="flex gap-3">
-                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2 hidden">
                                 <i class="fa-solid fa-fire text-orange-500"></i>
                                 <span class="font-bold text-slate-700">1 Day Streak</span>
                             </div>
-                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+                            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2 hidden">
                                 <i class="fa-solid fa-star text-yellow-500"></i>
                                 <span class="font-bold text-slate-700">Level 1</span>
                             </div>
@@ -286,9 +308,9 @@
                                 <div class="bg-blue-100 p-3 rounded-lg text-blue-600"><i class="fa-solid fa-chart-pie text-xl"></i></div>
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Readiness</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-1">45%</h3>
+                            <h3 id="dash-readiness-percent" class="text-3xl font-bold text-slate-800 mb-1">0%</h3>
                             <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
-                                <div class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
+                                <div id="dash-readiness-bar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
                             </div>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
@@ -297,15 +319,15 @@
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Target</span>
                             </div>
                             <h3 id="dash-target-role" class="text-xl font-bold text-slate-800 mb-1">Developer</h3>
-                            <p class="text-sm text-slate-500">Next Goal: Basics</p>
+                            <p class="text-sm text-slate-500">Field: <span id="dash-target-field">IT/Tech</span></p>
                         </div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600"><i class="fa-solid fa-check-circle text-xl"></i></div>
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Modules</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-slate-800 mb-1">1/5</h3>
-                            <p class="text-sm text-slate-500">Last: Baseline Assessment</p>
+                            <h3 id="dash-modules-complete" class="text-3xl font-bold text-slate-800 mb-1">0/5</h3>
+                            <p id="dash-modules-status" class="text-sm text-slate-500">Status: Incomplete</p>
                         </div>
                     </div>
 
@@ -335,8 +357,8 @@
                             <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                                 <h3 class="font-bold text-lg text-slate-800 mb-4">Daily Challenge</h3>
                                 <div class="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-4">
-                                    <span class="text-xs font-bold text-orange-600 uppercase tracking-wide">Aptitude</span>
-                                    <p class="font-medium text-slate-800 mt-1">Time & Work Problem</p>
+                                    <span class="text-xs font-bold text-orange-600 uppercase tracking-wide" id="daily-challenge-topic">APTITUDE</span>
+                                    <p class="font-medium text-slate-800 mt-1" id="daily-challenge-problem">Time & Work Problem</p>
                                 </div>
                                 <button class="w-full border border-slate-200 text-slate-600 font-medium py-2 rounded-lg hover:bg-slate-50 transition">Solve Now</button>
                             </div>
@@ -455,25 +477,109 @@
                     </div>
                 </div>
 
+                <div id="view-test-series" class="section-view pb-12">
+                    <h2 class="text-2xl font-bold text-slate-800 font-heading mb-6 flex items-center gap-2"><i class="fa-solid fa-list-ol text-primary"></i> Structured Preparation Path</h2>
+                    <p class="text-slate-500 max-w-2xl mb-8">Follow this three-level testing series customized for your career target to ensure you are fully interview-ready. Target Role: <span class="font-bold text-primary" id="test-series-role"></span></p>
+                    
+                    <div id="level-test-area" class="bg-white rounded-xl shadow-xl p-8 border border-slate-100 hidden">
+                        <div id="level-test-loading" class="text-center py-16">
+                            <div class="loader mx-auto mb-6 border-t-secondary w-12 h-12"></div>
+                            <h3 class="text-lg font-bold text-slate-700 mb-2">Generating <span id="loading-level"></span> Questions...</h3>
+                            <p class="text-slate-500 animate-pulse max-w-md mx-auto">Our AI is fetching questions for your role: <span id="loading-role" class="font-medium text-primary"></span></p>
+                        </div>
+                        <div id="level-test-questions" class="space-y-6 hidden">
+                            </div>
+                        <div id="level-test-results" class="hidden text-center py-8">
+                            <h3 class="text-3xl font-bold text-slate-800 mb-4 font-heading" id="results-heading"></h3>
+                            <div class="bg-white p-6 rounded-xl text-left mb-8 border-t-4 border-red-500 shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                                <h4 class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Detailed Feedback</h4>
+                                <div id="results-feedback-text" class="prose prose-slate text-slate-700"></div>
+                            </div>
+                             <button onclick="switchView('view-test-series')" class="bg-slate-500 text-white font-bold py-3 px-8 rounded-xl hover:bg-slate-600 transition shadow-lg mt-4">
+                                Back to Test Levels
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="level-selection-area" class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-lg border-t-4 border-blue-500 p-6">
+                            <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-shuffle text-blue-500"></i> Level 1: Aptitude Test</h3>
+                            <p class="text-slate-600 mb-4">Focuses on core abilities like Quantitative Aptitude, Logical Reasoning, and Verbal Ability.</p>
+                            <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
+                                <li>**Analytics**: Detailed score breakdown by topic.</li>
+                                <li>**Explanations**: Step-by-step solutions for every question.</li>
+                            </ul>
+                            <button onclick="startLevelTest('Level 1', 'Aptitude')" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition shadow-md">
+                                Start Aptitude Test <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg border-t-4 border-primary p-6">
+                            <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-microchip text-primary"></i> Level 2: Technical Test</h3>
+                            <p class="text-slate-600 mb-4">Role-based assessment covering domain-specific knowledge and practical skills for a <span class="font-bold text-primary" id="test-series-role-level2">Software Developer</span>.</p>
+                            <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
+                                <li>**MCQs**: Multiple Choice Questions tailored to your target role.</li>
+                                <li>**Coding Tasks**: Hands-on problems (for technical roles) with real-time feedback.</li>
+                            </ul>
+                            <button onclick="startLevelTest('Level 2', 'Technical')" class="bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition shadow-md">
+                                Start Technical Test <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg border-t-4 border-yellow-500 p-6">
+                            <h3 class="text-xl font-bold text-slate-800 font-heading mb-2 flex items-center gap-2"><i class="fa-solid fa-handshake text-yellow-500"></i> Level 3: HR Test</h3>
+                            <p class="text-slate-600 mb-4">Simulates the final interview round, testing soft skills, situational judgment, and communication.</p>
+                            <ul class="list-disc pl-5 text-sm text-slate-500 mb-4 space-y-1">
+                                <li>**Scenario-Based Questions**: Behavioral and situational queries.</li>
+                                <li>**Written/Audio Answers**: Practice providing structured responses.</li>
+                            </ul>
+                            <button onclick="switchView('view-mock-interview')" class="bg-yellow-500 text-slate-800 font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition shadow-md">
+                                Practice HR Round <i class="fa-solid fa-microphone-lines ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </main>
     </div>
 
     <script>
         // State Variables
-        // Mock User for Local Mode
-        let currentUser = {
-            uid: 'local-user-123',
-            displayName: 'Guest Student',
-            email: 'guest@cracknest.com'
-        };
         let userProfile = null;
-        
+        let activeTestQuestions = [];
+
         // --- GEMINI API HELPERS ---
-        const GEMINI_API_KEY = "AIzaSyBfO_k3iJ-n8_cQHNPuKkyXsYL5E_1d95g"; // Runtime key
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
+        // !!! IMPORTANT: REPLACE "AIzaSyC0inV4Bpo3iG-36QKQCM-rKOFfX6Z1k3A" WITH YOUR ACTUAL GEMINI API KEY !!!
+        const GEMINI_API_KEY = "AIzaSyBfO_k3iJ-n8_cQHNPuKkyXsYL5E_1d95g"; 
+        // FIX: Changed model name to standard 'gemini-2.5-flash'
+        const MODEL_NAME = "gemini-2.0-flash"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
 
         async function callGemini(prompt) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyC0inV4Bpo3iG-36QKQCM-rKOFfX6Z1k3A") {
+                console.error("Gemini Error: API Key is missing or invalid. Using dummy data.");
+                // Provide dummy content if key is missing to allow UI testing
+                if (prompt.includes("Generate 5 multiple choice questions")) {
+                    return `[{"question": "What is the capital of France? (DUMMY)", "options": ["Berlin", "Madrid", "Paris", "Rome"], "correctIndex": 2}, {"question": "What is the primary data structure for LIFO access?", "options": ["Queue", "Stack", "Array", "Heap"], "correctIndex": 1}, {"question": "Which accounting principle governs revenue recognition?", "options": ["Matching", "Cost", "Revenue recognition", "Conservatism"], "correctIndex": 2}, {"question": "What is 15% of 200?", "options": ["20", "30", "40", "50"], "correctIndex": 1}, {"question": "Which of these is a programming language?", "options": ["HTML", "CSS", "Python", "XML"], "correctIndex": 2}]`;
+                }
+                if (prompt.includes("Generate a brief, encouraging analysis")) {
+                    return "### Dummy Analysis\n* You scored 2/5 (40%). Keep practicing!\n* You need to focus on core concepts in your chosen role.\n* Tip: Review fundamental terminology and definitions.";
+                }
+                // DUMMY ROADMAP RESPONSE
+                if (prompt.includes("Create a 3-step learning roadmap")) {
+                     const roleMatch = prompt.match(/Create a 3-step learning roadmap \(JSON\) for a (.*)\./);
+                     const role = roleMatch ? roleMatch[1] : "Developer";
+                     return `[{"title": "Phase 1: Foundations in ${role} Fundamentals", "description": "Master the core principles and tools essential for the ${role} position. Focus on theoretical knowledge and basic skill acquisition.", "duration": "4 Weeks"}, {"title": "Phase 2: Project Implementation & Technical Deep Dive", "description": "Apply foundational skills to a simulated project. For a ${role}, this means complex problem-solving and tool integration.", "duration": "6 Weeks"}, {"title": "Phase 3: Interview Preparation & Soft Skills", "description": "High-intensity mock interviews, behavioral scenario training, and advanced communication workshops tailored for the ${role} career path.", "duration": "3 Weeks"}]`;
+                }
+                // DUMMY DAILY CHALLENGE RESPONSE
+                 if (prompt.includes("Generate a daily aptitude challenge")) {
+                    return `{"topic": "Time & Work Problem", "problem": "If 5 workers can build a wall in 10 days, how long will it take 8 workers to build the same wall, assuming they work at the same rate?"}`;
+                }
+                return null;
+            }
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -483,32 +589,34 @@
                     })
                 });
                 const data = await response.json();
-                // Check for candidates and content before accessing
-                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-                    return data.candidates[0].content.parts[0].text;
+                // Basic check for error structure from API
+                if (data.error) {
+                    console.error("Gemini API Error:", data.error.message);
+                    return null;
                 }
-                console.error("Gemini Error: Invalid API response structure.", data);
-                return null;
+                return data.candidates[0].content.parts[0].text;
             } catch (error) {
-                console.error("Gemini Error:", error);
+                console.error("Gemini Network Error:", error);
                 return null;
             }
         }
 
         // --- INITIALIZATION ---
         function initApp() {
-            // Check Local Storage for Profile
             const storedProfile = localStorage.getItem('cracknest_profile');
             
             if (storedProfile) {
                 userProfile = JSON.parse(storedProfile);
                 
-                // Update Sidebar
+                // Initialize new metrics if they don't exist
+                if (userProfile.readinessScore === undefined) {
+                    userProfile.readinessScore = 0;
+                    userProfile.modulesComplete = userProfile.baselineTestComplete ? 1 : 0;
+                }
+
                 updateSidebarUserInfo();
-                
                 handleNavigationState();
             } else {
-                // New user -> Profile Setup
                 userProfile = null;
                 switchView('view-profile-setup');
                 document.getElementById('full-page-loader').classList.add('hidden');
@@ -532,6 +640,7 @@
             if (!userProfile) {
                 switchView('view-profile-setup');
             } else if (!userProfile.baselineTestComplete) {
+                // CRITICAL PATH: Loads Test if profile exists but test is incomplete
                 switchView('view-skill-test');
                 document.getElementById('test-target-role').textContent = userProfile.targetRole;
                 loadSkillTest();
@@ -547,25 +656,38 @@
 
         // --- VIEW SWITCHER ---
         window.switchView = function(viewId) {
+            // 1. Hide ALL sections
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+            
+            // 2. Show TARGET section
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.add('active');
+            } else {
+                console.error(`View ID ${viewId} not found.`);
+            }
+            
             window.scrollTo(0,0);
             
-            // Highlight sidebar item
+            // 3. Highlight sidebar item
             document.querySelectorAll('.nav-item').forEach(el => {
                 if(el.dataset.target === viewId) el.classList.add('bg-indigo-50', 'text-primary');
                 else el.classList.remove('bg-indigo-50', 'text-primary');
             });
 
-            // Specific logic for Profile View (Check if it's Edit Mode)
             if (viewId === 'view-profile-setup' && userProfile) {
                 loadProfileForEdit();
             }
+            
+            // 4. Specific logic for Test Series View: Reset to level selection
+            if (viewId === 'view-test-series' && userProfile) {
+                document.getElementById('test-series-role').textContent = userProfile.targetRole;
+                document.getElementById('test-series-role-level2').textContent = userProfile.targetRole;
+                document.getElementById('level-selection-area').classList.remove('hidden');
+                document.getElementById('level-test-area').classList.add('hidden');
+            }
 
-            // Mobile menu close
             document.getElementById('mobile-menu').classList.add('hidden');
-            document.getElementById('mobile-menu').classList.remove('opacity-100'); // FIX: Ensure opacity is reset for mobile menu
-            document.getElementById('mobile-menu').classList.add('opacity-0');
         }
 
         // --- SIDEBAR RENDERER ---
@@ -573,10 +695,11 @@
             const nav = document.getElementById('sidebar-nav');
             const items = [
                 { id: 'view-dashboard', icon: 'fa-table-columns', label: 'Dashboard' },
+                { id: 'view-test-series', icon: 'fa-list-ol', label: 'Test Series' },
                 { id: 'view-training', icon: 'fa-book-open', label: 'Training Center' },
                 { id: 'view-mock-interview', icon: 'fa-headset', label: 'AI Mock Interview' },
                 { id: 'view-resume', icon: 'fa-file-lines', label: 'Resume Builder' },
-                { id: 'view-profile-setup', icon: 'fa-user', label: 'My Profile' }, // Added Profile item
+                { id: 'view-profile-setup', icon: 'fa-user', label: 'My Profile' }, 
             ];
 
             const html = items.map(item => `
@@ -586,7 +709,6 @@
             `).join('');
 
             nav.innerHTML = html;
-            // Also render mobile nav
             document.getElementById('mobile-nav-items').innerHTML = html;
         }
 
@@ -600,30 +722,45 @@
             
             // Populate Fields
             document.getElementById('p-name').value = userProfile.name;
-            document.getElementById('p-phone').value = userProfile.phone;
             document.getElementById('p-degree').value = userProfile.degree;
             document.getElementById('p-year').value = userProfile.year;
+            document.getElementById('p-languages').value = userProfile.languages;
+            document.getElementById('p-certifications').value = userProfile.certifications;
+            document.getElementById('p-field').value = userProfile.targetField;
+            document.getElementById('p-target').value = userProfile.targetRole; // Populate text input
             document.getElementById('p-experience').value = userProfile.experience;
-            document.getElementById('p-target').value = userProfile.targetRole;
         }
 
         document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('profile-submit-btn');
             const originalText = btn.innerHTML;
-            const isUpdate = !!userProfile; // Check if it's an update or new setup
+            const isUpdate = !!userProfile;
 
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             btn.disabled = true;
 
+            const targetRoleInput = document.getElementById('p-target').value.trim();
+            if (!targetRoleInput) {
+                 alert("Please enter a Specific Target Role.");
+                 btn.innerHTML = originalText;
+                 btn.disabled = false;
+                 return;
+            }
+
             const profileData = {
                 name: document.getElementById('p-name').value,
-                phone: document.getElementById('p-phone').value,
                 degree: document.getElementById('p-degree').value,
                 year: document.getElementById('p-year').value,
+                languages: document.getElementById('p-languages').value,
+                certifications: document.getElementById('p-certifications').value,
+                targetField: document.getElementById('p-field').value,
+                targetRole: targetRoleInput, // Get value from text input
                 experience: document.getElementById('p-experience').value,
-                targetRole: document.getElementById('p-target').value,
-                // Preserve existing data if updating
+                // New metrics for the dashboard
+                readinessScore: isUpdate && userProfile.readinessScore !== undefined ? userProfile.readinessScore : 0,
+                modulesComplete: isUpdate && userProfile.modulesComplete !== undefined ? userProfile.modulesComplete : 0,
+                // Ensure baselineTestComplete is false for a NEW profile submission
                 baselineTestComplete: isUpdate ? userProfile.baselineTestComplete : false,
                 testDate: isUpdate ? userProfile.testDate : null,
                 createdAt: isUpdate ? userProfile.createdAt : new Date().toISOString()
@@ -634,11 +771,9 @@
                 localStorage.setItem('cracknest_profile', JSON.stringify(profileData));
                 userProfile = profileData;
                 
-                // Update UI immediately
                 updateSidebarUserInfo();
 
                 if (isUpdate) {
-                    // Stay on page and show success for update
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Updated Successfully';
                     btn.classList.add('bg-green-600', 'hover:bg-green-700');
                     setTimeout(() => {
@@ -646,14 +781,8 @@
                         btn.classList.remove('bg-green-600', 'hover:bg-green-700');
                         btn.disabled = false;
                     }, 2000);
-                    
-                    // If target role changed, we should clear cached questions and roadmap
-                    localStorage.removeItem('cracknest_questions_' + profileData.targetRole);
-                    localStorage.removeItem('cracknest_roadmap_' + profileData.targetRole);
-                    userProfile.baselineTestComplete = false; // Force re-test if role changes (optional, but good practice)
-                    
                 } else {
-                    // New setup -> Continue flow
+                    // New setup -> Start Baseline Test via navigation state
                     handleNavigationState(); 
                 }
 
@@ -665,24 +794,32 @@
             }
         });
 
-        // --- 2. SKILL TEST LOGIC ---
+        // --- 2. BASELINE SKILL TEST LOGIC ---
         let currentQuestions = [];
 
         async function loadSkillTest() {
             const container = document.getElementById('test-container');
             const loading = document.getElementById('test-loading');
             
+            // Reset state
+            container.classList.add('hidden');
+            document.getElementById('test-results').classList.add('hidden');
+            loading.classList.remove('hidden');
+            
+            // Update role display
+            document.getElementById('test-target-role').textContent = userProfile.targetRole;
+
             // Check LocalStorage cache first
-            const cachedQuestions = localStorage.getItem('cracknest_questions_' + userProfile.targetRole);
+            const cacheKey = 'cracknest_questions_' + userProfile.targetRole;
+            const cachedQuestions = localStorage.getItem(cacheKey);
             
             if (cachedQuestions) {
                 currentQuestions = JSON.parse(cachedQuestions);
+                loading.classList.add('hidden');
                 renderQuestions();
             } else {
-                loading.classList.remove('hidden');
-                container.innerHTML = '';
                 
-                const prompt = `Generate 5 multiple choice questions (JSON format) for a ${userProfile.targetRole} interview. 
+                const prompt = `Generate 5 multiple choice questions (JSON format) for a baseline assessment for a ${userProfile.targetRole} role. 
                 Include 'question', 'options' (array of 4 strings), and 'correctIndex' (0-3). 
                 Output ONLY valid JSON array. No code blocks.`;
 
@@ -690,21 +827,22 @@
                 
                 if (result) {
                     try {
-                        // Clean the result string before parsing
                         const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
                         currentQuestions = JSON.parse(jsonStr);
                         // Save to LocalStorage
-                        localStorage.setItem('cracknest_questions_' + userProfile.targetRole, JSON.stringify(currentQuestions));
+                        localStorage.setItem(cacheKey, JSON.stringify(currentQuestions));
                         loading.classList.add('hidden');
                         renderQuestions();
                     } catch (e) {
-                        console.error("JSON Parse error in loadSkillTest", e, "Raw result:", result);
+                        console.error("JSON Parse error", e);
                         loading.classList.add('hidden');
-                        container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. AI returned invalid data. Please refresh or try another role.</div>';
+                        container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. AI response error. Check console.</div>';
+                        container.classList.remove('hidden');
                     }
                 } else {
                     loading.classList.add('hidden');
-                    container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to get response from AI. Please check API key or network.</div>';
+                    container.innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. API call failed. Check console and API key.</div>';
+                    container.classList.remove('hidden');
                 }
             }
         }
@@ -715,12 +853,22 @@
                 <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
                     <p class="font-bold text-slate-800 mb-4 text-lg"><span class="text-primary mr-2">Q${i+1}.</span> ${q.question}</p>
                     <div class="space-y-3">
-                        ${q.options.map((opt, idx) => `
-                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
-                                <input type="radio" name="q${i}" value="${idx}" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
-                                <span class="text-slate-700 font-medium group-hover:text-primary">${opt}</span>
-                            </label>
-                        `).join('')}
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="0" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[0]}</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="1" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[1]}</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="2" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[2]}</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                            <input type="radio" name="q${i}" value="3" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                            <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[3]}</span>
+                        </label>
                     </div>
                 </div>
             `).join('') + `
@@ -729,31 +877,58 @@
                 </button>
             `;
             
+            container.classList.remove('hidden');
+
             // Expose function globally
             window.submitTest = async () => {
                 const btn = document.querySelector('#test-container button');
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Results...';
                 btn.disabled = true;
                 
-                // Get Analysis from Gemini based on role
-                const analysisPrompt = `A student aiming for ${userProfile.targetRole} just finished a baseline test. 
-                Generate a brief, encouraging analysis (3 bullet points) on why this role is a good choice and a 1-sentence motivation. Format in Markdown.`;
+                let correctCount = 0;
+                const totalQuestions = currentQuestions.length;
+                let incorrectDetails = [];
                 
-                const analysis = await callGemini(analysisPrompt);
+                // 1. Grade the test
+                currentQuestions.forEach((q, i) => {
+                    const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                    const userAnswer = selectedOption ? parseInt(selectedOption.value) : -1;
+                    const isCorrect = userAnswer === q.correctIndex;
+                    
+                    if (isCorrect) {
+                        correctCount++;
+                    } else {
+                        incorrectDetails.push({
+                            question: q.question
+                        });
+                    }
+                });
+
+                const readinessScore = Math.round((correctCount / totalQuestions) * 100);
                 
-                // Update Local State
+                // 2. Update Local State with Score and Completion
                 userProfile.baselineTestComplete = true;
+                userProfile.readinessScore = readinessScore;
+                userProfile.modulesComplete = 1; // Baseline is module 1
                 userProfile.testDate = new Date().toISOString();
                 localStorage.setItem('cracknest_profile', JSON.stringify(userProfile)); 
+
+                // 3. Generate Feedback Prompt
+                const incorrectTopics = incorrectDetails.map(d => d.question).slice(0, 3).join(" | "); // Limit topics for brevity
+                const analysisPrompt = `A student aiming for ${userProfile.targetRole} just scored ${readinessScore}% (${correctCount}/${totalQuestions}) on a baseline test. 
+                They missed questions related to: [${incorrectTopics}]. 
+                Generate a brief, encouraging analysis (3 bullet points) on their performance, mentioning areas of weakness (if any) and a 1-sentence motivation. Format in Markdown.`;
+
+                // 4. Get Analysis
+                const analysis = await callGemini(analysisPrompt);
                 
-                // Show Results UI
+                // 5. Show Results UI
                 document.getElementById('test-container').classList.add('hidden');
                 document.getElementById('test-results').classList.remove('hidden');
-                // FIX: Use marked.parse to convert markdown to HTML
                 document.getElementById('test-analysis-text').innerHTML = marked.parse(analysis || "Great job! Your roadmap is ready.");
                 
                 // Pre-fetch roadmap
-                await loadDashboardData(true); // FIX: Await prefetch
+                loadDashboardData(true);
             };
         }
         
@@ -764,8 +939,24 @@
         // --- 3. DASHBOARD LOGIC ---
         async function loadDashboardData(prefetch = false) {
             document.getElementById('dash-target-role').textContent = userProfile.targetRole;
+            document.getElementById('dash-target-field').textContent = userProfile.targetField;
+
+            // Update Readiness Card
+            const readiness = userProfile.readinessScore || 0;
+            document.getElementById('dash-readiness-percent').textContent = `${readiness}%`;
+            document.getElementById('dash-readiness-bar').style.width = `${readiness}%`;
+
+            // Update Modules Card
+            const modules = userProfile.modulesComplete || 0;
+            document.getElementById('dash-modules-complete').textContent = `${modules}/5`;
+            document.getElementById('dash-modules-status').textContent = modules > 0 ? 'Status: Baseline Completed' : 'Status: Incomplete';
             
-            // Check cache
+            // Generate/Load Daily Challenge
+            if (!prefetch) {
+                await loadDailyChallenge();
+            }
+
+            // Check cache for Roadmap
             const cachedRoadmap = localStorage.getItem('cracknest_roadmap_' + userProfile.targetRole);
             
             if (cachedRoadmap) {
@@ -777,20 +968,21 @@
                 const result = await callGemini(prompt);
                 if (result) {
                     try {
-                        // Clean the result string before parsing
                         const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
                         const roadmap = JSON.parse(jsonStr);
                         localStorage.setItem('cracknest_roadmap_' + userProfile.targetRole, JSON.stringify(roadmap));
                         if(!prefetch) renderRoadmap(roadmap);
                     } catch(e) { 
-                        console.error("JSON Parse error in loadDashboardData", e, "Raw result:", result);
-                        if(!prefetch) {
-                             document.getElementById('roadmap-container').innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load roadmap. AI returned invalid data.</div>';
+                        console.error("Roadmap JSON Parse Error:", e);
+                        // Fallback to show placeholder on error
+                        if (!prefetch) {
+                             document.getElementById('roadmap-container').innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg">Failed to load personalized roadmap. Please try updating your profile.</div>`;
                         }
                     }
                 } else {
-                    if(!prefetch) {
-                        document.getElementById('roadmap-container').innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to get response from AI.</div>';
+                     // Fallback for API failure
+                    if (!prefetch) {
+                        document.getElementById('roadmap-container').innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg">Failed to load personalized roadmap due to API error. Check key/console.</div>`;
                     }
                 }
             }
@@ -811,8 +1003,60 @@
                 </div>
             `).join('');
         }
+        
+        // --- 5. DAILY CHALLENGE LOGIC ---
+        function getTodayDateKey() {
+            const today = new Date();
+            // This ensures the key changes once per day
+            return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
 
-        // --- 4. AI MOCK INTERVIEW LOGIC ---
+        async function loadDailyChallenge() {
+            const dateKey = getTodayDateKey();
+            const challengeCacheKey = `cracknest_daily_challenge_${dateKey}`;
+            const cachedChallenge = localStorage.getItem(challengeCacheKey);
+            
+            const topicEl = document.getElementById('daily-challenge-topic');
+            const problemEl = document.getElementById('daily-challenge-problem');
+
+            if (cachedChallenge) {
+                const challenge = JSON.parse(cachedChallenge);
+                topicEl.textContent = challenge.topic.toUpperCase();
+                problemEl.textContent = challenge.problem;
+            } else {
+                topicEl.textContent = "Loading...";
+                problemEl.textContent = "Generating a new challenge...";
+
+                const prompt = `Generate a daily aptitude challenge (JSON) relevant to a candidate aiming for a ${userProfile.targetRole} role. 
+                The problem should focus on a universal aptitude skill like Math, Logic, or Reasoning. 
+                Output ONLY JSON object with 'topic' (e.g., 'Time & Work', 'Financial Ratios') and 'problem' (the full question).`;
+
+                const result = await callGemini(prompt);
+                
+                if (result) {
+                    try {
+                        const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
+                        const challenge = JSON.parse(jsonStr);
+
+                        // Cache the result for the rest of the day
+                        localStorage.setItem(challengeCacheKey, JSON.stringify(challenge));
+
+                        topicEl.textContent = challenge.topic.toUpperCase();
+                        problemEl.textContent = challenge.problem;
+                    } catch (e) {
+                        console.error("Daily Challenge JSON Parse Error:", e);
+                        topicEl.textContent = "ERROR";
+                        problemEl.textContent = "Failed to generate challenge.";
+                    }
+                } else {
+                    topicEl.textContent = "APTITUDE";
+                    problemEl.textContent = "Try a classic: Ratios & Proportions.";
+                }
+            }
+        }
+
+
+        // --- 4. AI MOCK INTERVIEW LOGIC (Unchanged) ---
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-chat-btn');
@@ -829,26 +1073,16 @@
             startBtn.classList.add('opacity-50', 'cursor-not-allowed');
             startBtn.textContent = "Interview in Progress...";
 
-            // Use a temporary message while waiting for the AI response
-            const initialMessage = addMessage("AI", `Starting ${mode} Interview... connecting...`, true); 
+            addMessage("AI", `Starting ${mode} Interview... connecting...`);
             
             const prompt = `You are a professional and polite ${mode} interviewer for a ${userProfile.targetRole} role. 
             Start the interview by introducing yourself briefly and asking the first relevant question.`;
             
             const reply = await callGemini(prompt);
             
-            // Remove initial message and show real msg
-            if (initialMessage && initialMessage.parentNode) {
-                initialMessage.parentNode.removeChild(initialMessage);
-            }
-
-            if (reply) {
-                addMessage("AI", reply);
-            } else {
-                addMessage("AI", "Sorry, I couldn't start the interview. Please try again.");
-                chatInput.disabled = true;
-                sendBtn.disabled = true;
-            }
+            // Remove "Connecting..." and show real msg
+            historyDiv.innerHTML = ''; 
+            addMessage("AI", reply);
         });
 
         chatForm.addEventListener('submit', async (e) => {
@@ -867,69 +1101,184 @@
             Evaluate it briefly (one sentence feedback) and then ask the next follow-up question. Be encouraging but professional.`;
             
             const reply = await callGemini(prompt);
-            
-            if (reply) {
-                addMessage("AI", reply);
-            } else {
-                 addMessage("AI", "Sorry, I'm having trouble connecting. Please try again.");
-            }
+            addMessage("AI", reply);
             
             chatInput.disabled = false;
             sendBtn.disabled = false;
             chatInput.focus();
         });
 
-        function addMessage(sender, text, isTemporary = false) {
+        function addMessage(sender, text) {
             const isUser = sender === "You";
             const bubble = document.createElement('div');
-            // FIX: Corrected string concatenation for class names
-            bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'} ${isUser ? 'animate-fadeIn' : 'animate-fadeIn'}`; 
-            
-            // Icon structure improved with Tailwind classes for absolute positioning
-            const icon = isUser ? 
-                '<div class="absolute bottom-0 -right-8 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs transform translate-x-1/2 translate-y-1/4 shadow-md"><i class="fa-solid fa-user"></i></div>' : 
-                '<div class="absolute bottom-0 -left-8 w-6 h-6 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-xs transform -translate-x-1/2 translate-y-1/4 shadow-md"><i class="fa-solid fa-robot"></i></div>';
+            bubble.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-ai'} animate-fadeIn`;
             
             const content = isUser ? text : marked.parse(text);
             
-            bubble.innerHTML = content + icon;
+            bubble.innerHTML = content;
             historyDiv.appendChild(bubble);
             historyDiv.scrollTop = historyDiv.scrollHeight;
+        }
+
+        // --- 7. TEST SERIES LOGIC (Unchanged) ---
+        
+        window.startLevelTest = async function(level, type) {
+            document.getElementById('level-selection-area').classList.add('hidden');
+            document.getElementById('level-test-area').classList.remove('hidden');
+            document.getElementById('level-test-questions').classList.add('hidden');
+            document.getElementById('level-test-results').classList.add('hidden');
+            document.getElementById('level-test-loading').classList.remove('hidden');
+
+            document.getElementById('loading-level').textContent = `${level} (${type})`;
+            document.getElementById('loading-role').textContent = userProfile.targetRole;
             
-            if (isTemporary) return bubble; // Return the element for removal if temporary
+            const prompt = `Generate 5 multiple choice questions (JSON format) for a ${type} test for a ${userProfile.targetRole} role. 
+            Output array of objects with 'question', 'options' (array of 4 strings), and 'correctIndex' (0-3). 
+            Output ONLY valid JSON array. No code blocks.`;
+
+            const result = await callGemini(prompt);
+            
+            document.getElementById('level-test-loading').classList.add('hidden');
+
+            if (result) {
+                try {
+                    const jsonStr = result.replace(/```json/g, '').replace(/```/g, '').trim();
+                    activeTestQuestions = JSON.parse(jsonStr);
+                    renderLevelQuestions(level);
+                } catch (e) {
+                    console.error("JSON Parse error", e);
+                    document.getElementById('level-test-area').innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. AI response error.</div>';
+                }
+            } else {
+                 document.getElementById('level-test-area').innerHTML = '<div class="text-center p-4 bg-red-50 text-red-600 rounded-lg">Failed to load test. Network or API error.</div>';
+            }
+        }
+
+        function renderLevelQuestions(level) {
+            const container = document.getElementById('level-test-questions');
+            container.innerHTML = `
+                <h3 class="text-2xl font-bold text-slate-800 font-heading mb-6">${level} Test: ${userProfile.targetRole}</h3>
+                <form id="level-test-form" class="space-y-6">
+                ${activeTestQuestions.map((q, i) => `
+                    <div class="p-6 bg-slate-50 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
+                        <p class="font-bold text-slate-800 mb-4 text-lg"><span class="text-primary mr-2">Q${i+1}.</span> ${q.question}</p>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="0" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" required>
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[0]}</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="1" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[1]}</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="2" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[2]}</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition group">
+                                <input type="radio" name="q${i}" value="3" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary">
+                                <span class="text-slate-700 font-medium group-hover:text-primary">${q.options[3]}</span>
+                            </label>
+                        </div>
+                    </div>
+                `).join('')}
+                    <button type="submit" id="submit-level-test-btn" class="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition shadow-lg mt-4 text-lg">
+                        Submit Test & Get Feedback
+                    </button>
+                </form>
+            `;
+            container.classList.remove('hidden');
+
+            document.getElementById('level-test-form').addEventListener('submit', submitLevelTest);
+        }
+
+        async function submitLevelTest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-level-test-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Grading & Analyzing...';
+            btn.disabled = true;
+
+            let correctCount = 0;
+            let incorrectDetails = [];
+            
+            // 1. Grade the test
+            activeTestQuestions.forEach((q, i) => {
+                const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                const userAnswer = selectedOption ? parseInt(selectedOption.value) : -1;
+                const isCorrect = userAnswer === q.correctIndex;
+                
+                if (isCorrect) {
+                    correctCount++;
+                } else {
+                    incorrectDetails.push({
+                        question: q.question,
+                        userAnswerIndex: userAnswer,
+                        correctAnswer: q.options[q.correctIndex]
+                    });
+                }
+            });
+
+            // 2. Prepare Feedback Prompt
+            const totalQuestions = activeTestQuestions.length;
+            const score = correctCount;
+            let incorrectTopics = incorrectDetails.map(d => d.question).join(" | ");
+            
+            let feedbackPrompt = `A candidate for a ${userProfile.targetRole} role just scored ${score} out of ${totalQuestions} on a skill test. 
+            The candidate incorrectly answered questions related to: [${incorrectTopics}]. 
+            
+            Generate a detailed analysis (2-3 paragraphs) in Markdown for the candidate:
+            1. An encouraging opening statement with the final score.
+            2. A brief analysis of the incorrect topics.
+            3. A short, actionable tip on how to improve in the areas they struggled with, tailored to their role.
+            
+            Output ONLY the Markdown content.`;
+
+            // 3. Call Gemini for detailed feedback
+            const feedback = await callGemini(feedbackPrompt);
+            
+            // 4. Render Results
+            document.getElementById('level-test-questions').classList.add('hidden');
+            document.getElementById('level-test-results').classList.remove('hidden');
+
+            const resultsHeading = document.getElementById('results-heading');
+            resultsHeading.innerHTML = `Your Score: <span class="text-primary">${score}/${totalQuestions}</span>`;
+
+            // Set the border color of the feedback box based on performance
+            const feedbackBox = document.querySelector('#level-test-results .border-t-4');
+            const feedbackBorder = document.querySelector('#level-test-results .w-1');
+            
+            // Reset existing classes
+            feedbackBox.classList.remove('border-red-500', 'border-green-500');
+            feedbackBorder.classList.remove('bg-red-500', 'bg-green-500');
+
+            if (score / totalQuestions > 0.6) {
+                feedbackBox.classList.add('border-green-500');
+                feedbackBorder.classList.add('bg-green-500');
+            } else {
+                feedbackBox.classList.add('border-red-500');
+                feedbackBorder.classList.add('bg-red-500');
+            }
+
+            document.getElementById('results-feedback-text').innerHTML = marked.parse(feedback || "Could not generate AI feedback. Please review the topics you missed.");
+            
+            btn.disabled = false;
         }
 
         // --- LOGOUT / RESET ---
         document.getElementById('logout-btn').addEventListener('click', () => {
             if(confirm("This will clear your local progress and reset the app. Continue?")) {
                 localStorage.removeItem('cracknest_profile');
-                // Clear all dynamic caches too
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key.startsWith('cracknest_')) {
-                        localStorage.removeItem(key);
-                    }
-                }
-                window.location.href = "index.html"; // Should redirect to the login/landing page
+                localStorage.clear(); 
+                window.location.href = "index.html"; // Should redirect to an index page or reload
             }
         });
 
         // --- MOBILE MENU ---
         document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
             document.getElementById('mobile-menu').classList.remove('hidden');
-            // FIX: Added class to force transition
-            setTimeout(() => {
-                document.getElementById('mobile-menu').classList.remove('opacity-0');
-                document.getElementById('mobile-menu').classList.add('opacity-100');
-            }, 10);
         });
         document.getElementById('close-mobile-menu').addEventListener('click', () => {
-             // FIX: Added class to force transition
-            document.getElementById('mobile-menu').classList.remove('opacity-100');
-            document.getElementById('mobile-menu').classList.add('opacity-0');
-            setTimeout(() => {
-                 document.getElementById('mobile-menu').classList.add('hidden');
-            }, 300); // Wait for transition
+            document.getElementById('mobile-menu').classList.add('hidden');
         });
 
         // Start App
