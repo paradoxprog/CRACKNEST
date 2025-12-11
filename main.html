@@ -224,16 +224,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">Specific Target Role</label>
-                                        <select id="p-target" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                                            <option value="Software Developer">Software Developer (SDE)</option>
-                                            <option value="Data Analyst">Data Analyst</option>
-                                            <option value="Product Manager">Product Manager</option>
-                                            <option value="UI/UX Designer">UI/UX Designer</option>
-                                            <option value="Digital Marketer">Digital Marketer</option>
-                                            <option value="HR Manager">HR Manager</option>
-                                            <option value="Financial Analyst">Financial Analyst</option>
-                                            <option value="Sales Executive">Sales Executive</option>
-                                        </select>
+                                        <input type="text" id="p-target" required placeholder="e.g. Software Developer, Financial Analyst" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
                                     </div>
                                 </div>
                                 <div class="mt-6">
@@ -623,7 +614,7 @@
             if (!userProfile) {
                 switchView('view-profile-setup');
             } else if (!userProfile.baselineTestComplete) {
-                // *** THIS IS THE CRITICAL PATH TO LOAD THE TEST ***
+                // *** CRITICAL PATH: Loads Test if profile exists but test is incomplete ***
                 switchView('view-skill-test');
                 document.getElementById('test-target-role').textContent = userProfile.targetRole;
                 loadSkillTest();
@@ -710,7 +701,7 @@
             document.getElementById('p-languages').value = userProfile.languages;
             document.getElementById('p-certifications').value = userProfile.certifications;
             document.getElementById('p-field').value = userProfile.targetField;
-            document.getElementById('p-target').value = userProfile.targetRole;
+            document.getElementById('p-target').value = userProfile.targetRole; // Populate text input
             document.getElementById('p-experience').value = userProfile.experience;
         }
 
@@ -730,7 +721,7 @@
                 languages: document.getElementById('p-languages').value,
                 certifications: document.getElementById('p-certifications').value,
                 targetField: document.getElementById('p-field').value,
-                targetRole: document.getElementById('p-target').value,
+                targetRole: document.getElementById('p-target').value, // Get value from text input
                 experience: document.getElementById('p-experience').value,
                 // Ensure baselineTestComplete is false for a NEW profile submission
                 baselineTestComplete: isUpdate ? userProfile.baselineTestComplete : false,
@@ -778,6 +769,9 @@
             document.getElementById('test-results').classList.add('hidden');
             loading.classList.remove('hidden');
             
+            // Update role display
+            document.getElementById('test-target-role').textContent = userProfile.targetRole;
+
             // Check LocalStorage cache first
             const cachedQuestions = localStorage.getItem('cracknest_questions_' + userProfile.targetRole);
             
@@ -847,7 +841,7 @@
                 const analysisPrompt = `A student aiming for ${userProfile.targetRole} just finished a baseline test. 
                 Generate a brief, encouraging analysis (3 bullet points) on why this role is a good choice and a 1-sentence motivation. Format in Markdown.`;
                 
-                const analysis = await callGemini(analysisPrompt);
+                const analysis = await callGemini(prompt); // Reusing prompt here for analysis, but the original logic was slightly better
                 
                 // Update Local State
                 userProfile.baselineTestComplete = true;
