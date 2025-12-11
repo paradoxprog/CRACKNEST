@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrackNest | Personalized Dashboard</title>
+    <title>CrackNest | Personalized Dashboard (Gemini Integrated)</title>
     <meta name="description" content="Your AI-powered, personalized interview preparation dashboard.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,6 +111,11 @@
         </aside>
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-8" role="alert">
+                <strong class="font-bold">⚠️ SECURITY & IMPLEMENTATION NOTICE:</strong>
+                <span class="block sm:inline">The Gemini API calls are **mocked** in the JavaScript (`callGeminiAPI` function) for security. **To make the features truly work, you must replace the mock logic in `callGeminiAPI` with a `fetch` call to your own secure backend proxy.** This proxy will hold your API key and call the Gemini API.</span>
+            </div>
             
             <section id="overview" class="mb-10">
                 <h1 class="font-heading text-3xl font-bold text-slate-900 mb-2" id="greeting-name">Welcome Back!</h1>
@@ -346,13 +351,13 @@
                         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
                             <h3 class="font-bold text-xl text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-headset text-green-400"></i> HR Round Simulation</h3>
                             <p class="text-sm text-slate-400 mb-4">AI evaluates clarity, tone, and confidence.</p>
-                            <button class="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Start HR Mock</button>
+                            <button id="start-hr-mock" class="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Start HR Mock</button>
                         </div>
 
                         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
                             <h3 class="font-bold text-xl text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-terminal text-blue-400"></i> <span id="technical-mock-name">Technical Round</span> Simulation</h3>
                             <p class="text-sm text-slate-400 mb-4">AI assesses technical correctness specific to your role.</p>
-                            <button class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Start Mock</button>
+                            <button id="start-tech-mock" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Start Mock</button>
                         </div>
                     </div>
                     
@@ -398,22 +403,104 @@
     </footer>
     
     <script type="module">
-        // Import Firebase Auth (Mocked, as full initialization is complex)
+        // Import Firebase Auth (Mocked)
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // MOCK AUTH: Since we don't have the full Firebase context, we mock the sign out for redirect.
         const auth = { signOut: async () => { console.log("Mock Sign Out performed."); } };
 
-        // --- DOM Elements ---
+        // --- GEMINI API INTEGRATION & MOCKING LOGIC ---
+        
+        // Define the model for prompt optimization
+        const GEMINI_MODEL = "gemini-2.5-flash"; 
+        
+        /**
+         * ⚠️ CRITICAL: In a live app, this function MUST be replaced with a `fetch` call
+         * to a secure backend endpoint (your proxy server) that handles the actual Gemini SDK call.
+         * * The backend proxy should receive the 'promptType' and 'data', call Gemini, and return
+         * a structured JSON object.
+         * * @param {string} promptType - Identifier for the task (e.g., 'roadmap', 'resume')
+         * @param {object} data - Profile and Test data
+         */
+        async function callGeminiAPI(promptType, data) {
+            console.log("--- MOCK GEMINI API CALL STARTED ---");
+            aiLoadingIcon.classList.remove('hidden');
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate latency
+            
+            const { profile, testResults } = data;
+            const role = profile.role;
+            const field = profile.field;
+            const weakness = testResults.weakness || 'General Concepts';
+            const strength = testResults.strength || 'Aptitude';
+
+            let prompt = "";
+            let mockResponse = {};
+
+            switch (promptType) {
+                case 'baseline_analysis':
+                    // This data would typically come from an actual test result, not Gemini, 
+                    // but we use Gemini to *interpret* the results and give a text summary.
+                    prompt = `You are a career coach. Analyze the following student profile and mock test results. 
+                    Profile: ${JSON.stringify(profile)}. Results: Score ${testResults.score}%, Strength: ${strength}, Weakness: ${weakness}.
+                    Provide a concise summary of the student's readiness and the reason for the identified weakness.`;
+                    
+                    mockResponse = {
+                        score: testResults.score, // Use the score already generated in the test mock
+                        strength: strength,
+                        weakness: weakness,
+                        summary: `Your score is ${testResults.score}%. Excellent foundation in ${strength}. The AI detects a critical gap in **${weakness}** which is typical for a ${field} role. Your roadmap will prioritize fixing this.`
+                    };
+                    break;
+
+                case 'roadmap':
+                    prompt = `Using the ${GEMINI_MODEL} model, generate a 3-week learning roadmap structure for a student aiming for the role of '${role}' in the '${field}' field. 
+                    Current weakness is: '${weakness}'. Return the output in a clean JSON object containing: 
+                    {domainTitle: string, domainFocus: string, domainTopics: string[], roadmapSummary: string}.
+                    Topics must be specific to the domain (e.g., if Finance, use 'Valuation Methods', not 'Technical Training').`;
+                    
+                    // Mocked JSON response for the frontend to parse
+                    mockResponse = {
+                        domainTitle: `${field} Domain Mastery`,
+                        domainFocus: `${role} Core Principles`,
+                        domainTopics: [
+                            `1. Fundamentals of ${field} (Day 1-5)`,
+                            `2. Deep dive into ${weakness} (Day 6-12)`,
+                            `3. Project-based implementation of ${strength} (Day 13-21)`
+                        ],
+                        roadmapSummary: `The AI recommends dedicating 60% of your time to **${weakness}** (the weakest area) and reinforcing **${strength}** via practice tests. Aim for 80% readiness.`
+                    };
+                    break;
+
+                case 'resume_suggestions':
+                    prompt = `Act as an ATS/HR screening expert. Given the profile and test results, generate 3 hyper-specific resume improvement suggestions (actionable bullet points). 
+                    Profile: ${JSON.stringify(profile)}. Results: Score ${testResults.score}%, Strength: ${strength}, Weakness: ${weakness}.`;
+                    
+                    mockResponse = [
+                        `**Improve Summary:** Rephrase to explicitly mention your strength: 'Highly analytical candidate with verified **${strength}** skills, seeking ${role} role.'`,
+                        `**Quantify Experience:** Add a bullet point demonstrating how you used **${strength}** to achieve a measurable result.`,
+                        `**Mitigate Weakness:** Include a section on 'Self-Taught Skills' listing courses/projects taken in **${weakness}** to show proactive learning.`
+                    ];
+                    break;
+
+                case 'mock_feedback':
+                    // This mock simulates getting the AI to analyze a student's recorded answer (audio/text)
+                    prompt = `Simulate an HR interview evaluation for a student targeting '${role}' who answered 'Tell me about yourself' poorly. 
+                    Generate a brief score (e.g., 6/10) and a concise area for improvement.`;
+                    
+                    mockResponse = `**Score: 6/10** (Clarity). Improvement: Your response was too generic. Use the STAR method and link your past experiences directly to the ${role} requirements. Suggested Lesson: HR Communication Lesson 3: The STAR Method.`;
+                    break;
+            }
+
+            aiLoadingIcon.classList.add('hidden');
+            return { success: true, data: mockResponse };
+        }
+        
+        // --- DOM Elements & Local Storage Functions ---
         const profileEditForm = document.getElementById('profile-edit-form');
         const profileDisplayView = document.getElementById('profile-display-view');
         const editProfileBtn = document.getElementById('edit-profile-btn');
         const takeTestBtn = document.getElementById('take-test-btn');
         const testStatus = document.getElementById('test-status');
         const aiLoadingIcon = document.getElementById('ai-loading-icon');
-        const regenerateRoadmapBtn = document.getElementById('regenerate-roadmap');
 
-        // --- Default/Initial Data Structure ---
         const DEFAULT_PROFILE = {
             name: 'User Name', degree: 'N/A', year: 'N/A', certifications: 'None', languages: 'N/A',
             field: 'IT', role: 'Software Developer', experience: 'Fresher'
@@ -423,7 +510,6 @@
             score: '--', strength: 'N/A', weakness: 'N/A'
         };
 
-        // --- Utility Functions ---
         function getProfile() {
             return JSON.parse(localStorage.getItem('cracknestProfile')) || DEFAULT_PROFILE;
         }
@@ -442,84 +528,9 @@
             updateUI(getProfile(), results);
         }
 
-        // --- AI/Gemini Mock Functions ---
-
-        /**
-         * Mocks the generation of AI content based on profile and test results.
-         * In a real app, this would be an API call to Gemini.
-         * @param {object} profile 
-         * @param {object} testResults 
-         */
-        async function generateAIContent(profile, testResults) {
-            aiLoadingIcon.classList.remove('hidden');
-            
-            // Simulate API latency
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            const role = profile.role;
-            const field = profile.field;
-            const weakness = testResults.weakness === 'N/A' ? 'Aptitude Basics' : testResults.weakness;
-            const strength = testResults.strength === 'N/A' ? 'HR Communication' : testResults.strength;
-
-            // Mock Domain Training Content
-            let domainTitle, domainFocus, domainTopics;
-
-            if (field === 'IT' || field === 'Engineering') {
-                domainTitle = 'Technical Training';
-                domainFocus = `${role} Core Skills`;
-                if (role.toLowerCase().includes('software')) {
-                    domainTopics = [
-                        `Coding + DSA Mastery (${strength})`, 
-                        'System Design & Architecture Basics', 
-                        `Advanced Database Queries (${weakness})`
-                    ];
-                } else {
-                    domainTopics = [
-                        'CAD Software Proficiency', 
-                        'Material Science & stress Analysis', 
-                        'Project Management Methodologies'
-                    ];
-                }
-            } else if (field === 'Marketing') {
-                domainTitle = 'Domain Training';
-                domainFocus = 'Digital Marketing Strategy';
-                domainTopics = [
-                    'SEO & SEM Best Practices',
-                    'Content Strategy & Copywriting',
-                    'Marketing Analytics & Reporting'
-                ];
-            } else if (field === 'HR') {
-                domainTitle = 'Domain Training';
-                domainFocus = 'HR Policy & Compliance';
-                domainTopics = [
-                    'Recruitment Process & ATS Training',
-                    'Labor Law & Compliance Basics',
-                    'Employee Relations Case Studies'
-                ];
-            } else {
-                 domainTitle = 'Domain Training';
-                 domainFocus = `${field} Principles`;
-                 domainTopics = [`${field} Core Concepts`, `Industry Regulations`, `Financial Modeling Basics`];
-            }
-
-            // Mock Resume Suggestions
-            const resumeSuggestions = [
-                `**Improve Summary:** Tailor it to emphasize your skills for the **${role}** role.`,
-                `**Highlight Strongest Skill:** Ensure **${strength}** is clearly demonstrated with measurable results.`,
-                `**Weakness Mitigation:** Add relevant projects to cover gaps in **${weakness}**.`
-            ];
-            
-            // Mock Roadmap Summary
-            const roadmapSummary = `Based on your profile and test results, the AI recommends focusing **75%** of your time on **${weakness}** (Your primary gap) for the first two weeks, and reinforcing your **${strength}** for confidence.`;
-
-            aiLoadingIcon.classList.add('hidden');
-
-            return { domainTitle, domainFocus, domainTopics, resumeSuggestions, roadmapSummary, weakness };
-        }
-
-
         // --- UI Update Function ---
         async function updateUI(profile, testResults) {
+            
             // 1. Update Profile Display
             document.getElementById('greeting-name').textContent = `Welcome Back, ${profile.name.split(' ')[0]}!`;
             document.getElementById('user-name').textContent = profile.name;
@@ -534,8 +545,10 @@
                 if (input) input.value = profile[key];
             }
 
-            // 2. Update Test Results
+            // 2. Update Test Results & Readiness Score
+            const isProfileComplete = profile.name !== 'User Name' && profile.field !== '';
             const isTestTaken = testResults.score !== '--';
+            
             document.getElementById('readiness-score').textContent = `${testResults.score}%`;
             document.getElementById('test-readiness-score').textContent = `${testResults.score}%`;
             document.getElementById('test-strength').textContent = testResults.strength;
@@ -547,8 +560,7 @@
             document.getElementById('test-series-role').textContent = profile.role;
             document.getElementById('roadmap-role').textContent = profile.role;
 
-
-            if (profile.name === 'User Name') {
+            if (!isProfileComplete) {
                 takeTestBtn.disabled = true;
                 testStatus.classList.remove('hidden');
             } else {
@@ -556,67 +568,78 @@
                 testStatus.classList.add('hidden');
             }
 
-            // 3. AI-Driven Content Updates
-            const aiContent = await generateAIContent(profile, testResults);
-            
-            // Training Module
-            document.getElementById('domain-module-title').textContent = aiContent.domainTitle;
-            document.getElementById('domain-module-focus').textContent = aiContent.domainFocus;
-            document.getElementById('technical-test-name').textContent = `${aiContent.domainTitle} Test`;
-            document.getElementById('technical-mock-name').textContent = `${aiContent.domainTitle} Round`;
-            
-            const domainTopicsList = document.getElementById('domain-topics');
-            domainTopicsList.innerHTML = '';
-            aiContent.domainTopics.forEach(topic => {
-                const li = document.createElement('li');
-                li.className = 'flex items-center justify-between text-slate-700';
-                li.innerHTML = `${topic}`; // Mock progress is omitted for simplicity
-                domainTopicsList.appendChild(li);
-            });
+            // 3. AI-Driven Content Updates (Roadmap & Suggestions)
+            if (isTestTaken) {
+                const roadmapResult = await callGeminiAPI('roadmap', { profile, testResults });
+                const resumeResult = await callGeminiAPI('resume_suggestions', { profile, testResults });
+                
+                if (roadmapResult.success) {
+                    const aiContent = roadmapResult.data;
+                    
+                    // Update Training Module
+                    document.getElementById('domain-module-title').textContent = aiContent.domainTitle;
+                    document.getElementById('domain-module-focus').textContent = aiContent.domainFocus;
+                    document.getElementById('technical-test-name').textContent = `${aiContent.domainTitle} Test`;
+                    document.getElementById('technical-mock-name').textContent = `${aiContent.domainTitle} Round`;
+                    
+                    const domainTopicsList = document.getElementById('domain-topics');
+                    domainTopicsList.innerHTML = '';
+                    aiContent.domainTopics.forEach(topic => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-center justify-between text-slate-700';
+                        li.innerHTML = `<i class="fa-solid fa-check-circle text-primary text-xs mr-2"></i> ${topic}`;
+                        domainTopicsList.appendChild(li);
+                    });
 
-            // AI Roadmap Summary
-            document.getElementById('ai-roadmap-summary').innerHTML = `${aiContent.roadmapSummary} <button id="regenerate-roadmap" class="text-primary text-xs font-medium ml-2 hover:underline">Regenerate</button>`;
-            document.getElementById('ai-focus-area').textContent = aiContent.weakness;
+                    // AI Roadmap Summary
+                    document.getElementById('ai-roadmap-summary').innerHTML = `${aiContent.roadmapSummary} <button id="regenerate-roadmap" class="text-primary text-xs font-medium ml-2 hover:underline">Regenerate</button>`;
+                    
+                     // Re-bind the regenerate button created in innerHTML
+                    document.getElementById('regenerate-roadmap').addEventListener('click', () => updateUI(getProfile(), getTestResults()));
+                }
 
-            // Resume Suggestions
-            const resumeSuggestionsList = document.getElementById('ai-resume-suggestions');
-            resumeSuggestionsList.innerHTML = '';
-            aiContent.resumeSuggestions.forEach(suggestion => {
-                const li = document.createElement('li');
-                li.className = 'text-slate-600';
-                li.innerHTML = suggestion;
-                resumeSuggestionsList.appendChild(li);
-            });
+                if (resumeResult.success) {
+                    // Resume Suggestions
+                    const resumeSuggestionsList = document.getElementById('ai-resume-suggestions');
+                    resumeSuggestionsList.innerHTML = '';
+                    resumeResult.data.forEach(suggestion => {
+                        const li = document.createElement('li');
+                        li.className = 'text-slate-600';
+                        li.innerHTML = suggestion;
+                        resumeSuggestionsList.appendChild(li);
+                    });
+                }
+                
+                // Mock Mock Feedback
+                 document.getElementById('ai-mock-feedback').textContent = "Ready for your first mock interview. Start a Technical or HR simulation now to get immediate AI feedback.";
 
-            // Set up regenerate button listener (needs to be re-bound as innerHTML overwrites)
-            document.getElementById('regenerate-roadmap').addEventListener('click', () => {
-                generateAIContent(profile, testResults).then(content => {
-                    document.getElementById('ai-roadmap-summary').textContent = content.roadmapSummary;
-                });
-            });
-
+            } else {
+                 // Clear AI sections if test isn't taken
+                 document.getElementById('domain-topics').innerHTML = '<li class="text-slate-700">Please take the Baseline Skill Test to generate personalized content.</li>';
+                 document.getElementById('ai-roadmap-summary').innerHTML = 'Roadmap generation pending...';
+                 document.getElementById('ai-resume-suggestions').innerHTML = '<li>Take the Baseline Skill Test to get AI-powered resume suggestions.</li>';
+            }
 
             // 4. Update Final Evaluation Status (Mock Logic)
-            if (isTestTaken && profile.name !== 'User Name' && getProgress() > 80) {
+            const progress = getProgress(testResults.score);
+            document.getElementById('roadmap-progress').textContent = `Day ${Math.floor(progress * 0.3)}/30`;
+
+            if (progress >= 80) {
                  document.getElementById('cert-status').textContent = 'Ready to Certify!';
                  document.getElementById('start-final-exam-btn').disabled = false;
                  document.getElementById('final-summary').innerHTML = 'Congratulations! You are ready. <span class="font-bold text-primary">Final Readiness Score: 88%</span>';
             } else {
                 document.getElementById('cert-status').textContent = 'In Progress';
                 document.getElementById('start-final-exam-btn').disabled = true;
-                document.getElementById('final-summary').textContent = `Complete ${100 - getProgress()}% more training and mock tests to unlock.`;
+                document.getElementById('final-summary').textContent = `Complete ${100 - progress}% more training and mock tests to unlock.`;
             }
-            
-            // Mock Roadmap Progress
-            document.getElementById('roadmap-progress').textContent = `Day ${Math.floor(getProgress() * 0.3)}/30`;
-        }
 
+        }
+        
         // Mock Progress Function
-        function getProgress() {
-            // Simple mock progress calculation based on test score
-            const results = getTestResults();
-            const score = parseInt(results.score) || 0;
-            return Math.min(100, score + 20); // Ensures it's at least 20%
+        function getProgress(score) {
+            const s = parseInt(score) || 0;
+            return Math.min(100, s + 20); 
         }
 
         // --- Event Listeners ---
@@ -656,43 +679,70 @@
         });
 
         // Mock Take Test
-        takeTestBtn.addEventListener('click', () => {
+        takeTestBtn.addEventListener('click', async () => {
             const currentProfile = getProfile();
             alert(`Starting Baseline Skill Test for ${currentProfile.role}. This takes 10 minutes.`);
             
-            // Simulate AI test results generation based on role/field
+            // 1. Mock the Test Score Generation
             let mockScore;
             let strength, weakness;
             
-            if (currentProfile.field === 'IT') {
-                mockScore = Math.floor(Math.random() * (90 - 65 + 1)) + 65; // 65-90
+            if (currentProfile.field === 'IT' || currentProfile.field === 'Engineering') {
+                mockScore = Math.floor(Math.random() * (90 - 65 + 1)) + 65; 
                 strength = mockScore > 75 ? 'DSA & Logical Reasoning' : 'Verbal Ability';
                 weakness = mockScore > 75 ? 'System Design' : 'Coding Basics';
             } else if (currentProfile.field === 'Marketing') {
-                mockScore = Math.floor(Math.random() * (85 - 55 + 1)) + 55; // 55-85
+                mockScore = Math.floor(Math.random() * (85 - 55 + 1)) + 55; 
                 strength = mockScore > 70 ? 'Copywriting & Content' : 'HR Communication';
                 weakness = mockScore > 70 ? 'SEO/SEM Analytics' : 'Aptitude Quants';
-            } else { // HR, Finance, Engineering, etc.
-                mockScore = Math.floor(Math.random() * (80 - 60 + 1)) + 60; // 60-80
+            } else {
+                mockScore = Math.floor(Math.random() * (80 - 60 + 1)) + 60; 
                 strength = 'Domain Concepts';
                 weakness = 'Aptitude Basics';
             }
             
-            saveTestResults({
+            const tempResults = {
                 score: mockScore.toString(),
                 strength: strength,
                 weakness: weakness
-            });
+            };
             
-            alert(`Test Complete! Your readiness score is ${mockScore}%. Roadmap updated.`);
+            // 2. Save the Mock Score
+            saveTestResults(tempResults);
+            
+            // 3. Use Gemini (Mock) to get the final analysis text and update the UI
+            const analysisResult = await callGeminiAPI('baseline_analysis', { profile: currentProfile, testResults: tempResults });
+            if (analysisResult.success) {
+                alert(`Test Complete! Your readiness score is ${mockScore}%. Analysis: ${analysisResult.data.summary}`);
+            }
+        });
+        
+        // Mock Mock Interview (HR)
+        document.getElementById('start-hr-mock').addEventListener('click', async () => {
+            alert("Starting HR Mock Interview (Simulated). The AI will ask a question, and you will simulate the answer.");
+            const currentProfile = getProfile();
+            const result = await callGeminiAPI('mock_feedback', { profile: currentProfile, testResults: getTestResults() });
+
+            if (result.success) {
+                document.getElementById('ai-mock-feedback').innerHTML = `<p class="font-bold text-white">AI Interview Round 1 Complete:</p><p class="text-sm text-slate-300">${result.data}</p>`;
+            }
+        });
+
+        // Mock Mock Interview (Technical) - Similar to HR mock but with a technical focus prompt
+        document.getElementById('start-tech-mock').addEventListener('click', async () => {
+            alert("Starting Technical Mock Interview (Simulated). The AI will ask a role-specific question.");
+            const currentProfile = getProfile();
+            const result = await callGeminiAPI('mock_feedback', { profile: currentProfile, testResults: getTestResults() });
+
+            if (result.success) {
+                document.getElementById('ai-mock-feedback').innerHTML = `<p class="font-bold text-white">AI Interview Round 2 Complete:</p><p class="text-sm text-slate-300">${result.data}</p>`;
+            }
         });
 
         // Logout
         document.getElementById('logout-btn').addEventListener('click', async () => {
-            // await signOut(auth); // Actual Firebase Sign Out
             window.location.href = "index.html"; 
         });
-
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
