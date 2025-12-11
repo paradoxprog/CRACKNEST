@@ -476,7 +476,7 @@
                             </div>
                         <div id="level-test-results" class="hidden text-center py-8">
                             <h3 class="text-3xl font-bold text-slate-800 mb-4 font-heading" id="results-heading"></h3>
-                            <div class="bg-white p-6 rounded-xl text-left mb-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                            <div class="bg-white p-6 rounded-xl text-left mb-8 border-t-4 border-red-500 shadow-sm relative overflow-hidden">
                                 <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
                                 <h4 class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-chart"></i> Detailed Feedback</h4>
                                 <div id="results-feedback-text" class="prose prose-slate text-slate-700"></div>
@@ -604,11 +604,22 @@
 
         // --- VIEW SWITCHER ---
         window.switchView = function(viewId) {
+            console.log(`Switching view to: ${viewId}`); // DEBUG LOG
+
+            // 1. Hide ALL sections
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+            
+            // 2. Show TARGET section
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.add('active');
+            } else {
+                console.error(`View ID ${viewId} not found.`);
+            }
+            
             window.scrollTo(0,0);
             
-            // Highlight sidebar item
+            // 3. Highlight sidebar item
             document.querySelectorAll('.nav-item').forEach(el => {
                 if(el.dataset.target === viewId) el.classList.add('bg-indigo-50', 'text-primary');
                 else el.classList.remove('bg-indigo-50', 'text-primary');
@@ -618,8 +629,8 @@
                 loadProfileForEdit();
             }
             
+            // 4. Specific logic for Test Series View: Reset to level selection
             if (viewId === 'view-test-series' && userProfile) {
-                // Reset test view to level selection when navigating here
                 document.getElementById('test-series-role').textContent = userProfile.targetRole;
                 document.getElementById('test-series-role-level2').textContent = userProfile.targetRole;
                 document.getElementById('level-selection-area').classList.remove('hidden');
@@ -651,9 +662,6 @@
             document.getElementById('mobile-nav-items').innerHTML = html;
         }
         
-        // [Profile Setup, Dashboard, Mock Interview, and Training Center functions omitted for brevity, they remain unchanged from the previous valid state.]
-        // ... (loadProfileForEdit, profile-form listener, loadSkillTest, renderQuestions, loadDashboardData, renderRoadmap, Mock Interview functions) ...
-
         // --- DYNAMIC TEST SERIES LOGIC (New Implementation) ---
 
         window.startLevelTest = async function(level, type) {
@@ -745,12 +753,14 @@
             // 2. Prepare Feedback Prompt
             const totalQuestions = activeTestQuestions.length;
             const score = correctCount;
+            let incorrectTopics = incorrectDetails.map(d => d.question).join(" | ");
+            
             let feedbackPrompt = `A candidate for a ${userProfile.targetRole} role just scored ${score} out of ${totalQuestions} on a skill test. 
-            The candidate answered these questions incorrectly: ${JSON.stringify(incorrectDetails)}. 
+            The candidate incorrectly answered questions related to: [${incorrectTopics}]. 
             
             Generate a detailed analysis (2-3 paragraphs) in Markdown for the candidate:
             1. An encouraging opening statement with the final score.
-            2. A brief analysis of the incorrect topics (e.g., if multiple were about 'Time & Work', mention that).
+            2. A brief analysis of the incorrect topics.
             3. A short, actionable tip on how to improve in the areas they struggled with, tailored to their role.
             
             Output ONLY the Markdown content.`;
@@ -769,6 +779,7 @@
             const feedbackBox = document.querySelector('#level-test-results .border-t-4');
             const feedbackBorder = document.querySelector('#level-test-results .w-1');
             
+            // Reset existing classes
             feedbackBox.classList.remove('border-red-500', 'border-green-500');
             feedbackBorder.classList.remove('bg-red-500', 'bg-green-500');
 
@@ -805,7 +816,7 @@
         // Start App
         initApp();
         
-        // --- Remaining unchanged functions ---
+        // --- Remaining unchanged functions (for continuity) ---
         
         function loadProfileForEdit() {
             // Change Text to indicate Edit Mode
