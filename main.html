@@ -1202,7 +1202,7 @@
                         </div>
                         <div>
                             <h3 id="modal-title" class="font-bold text-slate-800">Practice Session</h3>
-                            <p id="modal-subtitle" class="text-xs text-slate-500">Question 1 of 5</p>
+                            <!-- REMOVED SUBTITLE: Question 1 of 5 -->
                         </div>
                     </div>
                     <button onclick="closePracticeModal()" class="p-2 hover:bg-slate-100 rounded-lg transition">
@@ -1231,10 +1231,10 @@
                     </div>
                 </div>
 
-                <div class="p-4 border-t border-slate-100 flex justify-between">
-                    <span id="modal-score" class="text-sm text-slate-500"><i class="fa-solid fa-check-circle text-green-500 mr-1"></i> Score: <span id="modal-score-value">0</span>/5</span>
+                <div class="p-4 border-t border-slate-100 flex justify-end">
+                    <!-- REMOVED SCORE DISPLAY -->
                     <button onclick="nextModalQuestion()" id="modal-next-btn" class="px-6 py-2 bg-primary hover:bg-indigo-700 text-white font-medium rounded-lg transition disabled:opacity-50" disabled>
-                        Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                        Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </div>
@@ -2075,7 +2075,8 @@
             document.getElementById('modal-question-area').classList.add('hidden');
             document.getElementById('modal-next-btn').disabled = true;
             document.getElementById('modal-explanation').classList.add('hidden');
-            document.getElementById('modal-score-value').textContent = '0';
+            
+            // REMOVED SCORE RESET
             
             // Reset state for new session
             appState.practiceState = {
@@ -2213,8 +2214,9 @@
             });
 
             if (selected === correct) {
-                appState.practiceState.score++;
-                document.getElementById('modal-score-value').textContent = appState.practiceState.score;
+                // Removed Score Update Logic
+                // appState.practiceState.score++;
+                // document.getElementById('modal-score-value').textContent = appState.practiceState.score;
                 
                 // Update local progress bars for gamification
                 updateTrainingProgress(appState.practiceState.topic);
