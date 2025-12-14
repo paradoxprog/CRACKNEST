@@ -1251,8 +1251,8 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
         // ============ CONFIGURATION ============
-        const GEMINI_API_KEY = 'AIzaSyCfFwa4Jki6w30vJo_T8wXJsm0FpdRYoWE'; // Replace with your API key
-        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        const GEMINI_API_KEY = 'AIzaSyDaAEacQmxOM__l9Xzg_VC_HQBeDoBiFXk'; // Replace with your API key
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
         // ... existing state management ...
         // ============ STATE MANAGEMENT ============
@@ -2163,16 +2163,25 @@
         };
 
         function getFallbackPracticeQuestion(topic) {
-            // Try to find exact topic, then check practiceDB keys for partial matches (e.g., 'coding concepts' -> 'coding')
+            // Try to find exact topic, then check practiceDB keys for partial matches
             let key = topic;
             if (!practiceDB[key]) {
-                const lowerTopic = topic.toLowerCase();
+                const lowerTopic = (topic || '').toLowerCase(); // Added safety check
                 key = Object.keys(practiceDB).find(k => lowerTopic.includes(k)) || 'default';
             }
             
-            const questions = practiceDB[key];
+            // Ensure we have a valid array
+            const questions = practiceDB[key] || practiceDB['default'];
             const randomIndex = Math.floor(Math.random() * questions.length);
-            return questions[randomIndex];
+            const raw = questions[randomIndex];
+
+            // Map compressed keys (q, o, c, e) to full keys (question, options, correct, explanation)
+            return {
+                question: raw.q,
+                options: raw.o,
+                correct: raw.c,
+                explanation: raw.e
+            };
         }
 
         function renderPracticeQuestion(q) {
