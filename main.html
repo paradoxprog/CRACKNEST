@@ -221,18 +221,21 @@
                             <button onclick="navigateTo('test-series')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="test-series">
                                 <i class="fa-solid fa-list-check w-5 text-slate-400"></i>
                                 <span>Test Series</span>
+                                <span class="ml-auto text-xs bg-indigo-100 text-primary px-2 py-0.5 rounded font-bold">New</span>
                             </button>
                         </li>
                         <li>
                             <button onclick="navigateTo('resume-builder')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="resume-builder">
                                 <i class="fa-solid fa-file-invoice w-5 text-slate-400"></i>
                                 <span>Resume Builder</span>
+                                <span class="ml-auto text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded font-bold">Beta</span>
                             </button>
                         </li>
                         <li>
                             <button onclick="navigateTo('mock-interview')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="mock-interview">
                                 <i class="fa-solid fa-robot w-5 text-slate-400"></i>
                                 <span>AI Mock Interview</span>
+                                <span class="ml-auto text-xs bg-amber-100 text-secondary px-2 py-0.5 rounded font-bold">Hot</span>
                             </button>
                         </li>
                     </ul>
@@ -274,6 +277,7 @@
         
         <!-- ==================== DASHBOARD SECTION ==================== -->
         <section id="section-dashboard" class="p-6 lg:p-8">
+            <!-- Content identical to previous version -->
             <div class="max-w-6xl mx-auto">
                 <!-- Welcome Header -->
                 <div class="mb-8">
@@ -397,7 +401,7 @@
         <!-- ... (Profile Setup, Skill Test, Training Sections kept as is from provided snippets or inferred) ... -->
         <!-- ==================== PROFILE SETUP SECTION ==================== -->
         <section id="section-profile" class="p-6 lg:p-8 hidden">
-             <!-- ... existing profile content ... -->
+             <!-- Content identical to previous version -->
             <div class="max-w-3xl mx-auto">
                 <!-- Progress Steps -->
                 <div class="mb-8">
@@ -813,7 +817,7 @@
         </section>
 
         <section id="section-training" class="p-6 lg:p-8 hidden">
-             <!-- ... existing training content ... -->
+             <!-- Content identical to previous version -->
              <div class="max-w-6xl mx-auto">
                 <div class="mb-8">
                     <h1 class="font-heading text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Training Center</h1>
@@ -925,7 +929,7 @@
                 </div>
 
                 <!-- Test Categories -->
-                <div class="grid lg:grid-cols-3 gap-6">
+                <div class="grid lg:grid-cols-2 gap-6">
                     <!-- Company Specific -->
                     <div class="training-card bg-white rounded-xl border border-slate-100 shadow-sm p-6">
                         <div class="flex items-center gap-4 mb-4">
@@ -957,18 +961,13 @@
                             <!-- Dynamic content -->
                         </div>
                     </div>
-
-                    <!-- Live Challenges -->
-                    <div id="live-challenge-content" class="training-card bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl shadow-lg p-6 text-white">
-                        <!-- Dynamic content -->
-                    </div>
                 </div>
             </div>
         </section>
 
         <!-- ... (Resume Builder, Mock Interview, Practice Modal kept as is) ... -->
         <section id="section-resume-builder" class="p-6 lg:p-8 hidden">
-             <!-- ... existing resume builder content ... -->
+             <!-- Content identical to previous version -->
               <div class="max-w-6xl mx-auto h-[calc(100vh-8rem)]">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
@@ -1056,7 +1055,7 @@
         </section>
 
         <section id="section-mock-interview" class="p-6 lg:p-8 hidden">
-             <!-- ... existing mock interview content ... -->
+             <!-- Content identical to previous version -->
                <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
@@ -1110,7 +1109,7 @@
 
         <!-- ==================== TRAINING PRACTICE MODAL ==================== -->
         <div id="practice-modal" class="fixed inset-0 z-50 hidden">
-             <!-- ... existing modal content ... -->
+             <!-- Content identical to previous version -->
              <div class="modal-overlay absolute inset-0 bg-black/50"></div>
             <div class="modal-content absolute inset-4 lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="flex items-center justify-between p-4 border-b border-slate-100">
@@ -1158,6 +1157,86 @@
             </div>
         </div>
 
+        <!-- ==================== TEST SERIES MODAL (NEW) ==================== -->
+        <div id="test-modal" class="fixed inset-0 z-50 hidden">
+            <div class="modal-overlay absolute inset-0 bg-black/50"></div>
+            <div class="modal-content absolute inset-4 lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-indigo-100 text-primary rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-stopwatch"></i>
+                        </div>
+                        <div>
+                            <h3 id="test-modal-title" class="font-bold text-slate-800">Mock Test</h3>
+                            <p class="text-xs text-slate-500">Question <span id="test-q-num">1</span> of <span id="test-total">10</span></p>
+                        </div>
+                    </div>
+                    <button onclick="closeTestModal()" class="p-2 hover:bg-slate-200 rounded-lg transition">
+                        <i class="fa-solid fa-xmark text-slate-400"></i>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="flex-1 overflow-y-auto p-6 relative">
+                    <div id="test-loading" class="text-center py-12 hidden">
+                        <div class="spinner w-12 h-12 mx-auto mb-4"></div>
+                        <p class="text-slate-500">Preparing your test environment...</p>
+                    </div>
+
+                    <!-- Question Container -->
+                    <div id="test-body" class="hidden">
+                        <p id="test-question-text" class="text-lg font-medium text-slate-800 mb-6"></p>
+                        <div id="test-options" class="space-y-3">
+                            <!-- Options inserted dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Result Container -->
+                    <div id="test-result" class="hidden text-center py-8">
+                        <div class="w-24 h-24 mx-auto bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-trophy text-primary text-4xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Test Completed!</h2>
+                        <p class="text-slate-500 mb-6">Here is your performance summary</p>
+                        
+                        <div class="inline-flex items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
+                            <div class="text-center px-6 border-r border-slate-200">
+                                <p class="text-3xl font-bold text-primary" id="result-score">0</p>
+                                <p class="text-xs text-slate-500 uppercase tracking-wider">Score</p>
+                            </div>
+                            <div class="text-center px-6">
+                                <p class="text-3xl font-bold text-slate-800" id="result-accuracy">0%</p>
+                                <p class="text-xs text-slate-500 uppercase tracking-wider">Accuracy</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center gap-4">
+                            <button onclick="closeTestModal()" class="px-6 py-2 border border-slate-200 hover:bg-slate-50 rounded-lg font-medium text-slate-600 transition">
+                                Close
+                            </button>
+                            <button onclick="navigateTo('training')" class="px-6 py-2 bg-primary hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                                Continue Practice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div id="test-footer" class="p-4 border-t border-slate-100 flex justify-between bg-slate-50">
+                    <button onclick="prevTestQuestion()" id="test-prev-btn" class="px-4 py-2 text-slate-500 hover:text-slate-800 font-medium disabled:opacity-30" disabled>
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Previous
+                    </button>
+                    <button onclick="nextTestQuestion()" id="test-next-btn" class="px-6 py-2 bg-primary hover:bg-indigo-700 text-white font-medium rounded-lg transition">
+                        Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                    <button onclick="submitTest()" id="test-submit-btn" class="hidden px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition">
+                        Submit Test <i class="fa-solid fa-check ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Toast Notification -->
@@ -1190,6 +1269,13 @@
                 currentQuestion: 0,
                 questions: [],
                 score: 0
+            },
+            // NEW: State for Full Test Series
+            mockTestState: {
+                questions: [],
+                userAnswers: {}, // map index -> selectedOptionIndex
+                currentIndex: 0,
+                total: 10
             },
             chatState: {
                 history: [],
@@ -1235,15 +1321,10 @@
                     { name: "Amazon SDE I", duration: "120m", type: "dsa" }
                 ],
                 topic: [
-                    { name: "Data Structures Sprint", questions: "30 Q", type: "dsa" },
-                    { name: "Algorithm Analysis", questions: "20 Q", type: "dsa" },
-                    { name: "Database Design", questions: "25 Q", type: "sql" }
-                ],
-                challenge: {
-                    title: "Full Stack Challenge",
-                    desc: "React, Node.js & Databases",
-                    type: "coding"
-                }
+                    { name: "Data Structures Sprint", questions: "10 Q", type: "dsa" },
+                    { name: "Algorithm Analysis", questions: "10 Q", type: "dsa" },
+                    { name: "Database Design", questions: "10 Q", type: "sql" }
+                ]
             },
             Marketing: {
                 mnc: [
@@ -1252,15 +1333,10 @@
                     { name: "Meta Blueprint Mock", duration: "45m", type: "campaigns" }
                 ],
                 topic: [
-                    { name: "SEO Mastery", questions: "30 Q", type: "seo" },
-                    { name: "Content Strategy", questions: "20 Q", type: "digital-marketing" },
-                    { name: "Google Analytics", questions: "25 Q", type: "analytics" }
-                ],
-                challenge: {
-                    title: "Viral Campaign Challenge",
-                    desc: "Create a strategy for a product launch",
-                    type: "campaigns"
-                }
+                    { name: "SEO Mastery", questions: "10 Q", type: "seo" },
+                    { name: "Content Strategy", questions: "10 Q", type: "digital-marketing" },
+                    { name: "Google Analytics", questions: "10 Q", type: "analytics" }
+                ]
             },
             HR: {
                 mnc: [
@@ -1269,15 +1345,10 @@
                     { name: "Tata HR Case Study", duration: "60m", type: "performance" }
                 ],
                 topic: [
-                    { name: "Recruitment Lifecycle", questions: "30 Q", type: "recruitment" },
-                    { name: "Labor Laws Quiz", questions: "20 Q", type: "labor-law" },
-                    { name: "Employee Relations", questions: "25 Q", type: "performance" }
-                ],
-                challenge: {
-                    title: "Talent Acquisition Hackathon",
-                    desc: "Optimize the hiring pipeline",
-                    type: "recruitment"
-                }
+                    { name: "Recruitment Lifecycle", questions: "10 Q", type: "recruitment" },
+                    { name: "Labor Laws Quiz", questions: "10 Q", type: "labor-law" },
+                    { name: "Employee Relations", questions: "10 Q", type: "performance" }
+                ]
             },
             Finance: {
                 mnc: [
@@ -1286,15 +1357,10 @@
                     { name: "Deloitte Audit Simulation", duration: "120m", type: "accounting" }
                 ],
                 topic: [
-                    { name: "Financial Modeling", questions: "30 Q", type: "financial-analysis" },
-                    { name: "Taxation Laws", questions: "20 Q", type: "taxation" },
-                    { name: "Accounting Standards", questions: "25 Q", type: "accounting" }
-                ],
-                challenge: {
-                    title: "Portfolio Management",
-                    desc: "Maximize returns with virtual capital",
-                    type: "investment"
-                }
+                    { name: "Financial Modeling", questions: "10 Q", type: "financial-analysis" },
+                    { name: "Taxation Laws", questions: "10 Q", type: "taxation" },
+                    { name: "Accounting Standards", questions: "10 Q", type: "accounting" }
+                ]
             }
         };
 
@@ -1466,7 +1532,7 @@
             const mncList = document.getElementById('mnc-tests-list');
             if(mncList) {
                 mncList.innerHTML = data.mnc.map(test => `
-                    <button onclick="startTraining('${test.type}')" class="w-full flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-primary transition group">
+                    <button onclick="startTest('${test.type}', '${test.name}')" class="w-full flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-primary transition group">
                         <span class="font-medium text-slate-700">${test.name}</span>
                         <span class="text-xs bg-slate-100 px-2 py-1 rounded">${test.duration}</span>
                     </button>
@@ -1477,37 +1543,11 @@
             const topicList = document.getElementById('topic-tests-list');
             if(topicList) {
                 topicList.innerHTML = data.topic.map(test => `
-                    <button onclick="startTraining('${test.type}')" class="w-full flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-primary transition group">
+                    <button onclick="startTest('${test.type}', '${test.name}')" class="w-full flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-primary transition group">
                         <span class="font-medium text-slate-700">${test.name}</span>
                         <span class="text-xs bg-slate-100 px-2 py-1 rounded">${test.questions}</span>
                     </button>
                 `).join('');
-            }
-
-            // Update Challenge
-            const challengeContent = document.getElementById('live-challenge-content');
-            if(challengeContent) {
-                challengeContent.innerHTML = `
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i class="fa-solid fa-trophy text-yellow-300 text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg">Weekly Challenge</h3>
-                            <p class="text-xs text-indigo-200">Compete with peers</p>
-                        </div>
-                    </div>
-                    <div class="mb-6">
-                        <h4 class="font-bold text-xl mb-1">${data.challenge.title}</h4>
-                        <p class="text-sm text-indigo-200 mb-4">${data.challenge.desc}</p>
-                        <div class="flex items-center gap-2 text-xs bg-black/20 p-2 rounded-lg inline-block">
-                            <i class="fa-solid fa-clock"></i> Ends in 2 days
-                        </div>
-                    </div>
-                    <button onclick="startTraining('${data.challenge.type}')" class="w-full py-3 bg-white text-primary font-bold rounded-lg hover:bg-indigo-50 transition">
-                        Participate Now
-                    </button>
-                `;
             }
         }
 
@@ -2125,8 +2165,6 @@
             document.getElementById('modal-next-btn').disabled = true;
             document.getElementById('modal-explanation').classList.add('hidden');
             
-            // REMOVED SCORE RESET
-            
             // Reset state for new session
             appState.practiceState = {
                 topic: topic,
@@ -2286,6 +2324,113 @@
 
         function closePracticeModal() {
             document.getElementById('practice-modal').classList.add('hidden');
+        }
+
+        // ============ NEW TEST SERIES LOGIC ============
+        function startTest(type, name) {
+            document.getElementById('test-modal').classList.remove('hidden');
+            document.getElementById('test-modal-title').textContent = name;
+            document.getElementById('test-body').classList.add('hidden');
+            document.getElementById('test-loading').classList.remove('hidden');
+            document.getElementById('test-result').classList.add('hidden');
+            document.getElementById('test-footer').classList.remove('hidden');
+            document.getElementById('test-submit-btn').classList.add('hidden');
+            document.getElementById('test-next-btn').classList.remove('hidden');
+            
+            // Init test state
+            appState.mockTestState = {
+                questions: [],
+                userAnswers: {},
+                currentIndex: 0,
+                total: 5 // Default for demo
+            };
+
+            // Generate questions (simulate set)
+            setTimeout(async () => {
+                // In real app, fetch unique set. Here we generate loop
+                const questions = [];
+                for(let i=0; i<5; i++) {
+                    const q = getFallbackPracticeQuestion(type);
+                    questions.push(q);
+                }
+                appState.mockTestState.questions = questions;
+                appState.mockTestState.total = questions.length;
+                document.getElementById('test-total').textContent = questions.length;
+                
+                document.getElementById('test-loading').classList.add('hidden');
+                document.getElementById('test-body').classList.remove('hidden');
+                renderTestQuestion(0);
+            }, 1000);
+        }
+
+        function renderTestQuestion(index) {
+            const q = appState.mockTestState.questions[index];
+            appState.mockTestState.currentIndex = index;
+            
+            document.getElementById('test-q-num').textContent = index + 1;
+            document.getElementById('test-question-text').textContent = q.question;
+            
+            const savedAnswer = appState.mockTestState.userAnswers[index];
+            
+            document.getElementById('test-options').innerHTML = q.options.map((opt, i) => `
+                <button onclick="selectTestAnswer(${i})" class="test-opt w-full p-4 border-2 ${savedAnswer === i ? 'border-primary bg-indigo-50' : 'border-slate-200'} rounded-xl text-left hover:border-primary transition group">
+                    <span class="inline-flex items-center justify-center w-8 h-8 ${savedAnswer === i ? 'bg-primary text-white' : 'bg-slate-100'} rounded-full text-sm font-bold mr-3">${String.fromCharCode(65 + i)}</span>
+                    <span class="text-slate-700">${opt}</span>
+                </button>
+            `).join('');
+
+            // Nav buttons state
+            document.getElementById('test-prev-btn').disabled = index === 0;
+            if (index === appState.mockTestState.total - 1) {
+                document.getElementById('test-next-btn').classList.add('hidden');
+                document.getElementById('test-submit-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('test-next-btn').classList.remove('hidden');
+                document.getElementById('test-submit-btn').classList.add('hidden');
+            }
+        }
+
+        function selectTestAnswer(selectedIndex) {
+            const current = appState.mockTestState.currentIndex;
+            appState.mockTestState.userAnswers[current] = selectedIndex;
+            renderTestQuestion(current); // Re-render to update styling
+        }
+
+        function nextTestQuestion() {
+            if (appState.mockTestState.currentIndex < appState.mockTestState.total - 1) {
+                renderTestQuestion(appState.mockTestState.currentIndex + 1);
+            }
+        }
+
+        function prevTestQuestion() {
+            if (appState.mockTestState.currentIndex > 0) {
+                renderTestQuestion(appState.mockTestState.currentIndex - 1);
+            }
+        }
+
+        function submitTest() {
+            // Calculate Score
+            let correct = 0;
+            const total = appState.mockTestState.total;
+            
+            appState.mockTestState.questions.forEach((q, i) => {
+                if (appState.mockTestState.userAnswers[i] === q.correct) {
+                    correct++;
+                }
+            });
+
+            const accuracy = Math.round((correct / total) * 100);
+            
+            document.getElementById('test-body').classList.add('hidden');
+            document.getElementById('test-footer').classList.add('hidden');
+            document.getElementById('test-result').classList.remove('hidden');
+            
+            document.getElementById('result-score').textContent = `${correct}/${total}`;
+            document.getElementById('result-accuracy').textContent = `${accuracy}%`;
+        }
+
+        function closeTestModal() {
+            document.getElementById('test-modal').classList.add('hidden');
         }
 
         function showToast(msg, type='success') {
