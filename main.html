@@ -399,6 +399,7 @@
 
         <!-- ==================== PROFILE SETUP SECTION ==================== -->
         <section id="section-profile" class="p-6 lg:p-8 hidden">
+             <!-- ... existing profile content ... -->
             <div class="max-w-3xl mx-auto">
                 <!-- Progress Steps -->
                 <div class="mb-8">
@@ -817,7 +818,7 @@
         <!-- ... (Rest of existing sections: Training, Test Series, Resume Builder, Mock Interview, Modals, etc.) ... -->
         <!-- These sections are unchanged, just including placeholders to keep file structure valid if I were to output full file, but focusing on JS changes mostly -->
         <section id="section-training" class="p-6 lg:p-8 hidden">
-            <!-- Content identical to previous version -->
+             <!-- Content identical to previous version -->
              <div class="max-w-6xl mx-auto">
                 <div class="mb-8">
                     <h1 class="font-heading text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Training Center</h1>
@@ -1049,7 +1050,7 @@
         </section>
 
         <section id="section-resume-builder" class="p-6 lg:p-8 hidden">
-             <!-- Content identical to previous version -->
+             <!-- ... existing resume builder content ... -->
               <div class="max-w-6xl mx-auto h-[calc(100vh-8rem)]">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
@@ -1137,7 +1138,7 @@
         </section>
 
         <section id="section-mock-interview" class="p-6 lg:p-8 hidden">
-             <!-- Content identical to previous version -->
+             <!-- ... existing mock interview content ... -->
                <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
@@ -1191,7 +1192,7 @@
 
         <!-- ==================== TRAINING PRACTICE MODAL ==================== -->
         <div id="practice-modal" class="fixed inset-0 z-50 hidden">
-             <!-- Content identical to previous version -->
+             <!-- ... existing modal content ... -->
              <div class="modal-overlay absolute inset-0 bg-black/50"></div>
             <div class="modal-content absolute inset-4 lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="flex items-center justify-between p-4 border-b border-slate-100">
@@ -1253,6 +1254,7 @@
         const GEMINI_API_KEY = 'AIzaSyDR3u75VFOrNcXg0KyUexF_YJ4j9eGZRug'; // Replace with your API key
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
+        // ... existing state management ...
         // ============ STATE MANAGEMENT ============
         let appState = {
             user: null,
@@ -1277,6 +1279,7 @@
             }
         };
 
+        // ... existing role options ...
         // ============ ROLE OPTIONS ============
         // Technical topics by field
         const techTopics = {
@@ -1306,6 +1309,7 @@
             ]
         };
 
+        // ... existing initialization code ...
         // ============ INITIALIZATION ============
         document.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage();
@@ -2051,30 +2055,180 @@
             }
         }
 
-        // Reuse existing Practice/Modal Logic (abbreviated for clarity, assumes existing functions work)
-        function startTraining(topic) { openPracticeModal(topic); }
-        
-        function openPracticeModal(topic) {
+        // ============ TRAINING LOGIC ============
+        function startTraining(topic) {
+             openPracticeModal(topic); 
+        }
+
+        async function openPracticeModal(topic) {
             document.getElementById('practice-modal').classList.remove('hidden');
-            document.getElementById('modal-title').textContent = topic.toUpperCase().replace('-', ' ');
+            const displayTitle = topic.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            document.getElementById('modal-title').textContent = displayTitle + ' Practice';
+            
             document.getElementById('modal-loading').classList.remove('hidden');
             document.getElementById('modal-question-area').classList.add('hidden');
+            document.getElementById('modal-next-btn').disabled = true;
+            document.getElementById('modal-explanation').classList.add('hidden');
+            document.getElementById('modal-score-value').textContent = '0';
             
-            // Simulate loading questions
-            setTimeout(() => {
-                document.getElementById('modal-loading').classList.add('hidden');
-                document.getElementById('modal-question-area').classList.remove('hidden');
-                document.getElementById('modal-question-text').textContent = "Sample Question for " + topic + "?";
-                document.getElementById('modal-options').innerHTML = `
-                    <button class="quiz-option w-full p-4 border rounded-xl text-left">Option A</button>
-                    <button class="quiz-option w-full p-4 border rounded-xl text-left">Option B</button>
-                `;
-                document.getElementById('modal-next-btn').disabled = false;
-            }, 1000);
+            // Reset state for new session
+            appState.practiceState = {
+                topic: topic,
+                currentQuestion: 0,
+                questions: [],
+                score: 0
+            };
+
+            // Generate question immediately
+            await generatePracticeQuestion(topic);
+        }
+
+        async function generatePracticeQuestion(topic) {
+             document.getElementById('modal-loading').classList.remove('hidden');
+             document.getElementById('modal-question-area').classList.add('hidden');
+             document.getElementById('modal-explanation').classList.add('hidden');
+             document.getElementById('modal-next-btn').disabled = true;
+
+             let question = null;
+
+             try {
+                if(GEMINI_API_KEY) {
+                    const profileContext = appState.profile ? `for a ${appState.profile.role} role` : '';
+                    const prompt = `Generate 1 multiple choice question about "${topic}" ${profileContext}. 
+                    Format: JSON object with keys: question, options (array of 4 strings), correct (index 0-3), explanation. 
+                    Ensure difficulty is moderate. Return ONLY JSON.`;
+                    
+                    const response = await callGeminiAPI(prompt);
+                    const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                    question = JSON.parse(jsonStr);
+                } else {
+                    throw new Error("No API Key");
+                }
+             } catch (e) {
+                 console.warn("Using fallback question generator for " + topic);
+                 question = getFallbackPracticeQuestion(topic);
+             }
+
+             renderPracticeQuestion(question);
+        }
+
+        function getFallbackPracticeQuestion(topic) {
+            const fallbackDB = {
+                'quantitative': { q: "If x + y = 10 and x - y = 4, what is the value of x?", o: ["5", "6", "7", "8"], c: 2, e: "Adding equations: 2x = 14, so x = 7." },
+                'logical': { q: "Find the next number: 2, 6, 12, 20, ?", o: ["28", "30", "32", "42"], c: 1, e: "Differences are 4, 6, 8. Next diff is 10. 20+10=30." },
+                'verbal': { q: "Synonym of 'Ephemeral' is:", o: ["Lasting", "Short-lived", "Eternal", "Heavy"], c: 1, e: "Ephemeral means lasting for a very short time." },
+                'coding': { q: "Time complexity of binary search is:", o: ["O(n)", "O(n^2)", "O(log n)", "O(1)"], c: 2, e: "Binary search divides the search space in half each step." },
+                'dsa': { q: "Which data structure uses LIFO?", o: ["Queue", "Stack", "List", "Tree"], c: 1, e: "Stack follows Last In First Out." },
+                'sql': { q: "Command to fetch unique records:", o: ["SELECT UNIQUE", "SELECT DISTINCT", "SELECT DIFFERENT", "SELECT ALL"], c: 1, e: "DISTINCT keyword returns only distinct (different) values." },
+                'hr-questions': { q: "Best answer for 'What is your weakness?':", o: ["I have none", "I work too hard", "A real weakness + how you manage it", "I am a perfectionist"], c: 2, e: "Show self-awareness and improvement." },
+                'email-writing': { q: "Standard professional closing:", o: ["See ya", "Best regards", "Cheers", "Later"], c: 1, e: "'Best regards' is standard and professional." },
+                'confidence': { q: "Best body language for interviews:", o: ["Slouching", "Crossing arms", "Eye contact & upright posture", "Staring at floor"], c: 2, e: "Shows engagement and confidence." },
+                'default': { q: `A practice question about ${topic}`, o: ["Option A", "Option B", "Option C", "Option D"], c: 0, e: "This is a sample explanation." }
+            };
+            
+            const q = fallbackDB[topic] || fallbackDB['default'];
+            // Add randomness to default to simulate variety if needed, or just return static
+            return {
+                question: q.q,
+                options: q.o,
+                correct: q.c,
+                explanation: q.e
+            };
+        }
+
+        function renderPracticeQuestion(q) {
+            document.getElementById('modal-loading').classList.add('hidden');
+            document.getElementById('modal-question-area').classList.remove('hidden');
+            
+            document.getElementById('modal-question-text').textContent = q.question;
+            document.getElementById('modal-options').innerHTML = q.options.map((opt, i) => `
+                <button onclick="checkPracticeAnswer(${i}, ${q.correct}, '${q.explanation.replace(/'/g, "\\'")}')" class="practice-opt w-full p-4 border-2 border-slate-200 rounded-xl text-left hover:border-primary transition group">
+                    <span class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 group-hover:bg-indigo-50 rounded-full text-sm font-bold text-slate-600 mr-3">${String.fromCharCode(65 + i)}</span>
+                    <span class="text-slate-700">${opt}</span>
+                </button>
+            `).join('');
+            
+            // Store current question details for logic if needed, but handled inline
+        }
+
+        function checkPracticeAnswer(selected, correct, explanation) {
+            const opts = document.querySelectorAll('.practice-opt');
+            opts.forEach((btn, i) => {
+                btn.disabled = true; // Prevent multiple clicks
+                if (i === correct) {
+                    btn.classList.add('bg-green-50', 'border-green-500');
+                    btn.querySelector('span').classList.add('text-green-700', 'bg-green-200');
+                } else if (i === selected) {
+                    btn.classList.add('bg-red-50', 'border-red-500');
+                    btn.querySelector('span').classList.add('text-red-700', 'bg-red-200');
+                }
+            });
+
+            if (selected === correct) {
+                appState.practiceState.score++;
+                document.getElementById('modal-score-value').textContent = appState.practiceState.score;
+            }
+
+            const expDiv = document.getElementById('modal-explanation');
+            document.getElementById('modal-explanation-text').textContent = explanation;
+            expDiv.classList.remove('hidden');
+            expDiv.classList.add('fade-in');
+
+            document.getElementById('modal-next-btn').disabled = false;
+        }
+
+        async function nextModalQuestion() {
+            // Simply generate a new one indefinitely for practice mode
+            await generatePracticeQuestion(appState.practiceState.topic);
         }
 
         function closePracticeModal() {
             document.getElementById('practice-modal').classList.add('hidden');
+        }
+
+        // ============ QUICK PRACTICE LOGIC ============
+        async function getQuickQuestion() {
+            const area = document.getElementById('quick-practice-area');
+            const content = document.getElementById('quick-question-content');
+            const loading = document.getElementById('quick-loading');
+            
+            area.classList.remove('hidden');
+            content.innerHTML = '';
+            loading.classList.remove('hidden');
+
+            try {
+                let question = null;
+                // Pick a random topic from keys of fallbackDB
+                const topics = ['quantitative', 'logical', 'verbal', 'coding', 'hr-questions'];
+                const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+
+                if (GEMINI_API_KEY) {
+                     const prompt = `Generate 1 short interview question about ${randomTopic}. Format: JSON object {question: "...", answer: "..."}. Return ONLY JSON.`;
+                     const response = await callGeminiAPI(prompt);
+                     const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                     question = JSON.parse(jsonStr);
+                } else {
+                    // Fallback
+                    const fb = getFallbackPracticeQuestion(randomTopic);
+                    question = { question: fb.question, answer: fb.explanation }; // simplified for quick view
+                }
+
+                loading.classList.add('hidden');
+                content.innerHTML = `
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <p class="font-semibold text-slate-800 mb-2">${question.question}</p>
+                        <div class="reveal-answer mt-2">
+                            <button onclick="this.nextElementSibling.classList.remove('hidden'); this.classList.add('hidden');" class="text-xs text-primary font-medium hover:underline">Show Answer</button>
+                            <p class="hidden text-sm text-slate-600 mt-1 pt-2 border-t border-indigo-200">${question.answer || question.explanation}</p>
+                        </div>
+                    </div>
+                `;
+
+            } catch (e) {
+                console.error(e);
+                loading.classList.add('hidden');
+                content.innerHTML = `<p class="text-red-500 text-sm">Failed to load question.</p>`;
+            }
         }
 
         function showToast(msg, type='success') {
