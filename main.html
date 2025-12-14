@@ -186,7 +186,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 p-4 overflow-y-auto hide-scrollbar">
+          <nav class="flex-1 p-4 overflow-y-auto hide-scrollbar">
                 <ul class="space-y-1">
                     <li>
                         <button onclick="navigateTo('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="dashboard">
@@ -251,7 +251,6 @@
         </div>
     </aside>
 
-    <!-- ... (Header and Main Content setup remains same) ... -->
     <!-- Mobile Header -->
     <header class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-30 flex items-center justify-between px-4">
         <button onclick="toggleSidebar()" class="p-2 text-slate-600 hover:text-primary">
@@ -269,7 +268,6 @@
         
         <!-- ==================== DASHBOARD SECTION ==================== -->
         <section id="section-dashboard" class="p-6 lg:p-8">
-            <!-- ... (Dashboard content same as before) ... -->
             <div class="max-w-6xl mx-auto">
                 <!-- Welcome Header -->
                 <div class="mb-8">
@@ -279,51 +277,7 @@
                     <p class="text-slate-500">Continue your interview preparation journey</p>
                 </div>
 
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-                    <div class="bg-white rounded-xl p-4 lg:p-6 border border-slate-100 shadow-sm">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-chart-line text-primary"></i>
-                            </div>
-                            <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                <i class="fa-solid fa-arrow-up mr-1"></i>12%
-                            </span>
-                        </div>
-                        <p class="text-2xl lg:text-3xl font-bold text-slate-800" id="stat-readiness">0%</p>
-                        <p class="text-xs lg:text-sm text-slate-500">Readiness Score</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-4 lg:p-6 border border-slate-100 shadow-sm">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-fire text-secondary"></i>
-                            </div>
-                        </div>
-                        <p class="text-2xl lg:text-3xl font-bold text-slate-800" id="stat-streak">0</p>
-                        <p class="text-xs lg:text-sm text-slate-500">Day Streak</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-4 lg:p-6 border border-slate-100 shadow-sm">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-check-circle text-green-600"></i>
-                            </div>
-                        </div>
-                        <p class="text-2xl lg:text-3xl font-bold text-slate-800" id="stat-completed">0</p>
-                        <p class="text-xs lg:text-sm text-slate-500">Tests Completed</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-4 lg:p-6 border border-slate-100 shadow-sm">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-clock text-purple-600"></i>
-                            </div>
-                        </div>
-                        <p class="text-2xl lg:text-3xl font-bold text-slate-800" id="stat-hours">0h</p>
-                        <p class="text-xs lg:text-sm text-slate-500">Practice Time</p>
-                    </div>
-                </div>
+                <!-- REMOVED STATS CARDS -->
 
                 <!-- Quick Actions & Progress -->
                 <div class="grid lg:grid-cols-3 gap-6">
@@ -380,17 +334,10 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
-                <div class="mt-6 bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
-                    <h2 class="font-heading font-bold text-lg text-slate-800 mb-4">Recent Activity</h2>
-                    <div id="activity-list" class="space-y-3">
-                        <p class="text-slate-500 text-sm py-4 text-center">No activity yet. Start your journey!</p>
-                    </div>
-                </div>
+                <!-- REMOVED RECENT ACTIVITY -->
             </div>
         </section>
 
-        <!-- ... (Profile Setup, Skill Test, Training, Test Series Sections kept same) ... -->
         <!-- ==================== PROFILE SETUP SECTION ==================== -->
         <section id="section-profile" class="p-6 lg:p-8 hidden">
              <!-- ... existing profile content ... -->
@@ -582,9 +529,7 @@
                         <p class="text-slate-500">Your personalized roadmap is ready</p>
                     </div>
 
-                    <div id="ai-roadmap" class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100 mb-6">
-                        <!-- AI roadmap content will be inserted here -->
-                    </div>
+                    <!-- REMOVED AI ROADMAP CONTAINER -->
 
                     <div class="flex gap-4 justify-center">
                         <button onclick="navigateTo('skill-test')" class="px-6 py-3 bg-primary hover:bg-indigo-700 text-white font-semibold rounded-lg transition flex items-center gap-2">
@@ -604,6 +549,7 @@
             </div>
         </section>
 
+        <!-- ... (Skill Test, Training, Test Series, Resume Builder, Mock Interview sections kept the same) ... -->
         <section id="section-skill-test" class="p-6 lg:p-8 hidden">
             <!-- ... existing skill test content ... -->
              <div class="max-w-3xl mx-auto">
@@ -1164,7 +1110,7 @@
                         </div>
                         <div>
                             <h3 id="test-modal-title" class="font-bold text-slate-800">Mock Test</h3>
-                            <p class="text-xs text-slate-500">Question <span id="test-q-num">1</span> of <span id="test-total">10</span></p>
+                            <!-- REMOVED QUESTION COUNTER -->
                         </div>
                     </div>
                     <button onclick="closeTestModal()" class="p-2 hover:bg-slate-200 rounded-lg transition">
@@ -1243,7 +1189,7 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
         // ============ CONFIGURATION ============
-        const GEMINI_API_KEY = 'AIzaSyAfbEe8bM9hXwGk62JffIlb3sASseKUDgU'; // Replace with your API key
+        const GEMINI_API_KEY = 'AIzaSyDMKvxrPBzePCyJ6_fPb_v782zSDN01I8M'; // Replace with your API key
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
         // ... existing state management ...
@@ -1440,36 +1386,12 @@
             document.getElementById('dashboard-name').textContent = userName.split(' ')[0];
 
             if (appState.testResults) {
-                document.getElementById('stat-readiness').textContent = appState.testResults.overallScore + '%';
-                document.getElementById('stat-completed').textContent = '1';
-                updateActivityList();
+                // REMOVED STAT UPDATES
             }
         }
 
         function updateActivityList() {
-            const activityList = document.getElementById('activity-list');
-            const activities = [];
-
-            if (appState.profile?.completed) {
-                activities.push({ icon: 'fa-user-check', color: 'bg-green-100 text-green-600', text: 'Completed profile setup', time: 'Recently' });
-            }
-            if (appState.testResults) {
-                activities.push({ icon: 'fa-clipboard-check', color: 'bg-indigo-100 text-primary', text: `Scored ${appState.testResults.overallScore}% in baseline test`, time: 'Recently' });
-            }
-
-            if (activities.length > 0) {
-                activityList.innerHTML = activities.map(a => `
-                    <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
-                        <div class="w-10 h-10 ${a.color} rounded-lg flex items-center justify-center">
-                            <i class="fa-solid ${a.icon}"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-slate-700">${a.text}</p>
-                            <p class="text-xs text-slate-400">${a.time}</p>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            // REMOVED FUNCTION
         }
 
         function updateRoadmapPreview() {
@@ -1699,12 +1621,7 @@
                 document.getElementById('profile-complete').classList.remove('hidden');
                 updateRoadmapPreview(); 
                 
-                // Show roadmap in completion screen
-                document.getElementById('ai-roadmap').innerHTML = profile.roadmap.map((item, i) => {
-                    const text = typeof item === 'string' ? item : (item.step || item.title || JSON.stringify(item));
-                    return `
-                    <div class="flex items-center gap-2 mb-2"><span class="font-bold text-primary">${i+1}.</span> ${text}</div>
-                `}).join('');
+                // REMOVED AI ROADMAP POPULATION
 
             } catch (error) {
                 console.error(error);
@@ -2428,7 +2345,8 @@
             const q = appState.mockTestState.questions[index];
             appState.mockTestState.currentIndex = index;
             
-            document.getElementById('test-q-num').textContent = index + 1;
+            // REMOVED QUESTION COUNTER
+            // document.getElementById('test-q-num').textContent = index + 1;
             document.getElementById('test-question-text').textContent = q.question;
             
             const savedAnswer = appState.mockTestState.userAnswers[index];
