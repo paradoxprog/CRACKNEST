@@ -1439,8 +1439,14 @@
         }
 
         function updateTechTopics() {
-            const field = appState.profile?.field || 'IT';
-            // Default to IT topics if field not found, or could show generic ones
+            const fieldRaw = appState.profile?.field || 'IT';
+            // Simple mapping to handle various inputs
+            let field = 'IT';
+            const lowerField = fieldRaw.toLowerCase();
+            if (lowerField.includes('market')) field = 'Marketing';
+            else if (lowerField.includes('hr') || lowerField.includes('human')) field = 'HR';
+            else if (lowerField.includes('financ') || lowerField.includes('account')) field = 'Finance';
+            
             const topics = techTopics[field] || techTopics.IT; 
             const container = document.getElementById('tech-topics');
             if (container) {
@@ -2112,28 +2118,61 @@
              renderPracticeQuestion(question);
         }
 
+        // Robust Fallback Database for Demo
+        const practiceDB = {
+            'quantitative': [
+                { q: "If x + y = 10 and x - y = 4, what is the value of x?", o: ["5", "6", "7", "8"], c: 2, e: "Adding equations: 2x = 14, so x = 7." },
+                { q: "What is 15% of 80?", o: ["10", "12", "14", "16"], c: 1, e: "10% is 8, 5% is 4. 8+4=12." },
+                { q: "A car travels 60 km in 1.5 hours. What is its speed?", o: ["30 km/h", "40 km/h", "45 km/h", "50 km/h"], c: 1, e: "Speed = Distance/Time = 60/1.5 = 40 km/h." }
+            ],
+            'logical': [
+                { q: "Find the next number: 2, 6, 12, 20, ?", o: ["28", "30", "32", "42"], c: 1, e: "Differences are 4, 6, 8. Next diff is 10. 20+10=30." },
+                { q: "SCD, TEF, UGH, ____, WKL", o: ["CMN", "UJI", "VIJ", "IJT"], c: 2, e: "First letters: S, T, U, V, W. Second: C, E, G, I, K." }
+            ],
+            'verbal': [
+                { q: "Synonym of 'Ephemeral' is:", o: ["Lasting", "Short-lived", "Eternal", "Heavy"], c: 1, e: "Ephemeral means lasting for a very short time." },
+                { q: "Choose correct spelling:", o: ["Accomodate", "Accommodate", "Acommodate", "Acomodate"], c: 1, e: "Double 'c', double 'm'." }
+            ],
+            'coding': [
+                { q: "Time complexity of binary search is:", o: ["O(n)", "O(n^2)", "O(log n)", "O(1)"], c: 2, e: "Binary search divides the search space in half each step." },
+                { q: "Which is NOT a primitive type in Java?", o: ["int", "float", "String", "boolean"], c: 2, e: "String is a Class/Reference type." }
+            ],
+            'dsa': [
+                { q: "Which data structure uses LIFO?", o: ["Queue", "Stack", "List", "Tree"], c: 1, e: "Stack follows Last In First Out." },
+                { q: "Best case complexity of Bubble Sort?", o: ["O(n)", "O(n log n)", "O(n^2)", "O(1)"], c: 0, e: "O(n) when array is already sorted." }
+            ],
+            'sql': [
+                { q: "Command to fetch unique records:", o: ["SELECT UNIQUE", "SELECT DISTINCT", "SELECT DIFFERENT", "SELECT ALL"], c: 1, e: "DISTINCT keyword returns only distinct (different) values." },
+                { q: "Which is DDL command?", o: ["SELECT", "INSERT", "CREATE", "UPDATE"], c: 2, e: "CREATE is Data Definition Language." }
+            ],
+            'hr-questions': [
+                { q: "Best answer for 'What is your weakness?':", o: ["I have none", "I work too hard", "A real weakness + how you manage it", "I am a perfectionist"], c: 2, e: "Show self-awareness and improvement." },
+                { q: "Why should we hire you?", o: ["I need money", "I am the best", "I align with your values & skills", "My parents want me to"], c: 2, e: "Focus on value addition and fit." }
+            ],
+            'email-writing': [
+                { q: "Standard professional closing:", o: ["See ya", "Best regards", "Cheers", "Later"], c: 1, e: "'Best regards' is standard and professional." },
+                { q: "Subject line should be:", o: ["Empty", "Hi", "Clear & Concise", "Very long"], c: 2, e: "Allows recipient to know purpose immediately." }
+            ],
+            'confidence': [
+                { q: "Best body language for interviews:", o: ["Slouching", "Crossing arms", "Eye contact & upright posture", "Staring at floor"], c: 2, e: "Shows engagement and confidence." },
+                { q: "If you don't know an answer:", o: ["Lie", "Guess wildly", "Admit it but offer to learn", "Remain silent"], c: 2, e: "Honesty + Growth mindset is key." }
+            ],
+            'default': [
+                { q: "A practice question about this topic", o: ["Option A", "Option B", "Option C", "Option D"], c: 0, e: "This is a sample explanation." }
+            ]
+        };
+
         function getFallbackPracticeQuestion(topic) {
-            const fallbackDB = {
-                'quantitative': { q: "If x + y = 10 and x - y = 4, what is the value of x?", o: ["5", "6", "7", "8"], c: 2, e: "Adding equations: 2x = 14, so x = 7." },
-                'logical': { q: "Find the next number: 2, 6, 12, 20, ?", o: ["28", "30", "32", "42"], c: 1, e: "Differences are 4, 6, 8. Next diff is 10. 20+10=30." },
-                'verbal': { q: "Synonym of 'Ephemeral' is:", o: ["Lasting", "Short-lived", "Eternal", "Heavy"], c: 1, e: "Ephemeral means lasting for a very short time." },
-                'coding': { q: "Time complexity of binary search is:", o: ["O(n)", "O(n^2)", "O(log n)", "O(1)"], c: 2, e: "Binary search divides the search space in half each step." },
-                'dsa': { q: "Which data structure uses LIFO?", o: ["Queue", "Stack", "List", "Tree"], c: 1, e: "Stack follows Last In First Out." },
-                'sql': { q: "Command to fetch unique records:", o: ["SELECT UNIQUE", "SELECT DISTINCT", "SELECT DIFFERENT", "SELECT ALL"], c: 1, e: "DISTINCT keyword returns only distinct (different) values." },
-                'hr-questions': { q: "Best answer for 'What is your weakness?':", o: ["I have none", "I work too hard", "A real weakness + how you manage it", "I am a perfectionist"], c: 2, e: "Show self-awareness and improvement." },
-                'email-writing': { q: "Standard professional closing:", o: ["See ya", "Best regards", "Cheers", "Later"], c: 1, e: "'Best regards' is standard and professional." },
-                'confidence': { q: "Best body language for interviews:", o: ["Slouching", "Crossing arms", "Eye contact & upright posture", "Staring at floor"], c: 2, e: "Shows engagement and confidence." },
-                'default': { q: `A practice question about ${topic}`, o: ["Option A", "Option B", "Option C", "Option D"], c: 0, e: "This is a sample explanation." }
-            };
+            // Try to find exact topic, then check practiceDB keys for partial matches (e.g., 'coding concepts' -> 'coding')
+            let key = topic;
+            if (!practiceDB[key]) {
+                const lowerTopic = topic.toLowerCase();
+                key = Object.keys(practiceDB).find(k => lowerTopic.includes(k)) || 'default';
+            }
             
-            const q = fallbackDB[topic] || fallbackDB['default'];
-            // Add randomness to default to simulate variety if needed, or just return static
-            return {
-                question: q.q,
-                options: q.o,
-                correct: q.c,
-                explanation: q.e
-            };
+            const questions = practiceDB[key];
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            return questions[randomIndex];
         }
 
         function renderPracticeQuestion(q) {
@@ -2167,6 +2206,9 @@
             if (selected === correct) {
                 appState.practiceState.score++;
                 document.getElementById('modal-score-value').textContent = appState.practiceState.score;
+                
+                // Update local progress bars for gamification
+                updateTrainingProgress(appState.practiceState.topic);
             }
 
             const expDiv = document.getElementById('modal-explanation');
@@ -2175,6 +2217,28 @@
             expDiv.classList.add('fade-in');
 
             document.getElementById('modal-next-btn').disabled = false;
+        }
+
+        function updateTrainingProgress(topic) {
+            // Simple mapping to find which card to update
+            let category = 'tech'; // default
+            const lowerTopic = topic.toLowerCase();
+            
+            if (['quantitative', 'logical', 'verbal'].includes(lowerTopic)) category = 'apt';
+            else if (['hr-questions', 'email-writing', 'confidence'].includes(lowerTopic)) category = 'hr';
+            
+            const completedEl = document.getElementById(`${category}-completed`);
+            const progressEl = document.getElementById(`${category}-progress`);
+            
+            if(completedEl && progressEl) {
+                let count = parseInt(completedEl.textContent) || 0;
+                count++;
+                completedEl.textContent = count;
+                
+                // Simulate progress percentage (cap at 100)
+                let progress = Math.min(100, Math.round(count * 5)); // 5% per correct answer
+                progressEl.textContent = progress;
+            }
         }
 
         async function nextModalQuestion() {
@@ -2208,7 +2272,7 @@
                      const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
                      question = JSON.parse(jsonStr);
                 } else {
-                    // Fallback
+                    // Fallback using the new robust DB
                     const fb = getFallbackPracticeQuestion(randomTopic);
                     question = { question: fb.question, answer: fb.explanation }; // simplified for quick view
                 }
