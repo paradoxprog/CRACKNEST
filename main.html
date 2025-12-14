@@ -611,7 +611,8 @@
 
         <!-- ==================== SKILL TEST SECTION ==================== -->
         <section id="section-skill-test" class="p-6 lg:p-8 hidden">
-            <div class="max-w-3xl mx-auto">
+            <!-- ... existing code ... -->
+             <div class="max-w-3xl mx-auto">
                 <!-- Test Intro -->
                 <div id="test-intro" class="bg-white rounded-xl p-6 lg:p-8 border border-slate-100 shadow-sm">
                     <div class="text-center mb-8">
@@ -813,16 +814,17 @@
             </div>
         </section>
 
-        <!-- ==================== TRAINING SECTION ==================== -->
+        <!-- ... (Rest of existing sections: Training, Test Series, Resume Builder, Mock Interview, Modals, etc.) ... -->
+        <!-- These sections are unchanged, just including placeholders to keep file structure valid if I were to output full file, but focusing on JS changes mostly -->
         <section id="section-training" class="p-6 lg:p-8 hidden">
-            <div class="max-w-6xl mx-auto">
+            <!-- Content identical to previous version -->
+             <div class="max-w-6xl mx-auto">
                 <div class="mb-8">
                     <h1 class="font-heading text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Training Center</h1>
                     <p class="text-slate-500">Master skills with AI-powered practice sessions</p>
                 </div>
-
-                <!-- Training Categories -->
-                <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                <!-- ... existing training content ... -->
+                 <div class="grid lg:grid-cols-3 gap-6 mb-8">
                     <!-- Aptitude Training -->
                     <div class="training-card bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
                         <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6">
@@ -926,7 +928,8 @@
 
                 <!-- Quick Practice Section -->
                 <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
-                    <div class="flex items-center justify-between mb-6">
+                    <!-- ... existing quick practice ... -->
+                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="font-heading font-bold text-lg text-slate-800">Quick Practice</h2>
                             <p class="text-sm text-slate-500">Answer a quick AI-generated question</p>
@@ -950,9 +953,9 @@
             </div>
         </section>
 
-        <!-- ==================== TEST SERIES SECTION ==================== -->
         <section id="section-test-series" class="p-6 lg:p-8 hidden">
-            <div class="max-w-6xl mx-auto">
+             <!-- Content identical to previous version -->
+              <div class="max-w-6xl mx-auto">
                 <div class="mb-8 flex items-center justify-between">
                     <div>
                         <h1 class="font-heading text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Test Series</h1>
@@ -1045,9 +1048,9 @@
             </div>
         </section>
 
-        <!-- ==================== RESUME BUILDER SECTION ==================== -->
         <section id="section-resume-builder" class="p-6 lg:p-8 hidden">
-            <div class="max-w-6xl mx-auto h-[calc(100vh-8rem)]">
+             <!-- Content identical to previous version -->
+              <div class="max-w-6xl mx-auto h-[calc(100vh-8rem)]">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
                         <h1 class="font-heading text-2xl font-bold text-slate-800">AI Resume Builder</h1>
@@ -1133,9 +1136,9 @@
             </div>
         </section>
 
-        <!-- ==================== MOCK INTERVIEW SECTION ==================== -->
         <section id="section-mock-interview" class="p-6 lg:p-8 hidden">
-            <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
+             <!-- Content identical to previous version -->
+               <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="font-heading text-2xl font-bold text-slate-800">AI Mock Interview</h1>
@@ -1188,7 +1191,8 @@
 
         <!-- ==================== TRAINING PRACTICE MODAL ==================== -->
         <div id="practice-modal" class="fixed inset-0 z-50 hidden">
-            <div class="modal-overlay absolute inset-0 bg-black/50"></div>
+             <!-- Content identical to previous version -->
+             <div class="modal-overlay absolute inset-0 bg-black/50"></div>
             <div class="modal-content absolute inset-4 lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="flex items-center justify-between p-4 border-b border-slate-100">
                     <div class="flex items-center gap-3">
@@ -1274,8 +1278,6 @@
         };
 
         // ============ ROLE OPTIONS ============
-        // Removed predefined roleOptions as user enters manually now.
-
         // Technical topics by field
         const techTopics = {
             IT: [
@@ -1420,12 +1422,15 @@
             if (appState.profile?.roadmap) {
                 const preview = document.getElementById('roadmap-preview');
                 const items = appState.profile.roadmap.slice(0, 3);
-                preview.innerHTML = items.map((item, i) => `
+                // Handle potential object structure or string structure from legacy data
+                preview.innerHTML = items.map((item, i) => {
+                    const text = typeof item === 'string' ? item : (item.step || item.title || JSON.stringify(item));
+                    return `
                     <div class="flex items-center gap-3 text-sm">
                         <span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold">${i + 1}</span>
-                        <span class="text-indigo-100">${item}</span>
+                        <span class="text-indigo-100">${text}</span>
                     </div>
-                `).join('');
+                `}).join('');
             }
         }
 
@@ -1560,11 +1565,23 @@
                 // We'll generate a roadmap based on these custom inputs
                 let roadmap = [];
                 if (GEMINI_API_KEY) {
-                     const prompt = `Generate a 4-step interview preparation roadmap for a ${profile.role} role in the ${profile.field} industry. The candidate has a ${profile.degree}. Return JSON string array.`;
+                     const prompt = `Generate a 4-step interview preparation roadmap for a ${profile.role} role in the ${profile.field} industry. The candidate has a ${profile.degree}. Return a pure JSON array of strings (no objects). Example: ["Master fundamentals", "Build projects"]`;
                      try {
                         const response = await callGeminiAPI(prompt);
                         const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                        roadmap = JSON.parse(jsonStr);
+                        const parsed = JSON.parse(jsonStr);
+                        
+                        // Sanitize to ensure string array
+                        if (Array.isArray(parsed)) {
+                            roadmap = parsed.map(item => {
+                                if (typeof item === 'string') return item;
+                                if (typeof item === 'object' && item !== null) {
+                                    // Extract known fields if AI returns objects despite instruction
+                                    return item.step || item.title || item.description || JSON.stringify(item);
+                                }
+                                return String(item);
+                            });
+                        }
                      } catch (e) {
                         console.warn("AI Roadmap generation failed, using fallback", e);
                      }
@@ -1572,10 +1589,10 @@
                 
                 if (roadmap.length === 0) {
                     roadmap = [
-                        `Master ${profile.field} fundamentals`,
-                        `Practice aptitude & logic daily`,
-                        `Build 2-3 projects related to ${profile.role}`,
-                        `Mock interviews for ${profile.role} position`
+                        `Master fundamentals of ${profile.field}`,
+                        `Deep dive into ${profile.role} specific skills`,
+                        `Build a capstone project for your ${profile.degree} portfolio`,
+                        `Practice mock interviews for ${profile.role} roles`
                     ];
                 }
                 
@@ -1589,9 +1606,11 @@
                 updateRoadmapPreview(); 
                 
                 // Show roadmap in completion screen
-                document.getElementById('ai-roadmap').innerHTML = profile.roadmap.map((item, i) => `
-                    <div class="flex items-center gap-2 mb-2"><span class="font-bold text-primary">${i+1}.</span> ${item}</div>
-                `).join('');
+                document.getElementById('ai-roadmap').innerHTML = profile.roadmap.map((item, i) => {
+                    const text = typeof item === 'string' ? item : (item.step || item.title || JSON.stringify(item));
+                    return `
+                    <div class="flex items-center gap-2 mb-2"><span class="font-bold text-primary">${i+1}.</span> ${text}</div>
+                `}).join('');
 
             } catch (error) {
                 console.error(error);
@@ -1603,7 +1622,8 @@
 
         // ============ SKILL TEST LOGIC ============
         async function startSkillTest() {
-            const profile = appState.profile;
+            // ... existing function ...
+             const profile = appState.profile;
             if (!profile || !profile.completed) {
                 showToast('Please complete your profile first', 'error');
                 navigateTo('profile');
@@ -1635,7 +1655,8 @@
         }
 
         async function generateTestQuestions(profile) {
-            const prompt = `Generate 21 interview assessment questions for a ${profile.role} candidate in ${profile.field}.
+            // ... existing function ...
+             const prompt = `Generate 21 interview assessment questions for a ${profile.role} candidate in ${profile.field}.
             Return a JSON array with exactly 21 questions:
             - 10 technical MCQs (relevant to ${profile.role})
             - 5 aptitude MCQs (quantitative/logical)
@@ -1672,7 +1693,8 @@
         }
 
         function generateFallbackQuestions(profile) {
-            // Basic fallback questions
+            // ... existing function ...
+             // Basic fallback questions
             const questions = [];
 
             // Technical (10)
@@ -1719,6 +1741,7 @@
         }
 
         function displayQuestion(index) {
+            // ... existing function ...
             const questions = appState.testState.questions;
             if (index >= questions.length) {
                 finishTest();
@@ -1817,7 +1840,8 @@
         }
 
         function calculateLocalResults() {
-            const answers = appState.testState.answers;
+            // ... existing function ...
+             const answers = appState.testState.answers;
             const categoryScores = {
                 technical: { correct: 0, total: 0 },
                 aptitude: { correct: 0, total: 0 },
@@ -1831,12 +1855,6 @@
                 } else if (!a.skipped && a.isCorrect) {
                     categoryScores[a.category].correct++;
                 }
-                if (a.category !== 'communication' && !a.skipped) {
-                     categoryScores[a.category].total++; // Count attempted only? Or total questions? Usually total.
-                     // But for simple logic, let's stick to what we track.
-                     // Actually better to use questions length per category but let's approximate
-                }
-                 // Fix total count based on questions array would be better but this is fine for now
             });
             
             // Recalculate totals based on actual questions to be accurate
@@ -1861,7 +1879,8 @@
         }
 
         async function finishTest() {
-            document.getElementById('test-progress').classList.add('hidden');
+            // ... existing function ...
+             document.getElementById('test-progress').classList.add('hidden');
             document.getElementById('test-analyzing').classList.remove('hidden');
 
             // Calculate locally first
@@ -1901,7 +1920,8 @@
         }
 
         function displayTestResults(results) {
-            document.getElementById('test-analyzing').classList.add('hidden');
+            // ... existing function ...
+             document.getElementById('test-analyzing').classList.add('hidden');
             document.getElementById('test-results').classList.remove('hidden');
 
             const circumference = 251.2;
