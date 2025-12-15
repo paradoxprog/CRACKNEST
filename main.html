@@ -2324,7 +2324,9 @@
                 let questions = [];
                 // Attempt to fetch from AI
                 try {
-                     const prompt = `Generate 5 multiple choice interview questions for the topic "${name}" (Category: ${type}). 
+                     const role = appState.profile?.role || 'Job Applicant';
+                     const prompt = `Generate 5 multiple choice interview questions for a ${role} candidate.
+                     Topic: "${name}" (Category: ${type}). 
                      Format: JSON array of objects. Each object must have: 
                      "question" (string), 
                      "options" (array of 4 strings), 
