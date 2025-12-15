@@ -76,12 +76,6 @@
             border-right: 3px solid #4F46E5;
         }
 
-        /* Progress bar */
-        .progress-bar {
-            background: linear-gradient(90deg, #4F46E5, #7C3AED);
-            transition: width 0.5s ease;
-        }
-
         /* Card hover effects */
         .training-card {
             transition: all 0.3s ease;
@@ -181,13 +175,13 @@
             <!-- Logo -->
             <div class="p-6 border-b border-slate-100">
                 <a href="index.html" class="flex items-center gap-2">
-                    <img src="logo.jpg" alt="CrackNest Logo" class="h-11 w-auto">
+                    <img src="logo.jpg" alt="CrackNest Logo" class="h-8 w-auto">
                     <span class="font-heading font-bold text-2xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
                 </a>
             </div>
 
             <!-- Navigation -->
-          <nav class="flex-1 p-4 overflow-y-auto hide-scrollbar">
+            <nav class="flex-1 p-4 overflow-y-auto hide-scrollbar">
                 <ul class="space-y-1">
                     <li>
                         <button onclick="navigateTo('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="dashboard">
@@ -213,25 +207,33 @@
                             <span>Training</span>
                         </button>
                     </li>
-                    <li>
-                        <button onclick="navigateTo('test-series')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="test-series">
-                            <i class="fa-solid fa-list-check w-5 text-slate-400"></i>
-                            <span>Test Series</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button onclick="navigateTo('resume-builder')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="resume-builder">
-                            <i class="fa-solid fa-file-invoice w-5 text-slate-400"></i>
-                            <span>Resume Builder</span
-                        </button>
-                    </li>
-                    <li>
-                        <button onclick="navigateTo('mock-interview')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="mock-interview">
-                            <i class="fa-solid fa-robot w-5 text-slate-400"></i>
-                            <span>AI Mock Interview</span>
-                        </button>
-                    </li>
                 </ul>
+
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Premium Features</p>
+                    <ul class="space-y-1">
+                        <li>
+                            <button onclick="navigateTo('test-series')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="test-series">
+                                <i class="fa-solid fa-list-check w-5 text-slate-400"></i>
+                                <span>Test Series</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="navigateTo('resume-builder')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="resume-builder">
+                                <i class="fa-solid fa-file-invoice w-5 text-slate-400"></i>
+                                <span>Resume Builder</span>
+                                <span class="ml-auto text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded font-bold">Beta</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="navigateTo('mock-interview')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 font-medium" data-section="mock-interview">
+                                <i class="fa-solid fa-robot w-5 text-slate-400"></i>
+                                <span>AI Mock Interview</span>
+                                <span class="ml-auto text-xs bg-amber-100 text-secondary px-2 py-0.5 rounded font-bold">Hot</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </nav>
 
             <!-- User Section -->
@@ -257,7 +259,10 @@
         <button onclick="toggleSidebar()" class="p-2 text-slate-600 hover:text-primary">
             <i class="fa-solid fa-bars text-xl"></i>
         </button>
-        <span class="font-heading font-bold text-xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
+        <div class="flex items-center gap-2">
+            <img src="logo.jpg" alt="CrackNest Logo" class="h-8 w-auto">
+            <span class="font-heading font-bold text-xl text-slate-800">Crack<span class="text-primary">Nest</span></span>
+        </div>
         <div id="mobile-avatar" class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">U</div>
     </header>
 
@@ -277,8 +282,6 @@
                     </h1>
                     <p class="text-slate-500">Continue your interview preparation journey</p>
                 </div>
-
-                <!-- REMOVED STATS CARDS -->
 
                 <!-- Quick Actions & Progress -->
                 <div class="grid lg:grid-cols-3 gap-6">
@@ -334,14 +337,11 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- REMOVED RECENT ACTIVITY -->
             </div>
         </section>
 
         <!-- ==================== PROFILE SETUP SECTION ==================== -->
         <section id="section-profile" class="p-6 lg:p-8 hidden">
-             <!-- ... existing profile content ... -->
             <div class="max-w-3xl mx-auto">
                 <!-- Progress Steps -->
                 <div class="mb-8">
@@ -530,8 +530,6 @@
                         <p class="text-slate-500">Your personalized roadmap is ready</p>
                     </div>
 
-                    <!-- REMOVED AI ROADMAP CONTAINER -->
-
                     <div class="flex gap-4 justify-center">
                         <button onclick="navigateTo('skill-test')" class="px-6 py-3 bg-primary hover:bg-indigo-700 text-white font-semibold rounded-lg transition flex items-center gap-2">
                             <i class="fa-solid fa-clipboard-check"></i>
@@ -550,9 +548,8 @@
             </div>
         </section>
 
-        <!-- ... (Skill Test, Training, Test Series, Resume Builder, Mock Interview sections kept the same) ... -->
+        <!-- ==================== SKILL TEST SECTION ==================== -->
         <section id="section-skill-test" class="p-6 lg:p-8 hidden">
-            <!-- ... existing skill test content ... -->
              <div class="max-w-3xl mx-auto">
                 <!-- Test Intro -->
                 <div id="test-intro" class="bg-white rounded-xl p-6 lg:p-8 border border-slate-100 shadow-sm">
@@ -756,13 +753,11 @@
         </section>
 
         <section id="section-training" class="p-6 lg:p-8 hidden">
-             <!-- Content identical to previous version -->
              <div class="max-w-6xl mx-auto">
                 <div class="mb-8">
                     <h1 class="font-heading text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Training Center</h1>
                     <p class="text-slate-500">Master skills with AI-powered practice sessions</p>
                 </div>
-                <!-- ... existing training content ... -->
                  <div class="grid lg:grid-cols-3 gap-6 mb-8">
                     <!-- Aptitude Training -->
                     <div class="training-card bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
@@ -862,7 +857,6 @@
                         <h1 class="font-heading text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Test Series</h1>
                         <p class="text-slate-500">Company-specific mock tests and full-length assessments</p>
                     </div>
-                    <!-- REMOVED PREMIUM BADGE -->
                 </div>
 
                 <!-- Test Categories -->
@@ -902,9 +896,7 @@
             </div>
         </section>
 
-        <!-- ... (Resume Builder, Mock Interview, Practice Modal kept as is) ... -->
         <section id="section-resume-builder" class="p-6 lg:p-8 hidden">
-             <!-- Content identical to previous version -->
               <div class="max-w-6xl mx-auto h-[calc(100vh-8rem)]">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
@@ -997,7 +989,6 @@
         </section>
 
         <section id="section-mock-interview" class="p-6 lg:p-8 hidden">
-             <!-- Content identical to previous version -->
                <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
@@ -1051,7 +1042,6 @@
 
         <!-- ==================== TRAINING PRACTICE MODAL ==================== -->
         <div id="practice-modal" class="fixed inset-0 z-50 hidden">
-             <!-- Content identical to previous version -->
              <div class="modal-overlay absolute inset-0 bg-black/50"></div>
             <div class="modal-content absolute inset-4 lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="flex items-center justify-between p-4 border-b border-slate-100">
@@ -1061,7 +1051,6 @@
                         </div>
                         <div>
                             <h3 id="modal-title" class="font-bold text-slate-800">Practice Session</h3>
-                            <!-- REMOVED SUBTITLE: Question 1 of 5 -->
                         </div>
                     </div>
                     <button onclick="closePracticeModal()" class="p-2 hover:bg-slate-100 rounded-lg transition">
@@ -1091,7 +1080,6 @@
                 </div>
 
                 <div class="p-4 border-t border-slate-100 flex justify-end">
-                    <!-- REMOVED SCORE DISPLAY -->
                     <button onclick="nextModalQuestion()" id="modal-next-btn" class="px-6 py-2 bg-primary hover:bg-indigo-700 text-white font-medium rounded-lg transition disabled:opacity-50" disabled>
                         Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
                     </button>
@@ -1099,7 +1087,7 @@
             </div>
         </div>
 
-        <!-- ==================== TEST SERIES MODAL (NEW) ==================== -->
+        <!-- ==================== TEST SERIES MODAL ==================== -->
         <div id="test-modal" class="fixed inset-0 z-50 hidden">
             <div class="modal-overlay absolute inset-0 bg-black/50"></div>
             <div class="modal-content absolute inset-4 lg:inset-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -1111,7 +1099,6 @@
                         </div>
                         <div>
                             <h3 id="test-modal-title" class="font-bold text-slate-800">Mock Test</h3>
-                            <!-- REMOVED QUESTION COUNTER -->
                         </div>
                     </div>
                     <button onclick="closeTestModal()" class="p-2 hover:bg-slate-200 rounded-lg transition">
@@ -1190,10 +1177,9 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
         // ============ CONFIGURATION ============
-        const GEMINI_API_KEY = 'AIzaSyDMKvxrPBzePCyJ6_fPb_v782zSDN01I8M'; // Replace with your API key
-        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+        // API Key removed for security. Backend proxy handles the call.
+        const API_ENDPOINT = '/api/gemini';
 
-        // ... existing state management ...
         // ============ STATE MANAGEMENT ============
         let appState = {
             user: null,
@@ -1225,7 +1211,6 @@
             }
         };
 
-        // ... existing role options ...
         // ============ ROLE OPTIONS ============
         // Technical topics by field
         const techTopics = {
@@ -1385,14 +1370,6 @@
             document.getElementById('sidebar-user-name').textContent = userName;
             document.getElementById('mobile-avatar').textContent = initials;
             document.getElementById('dashboard-name').textContent = userName.split(' ')[0];
-
-            if (appState.testResults) {
-                // REMOVED STAT UPDATES
-            }
-        }
-
-        function updateActivityList() {
-            // REMOVED FUNCTION
         }
 
         function updateRoadmapPreview() {
@@ -1578,30 +1555,19 @@
             document.getElementById('profile-generating').classList.remove('hidden');
 
             try {
-                // Mock AI call delay or Real AI Call if key present
-                // We'll generate a roadmap based on these custom inputs
                 let roadmap = [];
-                if (GEMINI_API_KEY) {
+                // API Call attempt via proxy
+                try {
                      const prompt = `Generate a 4-step interview preparation roadmap for a ${profile.role} role in the ${profile.field} industry. The candidate has a ${profile.degree}. Return a pure JSON array of strings (no objects). Example: ["Master fundamentals", "Build projects"]`;
-                     try {
-                        const response = await callGeminiAPI(prompt);
-                        const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                        const parsed = JSON.parse(jsonStr);
-                        
-                        // Sanitize to ensure string array
-                        if (Array.isArray(parsed)) {
-                            roadmap = parsed.map(item => {
-                                if (typeof item === 'string') return item;
-                                if (typeof item === 'object' && item !== null) {
-                                    // Extract known fields if AI returns objects despite instruction
-                                    return item.step || item.title || item.description || JSON.stringify(item);
-                                }
-                                return String(item);
-                            });
-                        }
-                     } catch (e) {
-                        console.warn("AI Roadmap generation failed, using fallback", e);
+                     const responseText = await callGeminiAPI(prompt);
+                     const jsonStr = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                     const parsed = JSON.parse(jsonStr);
+                     
+                     if (Array.isArray(parsed)) {
+                        roadmap = parsed.map(item => String(item));
                      }
+                } catch (e) {
+                    console.warn("AI Roadmap generation failed, using fallback", e);
                 }
                 
                 if (roadmap.length === 0) {
@@ -1621,8 +1587,6 @@
                 document.getElementById('profile-generating').classList.add('hidden');
                 document.getElementById('profile-complete').classList.remove('hidden');
                 updateRoadmapPreview(); 
-                
-                // REMOVED AI ROADMAP POPULATION
 
             } catch (error) {
                 console.error(error);
@@ -1667,7 +1631,6 @@
         }
 
         async function generateTestQuestions(profile) {
-            // ... existing function ...
              const prompt = `Generate 21 interview assessment questions for a ${profile.role} candidate in ${profile.field}.
             Return a JSON array with exactly 21 questions:
             - 10 technical MCQs (relevant to ${profile.role})
@@ -1695,7 +1658,6 @@
 
             try {
                 const response = await callGeminiAPI(prompt);
-                // Attempt to parse JSON cleanly, handling potential markdown blocks
                 const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
                 return JSON.parse(jsonStr);
             } catch (e) {
@@ -1705,7 +1667,6 @@
         }
 
         function generateFallbackQuestions(profile) {
-            // ... existing function ...
              // Basic fallback questions
             const questions = [];
 
@@ -1753,7 +1714,6 @@
         }
 
         function displayQuestion(index) {
-            // ... existing function ...
             const questions = appState.testState.questions;
             if (index >= questions.length) {
                 finishTest();
@@ -1852,7 +1812,6 @@
         }
 
         function calculateLocalResults() {
-            // ... existing function ...
              const answers = appState.testState.answers;
             const categoryScores = {
                 technical: { correct: 0, total: 0 },
@@ -1891,7 +1850,6 @@
         }
 
         async function finishTest() {
-            // ... existing function ...
              document.getElementById('test-progress').classList.add('hidden');
             document.getElementById('test-analyzing').classList.remove('hidden');
 
@@ -1932,7 +1890,6 @@
         }
 
         function displayTestResults(results) {
-            // ... existing function ...
              document.getElementById('test-analyzing').classList.add('hidden');
             document.getElementById('test-results').classList.remove('hidden');
 
@@ -1979,17 +1936,18 @@
 
             try {
                 let summary = "";
-                if (GEMINI_API_KEY) {
+                // API Call
+                try {
                     const prompt = `Write a professional, concise resume summary (max 50 words) for a ${role} position. Key skills: ${skills}. Tone: Professional and ambitious. Return ONLY the text.`;
                     summary = await callGeminiAPI(prompt);
-                } 
+                } catch(e) { console.warn(e); }
                 
-                // Fallback or if API fails (caught below)
+                // Fallback
                 if (!summary) {
                      summary = `Motivated ${role} with a strong foundation in ${skills}. Eager to leverage technical expertise and problem-solving abilities to contribute to organizational success. Committed to continuous learning and professional growth.`;
                 }
 
-                // Clean up any potential markdown or quotes
+                // Clean up
                 summary = summary.replace(/['"]/g, '').trim();
 
                 const textarea = document.getElementById('resume-summary');
@@ -1999,7 +1957,6 @@
 
             } catch (e) {
                 console.warn("AI Summary generation failed", e);
-                // Fallback on error
                 const fallback = `Aspiring ${role} skilled in ${skills}. Passionate about applying knowledge to real-world challenges and delivering high-quality results. Ready to join a dynamic team.`;
                 document.getElementById('resume-summary').value = fallback;
                 updateResumePreview();
@@ -2082,25 +2039,25 @@
 
         // ============ SHARED & UTILS ============
         async function callGeminiAPI(prompt) {
-            if (!GEMINI_API_KEY) {
-                // Simulation for demo purposes if no key
-                await new Promise(r => setTimeout(r, 1000));
-                throw new Error("API Key missing - using fallback");
-            }
-
             try {
-                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                // Try Vercel API Endpoint
+                const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
+                    body: JSON.stringify({ prompt })
                 });
+                
+                // If 404 (running locally/preview without backend) or other error
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
                 const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
+                if (data.error) throw new Error(data.error);
+                return data.text;
             } catch (e) {
-                console.error(e);
-                throw e;
+                console.warn("Backend API unavailable (running in preview?) - Using Fallback", e);
+                throw e; // Triggers the mock data fallbacks already present in the app
             }
         }
 
@@ -2140,18 +2097,15 @@
              let question = null;
 
              try {
-                if(GEMINI_API_KEY) {
-                    const profileContext = appState.profile ? `for a ${appState.profile.role} role` : '';
-                    const prompt = `Generate 1 multiple choice question about "${topic}" ${profileContext}. 
-                    Format: JSON object with keys: question, options (array of 4 strings), correct (index 0-3), explanation. 
-                    Ensure difficulty is moderate. Return ONLY JSON.`;
-                    
-                    const response = await callGeminiAPI(prompt);
-                    const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                    question = JSON.parse(jsonStr);
-                } else {
-                    throw new Error("No API Key");
-                }
+                // Try API first
+                const profileContext = appState.profile ? `for a ${appState.profile.role} role` : '';
+                const prompt = `Generate 1 multiple choice question about "${topic}" ${profileContext}. 
+                Format: JSON object with keys: question, options (array of 4 strings), correct (index 0-3), explanation. 
+                Ensure difficulty is moderate. Return ONLY JSON.`;
+                
+                const response = await callGeminiAPI(prompt);
+                const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                question = JSON.parse(jsonStr);
              } catch (e) {
                  console.warn("Using fallback question generator for " + topic);
                  question = getFallbackPracticeQuestion(topic);
@@ -2205,19 +2159,16 @@
         };
 
         function getFallbackPracticeQuestion(topic) {
-            // Try to find exact topic, then check practiceDB keys for partial matches
             let key = topic;
             if (!practiceDB[key]) {
                 const lowerTopic = (topic || '').toLowerCase(); // Added safety check
                 key = Object.keys(practiceDB).find(k => lowerTopic.includes(k)) || 'default';
             }
             
-            // Ensure we have a valid array
             const questions = practiceDB[key] || practiceDB['default'];
             const randomIndex = Math.floor(Math.random() * questions.length);
             const raw = questions[randomIndex];
 
-            // Map compressed keys (q, o, c, e) to full keys (question, options, correct, explanation)
             return {
                 question: raw.q,
                 options: raw.o,
@@ -2254,14 +2205,7 @@
                 }
             });
 
-            if (selected === correct) {
-                // Removed Score Update Logic
-                // appState.practiceState.score++;
-                // document.getElementById('modal-score-value').textContent = appState.practiceState.score;
-                
-                // Update local progress bars for gamification
-                // Removed updateTrainingProgress call
-            }
+            // Removed score update logic
 
             const expDiv = document.getElementById('modal-explanation');
             document.getElementById('modal-explanation-text').textContent = explanation;
@@ -2302,7 +2246,7 @@
             try {
                 let questions = [];
                 // Attempt to fetch from AI
-                if (GEMINI_API_KEY) {
+                try {
                      const prompt = `Generate 5 multiple choice interview questions for the topic "${name}" (Category: ${type}). 
                      Format: JSON array of objects. Each object must have: 
                      "question" (string), 
@@ -2310,13 +2254,11 @@
                      "correct" (integer index 0-3). 
                      Return ONLY valid JSON.`;
                      
-                     try {
-                         const response = await callGeminiAPI(prompt);
-                         const jsonStr = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                         questions = JSON.parse(jsonStr);
-                     } catch (e) {
-                         console.warn("AI generation failed for Test Series, falling back", e);
-                     }
+                     const responseText = await callGeminiAPI(prompt);
+                     const jsonStr = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                     questions = JSON.parse(jsonStr);
+                } catch(e) {
+                    console.warn(e);
                 }
 
                 // Fallback if AI fails or no key
@@ -2329,7 +2271,6 @@
 
                 appState.mockTestState.questions = questions;
                 appState.mockTestState.total = questions.length;
-                document.getElementById('test-total').textContent = questions.length;
                 
                 document.getElementById('test-loading').classList.add('hidden');
                 document.getElementById('test-body').classList.remove('hidden');
@@ -2346,8 +2287,6 @@
             const q = appState.mockTestState.questions[index];
             appState.mockTestState.currentIndex = index;
             
-            // REMOVED QUESTION COUNTER
-            // document.getElementById('test-q-num').textContent = index + 1;
             document.getElementById('test-question-text').textContent = q.question;
             
             const savedAnswer = appState.mockTestState.userAnswers[index];
