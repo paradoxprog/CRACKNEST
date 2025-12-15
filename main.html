@@ -1048,7 +1048,7 @@
         </section>
 
         <section id="section-mock-interview" class="p-6 lg:p-8 hidden">
-               <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
+             <div class="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="font-heading text-2xl font-bold text-slate-800">AI Mock Interview</h1>
@@ -1060,16 +1060,43 @@
                     </div>
                 </div>
 
-                <!-- Chat Area -->
-                <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                    <!-- Chat Messages -->
+                <!-- Mode Selection (New) -->
+                <div id="interview-setup" class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-headset text-primary text-4xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Select Interview Mode</h2>
+                    <p class="text-slate-500 mb-8 max-w-md">Choose the type of interview you want to practice today.</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 w-full max-w-2xl">
+                        <button onclick="startMockInterview('hr')" class="p-6 border-2 border-slate-200 hover:border-green-500 hover:bg-green-50 rounded-xl transition group text-left">
+                            <div class="flex items-center gap-4 mb-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-user-tie text-green-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800">HR Round</h3>
+                            </div>
+                            <p class="text-sm text-slate-600">Behavioral questions. AI evaluates clarity & confidence.</p>
+                        </button>
+
+                        <button onclick="startMockInterview('technical')" class="p-6 border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50 rounded-xl transition group text-left">
+                             <div class="flex items-center gap-4 mb-3">
+                                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-code text-amber-600"></i>
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800">Technical Round</h3>
+                            </div>
+                            <p class="text-sm text-slate-600">Role-based questions. AI analyzes technical correctness.</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Interface (Initially Hidden) -->
+                <div id="interview-chat-ui" class="hidden flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div id="chat-history" class="flex-1 p-6 overflow-y-auto bg-slate-50 space-y-4">
-                        <div class="chat-message ai p-4 max-w-[80%]">
-                            <p>Hello! I'm your AI Interviewer. To get started, please click the "Start Interview" button below. I will ask you questions based on your profile.</p>
-                        </div>
+                        <!-- Chat Messages will appear here -->
                     </div>
 
-                    <!-- Typing Indicator -->
                     <div id="ai-typing" class="hidden px-6 py-2 bg-slate-50 text-slate-400 text-xs flex items-center gap-2">
                         <span>AI is typing</span>
                         <div class="flex gap-1">
@@ -1079,16 +1106,8 @@
                         </div>
                     </div>
 
-                    <!-- Input Area -->
                     <div class="p-4 border-t border-slate-200 bg-white">
-                        <div id="interview-controls" class="text-center py-4">
-                            <button onclick="startMockInterview()" class="px-8 py-3 bg-primary hover:bg-indigo-700 text-white font-bold rounded-full shadow-lg transition transform hover:scale-105 flex items-center gap-2 mx-auto">
-                                <i class="fa-solid fa-microphone"></i>
-                                Start Interview
-                            </button>
-                        </div>
-                        
-                        <div id="interview-input" class="hidden flex gap-2">
+                        <div id="interview-input" class="flex gap-2">
                             <input type="text" id="chat-input" class="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition" placeholder="Type your answer here..." onkeypress="handleChatEnter(event)">
                             <button onclick="sendMockMessage()" class="p-3 bg-primary hover:bg-indigo-700 text-white rounded-xl transition">
                                 <i class="fa-solid fa-paper-plane"></i>
@@ -2050,24 +2069,33 @@
         }
 
         // ============ AI MOCK INTERVIEW LOGIC ============
-        async function startMockInterview() {
+        async function startMockInterview(mode) {
             if (!appState.profile) {
                 showToast('Please set up your profile first!', 'error');
                 navigateTo('profile');
                 return;
             }
 
-            document.getElementById('interview-controls').classList.add('hidden');
-            document.getElementById('interview-input').classList.remove('hidden');
+            // Switch UI
+            document.getElementById('interview-setup').classList.add('hidden');
+            document.getElementById('interview-chat-ui').classList.remove('hidden');
             
             const chatHistory = document.getElementById('chat-history');
             chatHistory.innerHTML = '';
             
-            // Add initial greeting
-            addChatMessage('ai', `Hello ${appState.profile.name.split(' ')[0]}! I see you are applying for a ${appState.profile.role} position. Let's start with a simple question: Tell me about yourself and why you chose this field.`);
-            
             appState.chatState.isActive = true;
             appState.chatState.history = [];
+            appState.chatState.mode = mode; // Store mode
+
+            // Initial Message
+            let greeting = "";
+            if (mode === 'hr') {
+                greeting = `Hello ${appState.profile.name.split(' ')[0]}! I'm your AI HR Manager. We'll focus on your soft skills, clarity, and confidence. To begin, please introduce yourself and tell me a bit about your background.`;
+            } else {
+                greeting = `Hello ${appState.profile.name.split(' ')[0]}! I'm your Technical Interviewer. I'll be testing your knowledge in ${appState.profile.role}. Let's dive straight in. What specific technical skills or frameworks are you most proficient in?`;
+            }
+            
+            addChatMessage('ai', greeting);
         }
 
         function addChatMessage(sender, text) {
@@ -2090,10 +2118,14 @@
             document.getElementById('ai-typing').classList.remove('hidden');
 
             try {
-                const context = `You are an strict but encouraging technical interviewer interviewing a candidate for ${appState.profile.role}. 
-                Candidate response: "${message}". 
-                Previous context: They are a ${appState.profile.experience}.
-                Give brief feedback on their answer (1 sentence) and ask the next relevant technical or behavioral question.`;
+                let context = "";
+                if (appState.chatState.mode === 'hr') {
+                    context = `You are an HR manager interviewing a candidate for a ${appState.profile.role} role. Focus on behavioral questions, situational judgment, and soft skills. Evaluate the following candidate response for clarity, confidence, and professionalism. Ask a follow-up HR question.
+                    Candidate Response: "${message}"`;
+                } else {
+                    context = `You are a Senior Technical Interviewer interviewing a candidate for a ${appState.profile.role} role. Focus on technical depth, problem-solving, and correctness. Evaluate the following candidate response for technical accuracy. Ask a follow-up technical question relevant to the role.
+                    Candidate Response: "${message}"`;
+                }
 
                 const response = await callGeminiAPI(context);
                 document.getElementById('ai-typing').classList.add('hidden');
